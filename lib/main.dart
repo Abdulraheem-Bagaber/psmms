@@ -11,6 +11,7 @@ import 'views/activity/officer/officer_list_activities_screen.dart';
 import 'views/activity/preacher/preacher_assign_activity_screen.dart';
 import 'views/activity/preacher/preacher_list_activities_screen.dart';
 import 'views/preacher/preacher_directory_screen.dart';
+import 'views/reports/reporting_dashboard_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -165,6 +166,15 @@ class MainMenuScreen extends StatelessWidget {
             subtitle: 'Search and review preacher profiles.',
             icon: Icons.people_alt,
             builder: (_) => PreacherDirectoryScreen.withProvider(),
+          ),
+          const SizedBox(height: 24),
+          _buildSectionHeader('Reports & Analytics'),
+          _buildModuleCard(
+            context,
+            title: 'Reports Dashboard',
+            subtitle: 'Generate activity, payment, KPI, and coverage reports.',
+            icon: Icons.analytics,
+            builder: (_) => ReportingDashboardScreen.withProvider(),
           ),
           const SizedBox(height: 24),
           _buildSectionHeader('Development Tools'),
