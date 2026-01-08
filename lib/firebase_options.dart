@@ -85,4 +85,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'psmmanagementsystem.firebasestorage.app',
     measurementId: 'G-J2K9L9R7XP',
   );
+
 }

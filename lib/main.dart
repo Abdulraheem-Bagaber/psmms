@@ -10,6 +10,11 @@ import 'views/payment/preacher_payment_history_screen.dart';
 import 'views/activity/officer/officer_list_activities_screen.dart';
 import 'views/activity/preacher/preacher_assign_activity_screen.dart';
 import 'views/activity/preacher/preacher_list_activities_screen.dart';
+import 'screens/login_screen.dart';
+import 'screens/register_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'screens/profile_screen.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,15 +31,47 @@ class PsmmsApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'PSMMS',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF0066FF)),
         useMaterial3: true,
       ),
+
       routes: {
+        '/login': (context) => const LoginScreen(),
+        '/register': (context) => const RegisterScreen(),
+        '/main': (context) => const MainMenuScreen(),
+
+        // keep your existing routes
         '/payment-form': (context) => const PaymentFormScreen(),
         '/activity-seeder': (context) => const ActivitySeederPage(),
       },
-      home: const MainMenuScreen(),
+
+      home: const AuthGate(),
+    );
+  }
+}
+
+class AuthGate extends StatelessWidget {
+  const AuthGate({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (snapshot.hasData) {
+          return const MainMenuScreen();
+        }
+
+        return const LoginScreen();
+      },
     );
   }
 }
@@ -127,6 +164,27 @@ class MainMenuScreen extends StatelessWidget {
             icon: Icons.data_object,
             builder: (_) => const ActivitySeederPage(),
           ),
+          const SizedBox(height: 24),
+          _buildSectionHeader('Settings'),
+
+          _buildModuleCard(
+            context,
+            title: 'My Profile',
+            subtitle: 'View or edit your own profile',
+            icon: Icons.person_outline,
+            builder: (_) => const ProfileScreen(),
+          ),
+
+          _buildModuleCard(
+            context,
+            title: 'Log Out',
+            subtitle: 'Log out from your account',
+            icon: Icons.logout,
+            builder: (_) => const SizedBox(), // dummy, we intercept onTap
+            onTapOverride: () async {
+              await FirebaseAuth.instance.signOut();
+            },
+          ),
         ],
       ),
     );
@@ -147,11 +205,12 @@ class MainMenuScreen extends StatelessWidget {
   }
 
   Widget _buildModuleCard(
-    BuildContext context, {
+  BuildContext context, {
     required String title,
     required String subtitle,
     required IconData icon,
     required WidgetBuilder builder,
+    VoidCallback? onTapOverride,
   }) {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -169,15 +228,17 @@ class MainMenuScreen extends StatelessWidget {
         title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
         subtitle: Text(subtitle, style: const TextStyle(fontSize: 13)),
         trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 18),
-        onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(builder: builder),
-          );
-        },
+        onTap: onTapOverride ??
+            () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: builder),
+              );
+            },
       ),
     );
   }
-}
+  }
+
 
 class ActivitySeederPage extends StatelessWidget {
   const ActivitySeederPage({super.key});
