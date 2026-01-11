@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "452845677908",
+    "project_id": "psmmanagementsystem",
+    "storage_bucket": "psmmanagementsystem.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:452845677908:android:ddd52624fb192715736cc1",
+        "android_client_info": {
+          "package_name": "com.example.flutter_application_1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC11ZjVTVJjRVVppyCqV5gtF_B8PKnVj5w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:452845677908:android:d77c5bdf0dbdcb13736cc1",
+        "android_client_info": {
+          "package_name": "com.example.psmms"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC11ZjVTVJjRVVppyCqV5gtF_B8PKnVj5w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
