@@ -16,6 +16,11 @@ import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'screens/profile_screen.dart';
+import 'package:provider/provider.dart';
+import 'views/kpi/kpi_preacher_list_page.dart';
+import 'views/kpi/kpi_dashboard_page.dart';
+import 'viewmodels/kpi_management_controller.dart';
+import 'viewmodels/preacher_controller.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -166,6 +171,33 @@ class MainMenuScreen extends StatelessWidget {
             subtitle: 'Search and review preacher profiles.',
             icon: Icons.people_alt,
             builder: (_) => PreacherDirectoryScreen.withProvider(),
+          ),
+          const SizedBox(height: 24),
+          _buildSectionHeader('KPI Management'),
+          _buildModuleCard(
+            context,
+            title: 'Manage KPI Targets',
+            subtitle: 'Set and edit KPI targets for preachers.',
+            icon: Icons.track_changes,
+            builder: (_) => MultiProvider(
+              providers: [
+                ChangeNotifierProvider(create: (_) => PreacherController()),
+                ChangeNotifierProvider(create: (_) => KPIManagementController()),
+              ],
+              child: const KPIPreacherListPage(),
+            ),
+          ),
+          _buildModuleCard(
+            context,
+            title: 'Preacher KPI Dashboard',
+            subtitle: 'View real-time KPI progress for preachers.',
+            icon: Icons.analytics_outlined,
+            builder: (_) => ChangeNotifierProvider(
+              create: (_) => KPIManagementController(),
+              child: const KPIDashboardPage(
+                preacherId: 'PREACHER-001', // Demo preacher
+              ),
+            ),
           ),
           const SizedBox(height: 24),
           _buildSectionHeader('Reports & Analytics'),
