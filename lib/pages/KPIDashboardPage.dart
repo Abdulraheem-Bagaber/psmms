@@ -313,6 +313,36 @@ class _MyKPIDashboardPageState extends State<MyKPIDashboardPage> {
         selectedItemColor: const Color(0xFF3B82F6),
         unselectedItemColor: Colors.grey,
         currentIndex: 2, // KPI tab selected
+        onTap: (index) {
+          // Handle navigation
+          switch (index) {
+            case 0:
+              // Navigate to Dashboard (Home)
+              Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+              break;
+            case 1:
+              // Activities - Show coming soon
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Activities page coming soon')),
+              );
+              break;
+            case 2:
+              // Already on KPI page
+              break;
+            case 3:
+              // Reports - Show coming soon
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Reports page coming soon')),
+              );
+              break;
+            case 4:
+              // Profile - Show coming soon
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Profile page coming soon')),
+              );
+              break;
+          }
+        },
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.dashboard),
