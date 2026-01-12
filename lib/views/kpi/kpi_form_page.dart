@@ -41,9 +41,10 @@ class _KPIFormPageState extends State<KPIFormPage> {
   void initState() {
     super.initState();
 
-    // Set default date range (current month)
-    _startDate = DateTime(DateTime.now().year, DateTime.now().month, 1);
-    _endDate = DateTime(DateTime.now().year, DateTime.now().month + 1, 0);
+    // Set default date range (from today to end of month)
+    final now = DateTime.now();
+    _startDate = DateTime(now.year, now.month, now.day);
+    _endDate = DateTime(now.year, now.month + 1, 0);
 
     // Load existing KPI after build completes
     WidgetsBinding.instance.addPostFrameCallback((_) {

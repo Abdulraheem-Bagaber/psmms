@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../viewmodels/preacher_controller.dart';
+import '../../viewmodels/kpi_management_controller.dart';
 import '../../models/preacher.dart';
 import 'kpi_form_page.dart';
 
@@ -140,11 +141,10 @@ class _KPIPreacherListPageState extends State<KPIPreacherListPage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder:
-                                (context) => ChangeNotifierProvider.value(
-                                  value: context.read<PreacherController>(),
-                                  child: KPIFormPage(preacher: preacher),
-                                ),
+                            builder: (context) => ChangeNotifierProvider(
+                              create: (_) => KPIManagementController(),
+                              child: KPIFormPage(preacher: preacher),
+                            ),
                           ),
                         );
                       },

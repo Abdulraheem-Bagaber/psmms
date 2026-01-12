@@ -107,131 +107,214 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const brandBlue = Color(0xFF0066FF);
+    const brandGreen = Color(0xFF2E7D32);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Registration'),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                // Card container like your screenshot vibe
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFF1B5E20),
+              Color(0xFF2E7D32),
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              // App Bar
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.arrow_back, color: Colors.white),
+                    ),
+                    const Text(
+                      'Create Account',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Form Container
+              Expanded(
+                child: Container(
+                  decoration: const BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.black12),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(32),
+                      topRight: Radius.circular(32),
+                    ),
                   ),
-                  child: Column(
-                    children: [
-                      TextFormField(
-                        controller: fullNameController,
-                        decoration: _inputDeco('Full Name', icon: Icons.person),
-                        validator: (v) =>
-                            (v == null || v.trim().isEmpty) ? 'Full name is required' : null,
-                      ),
-                      const SizedBox(height: 12),
-                      TextFormField(
-                        controller: icController,
-                        decoration: _inputDeco('IC Number', icon: Icons.badge),
-                        keyboardType: TextInputType.number,
-                        validator: (v) =>
-                            (v == null || v.trim().isEmpty) ? 'IC number is required' : null,
-                      ),
-                      const SizedBox(height: 12),
-                      TextFormField(
-                        controller: phoneController,
-                        decoration: _inputDeco('Phone Number', icon: Icons.phone),
-                        keyboardType: TextInputType.phone,
-                        validator: (v) =>
-                            (v == null || v.trim().isEmpty) ? 'Phone number is required' : null,
-                      ),
-                      const SizedBox(height: 12),
-                      TextFormField(
-                        controller: emailController,
-                        decoration: _inputDeco('Email', icon: Icons.email),
-                        keyboardType: TextInputType.emailAddress,
-                        validator: (v) {
-                          if (v == null || v.trim().isEmpty) return 'Email is required';
-                          if (!v.contains('@')) return 'Enter a valid email';
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      TextFormField(
-                        controller: passwordController,
-                        decoration: _inputDeco('Password', icon: Icons.lock).copyWith(
-                          suffixIcon: IconButton(
-                            onPressed: () => setState(() => obscure = !obscure),
-                            icon: Icon(obscure ? Icons.visibility : Icons.visibility_off),
-                          ),
-                        ),
-                        obscureText: obscure,
-                        validator: (v) {
-                          if (v == null || v.isEmpty) return 'Password is required';
-                          if (v.length < 6) return 'Password must be at least 6 characters';
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 12),
-
-                      // Role dropdown
-                      DropdownButtonFormField<String>(
-                        value: selectedRole,
-                        decoration: _inputDeco('Role', icon: Icons.work),
-                        items: roles
-                            .map((r) => DropdownMenuItem<String>(
-                                  value: r,
-                                  child: Text(r),
-                                ))
-                            .toList(),
-                        onChanged: (val) {
-                          if (val == null) return;
-                          setState(() => selectedRole = val);
-                        },
-                      ),
-
-                      const SizedBox(height: 18),
-
-                      SizedBox(
-                        width: double.infinity,
-                        height: 48,
-                        child: ElevatedButton(
-                          onPressed: loading ? null : register,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: brandBlue,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(24),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          // Icon
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF1B5E20), Color(0xFF2E7D32)],
+                              ),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.person_add,
+                              size: 40,
+                              color: Color(0xFFFFD700),
                             ),
                           ),
-                          child: loading
-                              ? const SizedBox(
-                                  height: 22,
-                                  width: 22,
-                                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                                )
-                              : const Text('Register', style: TextStyle(fontWeight: FontWeight.w600)),
-                        ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Join PSMMS',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey[800],
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+
+                          TextFormField(
+                            controller: fullNameController,
+                            decoration: _inputDeco('Full Name', icon: Icons.person),
+                            validator: (v) =>
+                                (v == null || v.trim().isEmpty) ? 'Full name is required' : null,
+                          ),
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            controller: icController,
+                            decoration: _inputDeco('IC Number', icon: Icons.badge),
+                            keyboardType: TextInputType.number,
+                            validator: (v) =>
+                                (v == null || v.trim().isEmpty) ? 'IC number is required' : null,
+                          ),
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            controller: phoneController,
+                            decoration: _inputDeco('Phone Number', icon: Icons.phone),
+                            keyboardType: TextInputType.phone,
+                            validator: (v) =>
+                                (v == null || v.trim().isEmpty) ? 'Phone number is required' : null,
+                          ),
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            controller: emailController,
+                            decoration: _inputDeco('Email', icon: Icons.email),
+                            keyboardType: TextInputType.emailAddress,
+                            validator: (v) {
+                              if (v == null || v.trim().isEmpty) return 'Email is required';
+                              if (!v.contains('@')) return 'Enter a valid email';
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            controller: passwordController,
+                            decoration: _inputDeco('Password', icon: Icons.lock).copyWith(
+                              suffixIcon: IconButton(
+                                onPressed: () => setState(() => obscure = !obscure),
+                                icon: Icon(obscure ? Icons.visibility_off : Icons.visibility),
+                              ),
+                            ),
+                            obscureText: obscure,
+                            validator: (v) {
+                              if (v == null || v.isEmpty) return 'Password is required';
+                              if (v.length < 6) return 'Password must be at least 6 characters';
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Role dropdown
+                          DropdownButtonFormField<String>(
+                            value: selectedRole,
+                            decoration: _inputDeco('Role', icon: Icons.work),
+                            items: roles
+                                .map((r) => DropdownMenuItem<String>(
+                                      value: r,
+                                      child: Text(r),
+                                    ))
+                                .toList(),
+                            onChanged: (val) {
+                              if (val == null) return;
+                              setState(() => selectedRole = val);
+                            },
+                          ),
+
+                          const SizedBox(height: 32),
+
+                          SizedBox(
+                            width: double.infinity,
+                            height: 56,
+                            child: ElevatedButton(
+                              onPressed: loading ? null : register,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: brandGreen,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: loading
+                                  ? const SizedBox(
+                                      height: 24,
+                                      width: 24,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2.5,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : const Text(
+                                      'Register',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Already have an account? ',
+                                style: TextStyle(color: Colors.grey[600]),
+                              ),
+                              TextButton(
+                                onPressed: loading ? null : () => Navigator.pop(context),
+                                child: const Text(
+                                  'Login',
+                                  style: TextStyle(
+                                    color: brandGreen,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
-
-                const SizedBox(height: 14),
-
-                TextButton(
-                  onPressed: loading ? null : () => Navigator.pop(context),
-                  child: const Text('Back to Login'),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

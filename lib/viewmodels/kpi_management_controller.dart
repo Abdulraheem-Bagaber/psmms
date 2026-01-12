@@ -41,26 +41,29 @@ class KPIManagementController extends ChangeNotifier {
     notifyListeners();
 
     try {
+      // Fetch all KPIs for preacher and filter in memory to avoid composite index
       final snapshot =
           await _db
               .collection('kpi_targets')
               .where('preacher_id', isEqualTo: preacherId)
-              .where(
-                'start_date',
-                isLessThanOrEqualTo: Timestamp.fromDate(endDate),
-              )
-              .where(
-                'end_date',
-                isGreaterThanOrEqualTo: Timestamp.fromDate(startDate),
-              )
-              .limit(1)
               .get();
 
       if (snapshot.docs.isNotEmpty) {
-        _currentKPI = KPITarget.fromFirestore(snapshot.docs.first);
+        // Filter in memory for overlapping date ranges
+        final matchingDocs = snapshot.docs.where((doc) {
+          final kpi = KPITarget.fromFirestore(doc);
+          return kpi.startDate.isBefore(endDate.add(const Duration(days: 1))) &&
+              kpi.endDate.isAfter(startDate.subtract(const Duration(days: 1)));
+        }).toList();
 
-        // Load corresponding progress
-        await _loadProgress(_currentKPI!.id!);
+        if (matchingDocs.isNotEmpty) {
+          _currentKPI = KPITarget.fromFirestore(matchingDocs.first);
+          // Load corresponding progress
+          await _loadProgress(_currentKPI!.id!);
+        } else {
+          _currentKPI = null;
+          _currentProgress = null;
+        }
       } else {
         _currentKPI = null;
         _currentProgress = null;
@@ -134,25 +137,25 @@ class KPIManagementController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // Check if KPI already exists
+      print('DEBUG: Saving KPI for preacher ID: $preacherId');  // Debug log
+      
+      // Check if KPI already exists - fetch all for preacher and filter in memory
       final existingSnapshot =
           await _db
               .collection('kpi_targets')
               .where('preacher_id', isEqualTo: preacherId)
-              .where(
-                'start_date',
-                isLessThanOrEqualTo: Timestamp.fromDate(endDate),
-              )
-              .where(
-                'end_date',
-                isGreaterThanOrEqualTo: Timestamp.fromDate(startDate),
-              )
-              .limit(1)
               .get();
 
-      if (existingSnapshot.docs.isNotEmpty) {
+      // Filter in memory for overlapping date ranges
+      final matchingDocs = existingSnapshot.docs.where((doc) {
+        final kpi = KPITarget.fromFirestore(doc);
+        return kpi.startDate.isBefore(endDate.add(const Duration(days: 1))) &&
+            kpi.endDate.isAfter(startDate.subtract(const Duration(days: 1)));
+      }).toList();
+
+      if (matchingDocs.isNotEmpty) {
         // Update existing KPI
-        final docId = existingSnapshot.docs.first.id;
+        final docId = matchingDocs.first.id;
         await _db.collection('kpi_targets').doc(docId).update({
           'monthly_session_target': monthlySessionTarget,
           'total_attendance_target': totalAttendanceTarget,
@@ -214,27 +217,39 @@ class KPIManagementController extends ChangeNotifier {
     notifyListeners();
 
     try {
+      print('DEBUG: Loading KPI for preacher ID: $preacherId');  // Debug log
+      
       // Get all KPIs for preacher
       final kpiSnapshot =
           await _db
               .collection('kpi_targets')
               .where('preacher_id', isEqualTo: preacherId)
-              .orderBy('created_at', descending: true)
-              .limit(1)
               .get();
+
+      print('DEBUG: Found ${kpiSnapshot.docs.length} KPI documents');  // Debug log
 
       if (kpiSnapshot.docs.isEmpty) {
         _currentKPI = null;
         _currentProgress = null;
         _error = 'No KPI targets set for this preacher';
       } else {
-        _currentKPI = KPITarget.fromFirestore(kpiSnapshot.docs.first);
+        // Sort by created_at in memory and get the most recent
+        final sortedDocs = kpiSnapshot.docs.toList()
+          ..sort((a, b) {
+            final aTime = (a.data()['created_at'] as Timestamp?)?.toDate() ?? DateTime(2000);
+            final bTime = (b.data()['created_at'] as Timestamp?)?.toDate() ?? DateTime(2000);
+            return bTime.compareTo(aTime);  // descending order
+          });
+        
+        _currentKPI = KPITarget.fromFirestore(sortedDocs.first);
+        print('DEBUG: Loaded KPI with ID: ${_currentKPI!.id}');  // Debug log
         await _loadProgress(_currentKPI!.id!);
       }
 
       _isLoading = false;
       notifyListeners();
     } catch (e) {
+      print('DEBUG: Error loading KPI: $e');  // Debug log
       _error = 'Failed to load progress: $e';
       _isLoading = false;
       notifyListeners();

@@ -13,7 +13,7 @@ class PreacherAPIHandler {
     : _db = firestore ?? FirebaseFirestore.instance;
 
   final FirebaseFirestore _db;
-  final String _collection = 'preachers';
+  final String _collection = 'users';  // Changed to users collection
 
   Future<PreacherPage> fetchPreachers({
     String? search,
@@ -22,7 +22,9 @@ class PreacherAPIHandler {
     int limit = 20,
     DocumentSnapshot? startAfter,
   }) async {
-    Query query = _db.collection(_collection).orderBy('fullName');
+    // Fetch users where role is 'Preacher'
+    Query query = _db.collection(_collection)
+        .where('role', isEqualTo: 'Preacher');
 
     if (region != null && region.isNotEmpty && region != 'All') {
       query = query.where('region', isEqualTo: region);
@@ -34,21 +36,27 @@ class PreacherAPIHandler {
       query = query.where('specialization', arrayContains: specialization);
     }
 
-    if (search != null && search.isNotEmpty) {
-      // Basic prefix search on fullName using range
-      final endText = _endTextForSearch(search);
-      query = query
-          .where('fullName', isGreaterThanOrEqualTo: search)
-          .where('fullName', isLessThan: endText);
-    }
+    // Note: Search removed to avoid index requirements
+    // You can add search filtering after fetching the data
 
     if (startAfter != null) {
       query = query.startAfterDocument(startAfter);
     }
 
     final snapshot = await query.limit(limit).get();
-    final items =
+    var items =
         snapshot.docs.map((doc) => Preacher.fromFirestore(doc)).toList();
+    
+    // Sort by fullName in code instead of using orderBy
+    items.sort((a, b) => a.fullName.compareTo(b.fullName));
+    
+    // Apply search filter if provided
+    if (search != null && search.isNotEmpty) {
+      items = items.where((p) => 
+        p.fullName.toLowerCase().contains(search.toLowerCase())
+      ).toList();
+    }
+    
     final last = snapshot.docs.isNotEmpty ? snapshot.docs.last : null;
     return PreacherPage(items: items, lastDocument: last);
   }

@@ -49,13 +49,17 @@ class Preacher {
 
     return Preacher(
       id: doc.id,
-      preacherId: data?['preacherId'] ?? '',
+      preacherId: doc.id,  // Always use document ID as preacher ID for consistency
       fullName: data?['fullName'] ?? '',
       email: data?['email'],
-      phone: data?['phone'],
-      region: data?['region'] ?? '',
-      specialization: List<String>.from(data?['specialization'] ?? const []),
-      skills: List<String>.from(data?['skills'] ?? const []),
+      phone: data?['phoneNumber'] ?? data?['phone'],  // Handle both field names
+      region: data?['region'] ?? 'Not Set',
+      specialization: data?['specialization'] != null 
+          ? List<String>.from(data!['specialization']) 
+          : const [],
+      skills: data?['skills'] != null 
+          ? List<String>.from(data!['skills']) 
+          : const [],
       bio: data?['bio'],
       status: data?['status'] ?? 'Active',
       rating: (data?['rating'] ?? 0.0).toDouble(),
