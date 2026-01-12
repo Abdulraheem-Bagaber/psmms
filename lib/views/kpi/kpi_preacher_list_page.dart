@@ -61,7 +61,11 @@ class _KPIPreacherListPageState extends State<KPIPreacherListPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.error_outline, size: 64, color: Colors.red.shade300),
+                  Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: Colors.red.shade300,
+                  ),
                   const SizedBox(height: 16),
                   Text(controller.error!),
                   const SizedBox(height: 16),
@@ -81,7 +85,11 @@ class _KPIPreacherListPageState extends State<KPIPreacherListPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.people_outline, size: 64, color: Colors.grey.shade400),
+                  Icon(
+                    Icons.people_outline,
+                    size: 64,
+                    color: Colors.grey.shade400,
+                  ),
                   const SizedBox(height: 16),
                   const Text(
                     'No preachers found',
@@ -118,7 +126,7 @@ class _KPIPreacherListPageState extends State<KPIPreacherListPage> {
                   onChanged: (value) => controller.onSearchChanged(value),
                 ),
               ),
-              
+
               // Preacher List
               Expanded(
                 child: ListView.builder(
@@ -132,10 +140,11 @@ class _KPIPreacherListPageState extends State<KPIPreacherListPage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => ChangeNotifierProvider.value(
-                              value: context.read<PreacherController>(),
-                              child: KPIFormPage(preacher: preacher),
-                            ),
+                            builder:
+                                (context) => ChangeNotifierProvider.value(
+                                  value: context.read<PreacherController>(),
+                                  child: KPIFormPage(preacher: preacher),
+                                ),
                           ),
                         );
                       },
@@ -156,10 +165,7 @@ class _PreacherCard extends StatelessWidget {
   final Preacher preacher;
   final VoidCallback onTap;
 
-  const _PreacherCard({
-    required this.preacher,
-    required this.onTap,
-  });
+  const _PreacherCard({required this.preacher, required this.onTap});
 
   String _getInitials(String name) {
     final parts = name.trim().split(' ');
@@ -171,7 +177,7 @@ class _PreacherCard extends StatelessWidget {
   Color _getAvatarColor(String name) {
     final colors = [
       const Color(0xFF10B981), // Green
-      const Color(0xFFEF4444), // Red  
+      const Color(0xFFEF4444), // Red
       const Color(0xFF3B82F6), // Blue
       const Color(0xFFF59E0B), // Orange
       const Color(0xFF8B5CF6), // Purple

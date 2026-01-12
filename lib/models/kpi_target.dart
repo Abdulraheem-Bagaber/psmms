@@ -5,7 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class KPITarget {
   final String? id; // Firestore document ID
   final String preacherId; // Reference to Preacher document ID
-  
+
   // KPI Metrics (Target Values)
   final int monthlySessionTarget;
   final int totalAttendanceTarget;
@@ -14,15 +14,15 @@ class KPITarget {
   final int communityProjectsTarget;
   final int charityEventsTarget;
   final int youthProgramAttendanceTarget;
-  
+
   // Performance Period
   final DateTime startDate;
   final DateTime endDate;
-  
+
   // Metadata
   final DateTime createdAt;
   final DateTime? updatedAt;
-  
+
   KPITarget({
     this.id,
     required this.preacherId,
@@ -38,7 +38,7 @@ class KPITarget {
     DateTime? createdAt,
     this.updatedAt,
   }) : createdAt = createdAt ?? DateTime.now();
-  
+
   // Convert to Firestore format
   Map<String, dynamic> toFirestore() {
     return {
@@ -56,7 +56,7 @@ class KPITarget {
       'updated_at': FieldValue.serverTimestamp(),
     };
   }
-  
+
   // Create from Firestore document
   factory KPITarget.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
@@ -69,18 +69,21 @@ class KPITarget {
       baptismsTarget: data['baptisms_target'] ?? 0,
       communityProjectsTarget: data['community_projects_target'] ?? 0,
       charityEventsTarget: data['charity_events_target'] ?? 0,
-      youthProgramAttendanceTarget: data['youth_program_attendance_target'] ?? 0,
+      youthProgramAttendanceTarget:
+          data['youth_program_attendance_target'] ?? 0,
       startDate: (data['start_date'] as Timestamp).toDate(),
       endDate: (data['end_date'] as Timestamp).toDate(),
-      createdAt: data['created_at'] != null 
-          ? (data['created_at'] as Timestamp).toDate()
-          : DateTime.now(),
-      updatedAt: data['updated_at'] != null 
-          ? (data['updated_at'] as Timestamp).toDate()
-          : null,
+      createdAt:
+          data['created_at'] != null
+              ? (data['created_at'] as Timestamp).toDate()
+              : DateTime.now(),
+      updatedAt:
+          data['updated_at'] != null
+              ? (data['updated_at'] as Timestamp).toDate()
+              : null,
     );
   }
-  
+
   // Create a copy with modified fields
   KPITarget copyWith({
     String? id,
@@ -101,19 +104,22 @@ class KPITarget {
       id: id ?? this.id,
       preacherId: preacherId ?? this.preacherId,
       monthlySessionTarget: monthlySessionTarget ?? this.monthlySessionTarget,
-      totalAttendanceTarget: totalAttendanceTarget ?? this.totalAttendanceTarget,
+      totalAttendanceTarget:
+          totalAttendanceTarget ?? this.totalAttendanceTarget,
       newConvertsTarget: newConvertsTarget ?? this.newConvertsTarget,
       baptismsTarget: baptismsTarget ?? this.baptismsTarget,
-      communityProjectsTarget: communityProjectsTarget ?? this.communityProjectsTarget,
+      communityProjectsTarget:
+          communityProjectsTarget ?? this.communityProjectsTarget,
       charityEventsTarget: charityEventsTarget ?? this.charityEventsTarget,
-      youthProgramAttendanceTarget: youthProgramAttendanceTarget ?? this.youthProgramAttendanceTarget,
+      youthProgramAttendanceTarget:
+          youthProgramAttendanceTarget ?? this.youthProgramAttendanceTarget,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
-  
+
   @override
   String toString() {
     return 'KPITarget(id: $id, preacherId: $preacherId, period: $startDate - $endDate)';

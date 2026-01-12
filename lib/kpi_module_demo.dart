@@ -24,10 +24,7 @@ class KPIModuleDemo extends StatelessWidget {
           children: [
             const Text(
               'KPI Module Integration Test',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             const Text(
@@ -39,25 +36,27 @@ class KPIModuleDemo extends StatelessWidget {
             // MUIP Official Features
             const Text(
               'MUIP Official Features:',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 12),
-            
+
             ElevatedButton.icon(
               onPressed: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => MultiProvider(
-                      providers: [
-                        ChangeNotifierProvider(create: (_) => PreacherController()),
-                        ChangeNotifierProvider(create: (_) => KPIManagementController()),
-                      ],
-                      child: const KPIPreacherListPage(),
-                    ),
+                    builder:
+                        (context) => MultiProvider(
+                          providers: [
+                            ChangeNotifierProvider(
+                              create: (_) => PreacherController(),
+                            ),
+                            ChangeNotifierProvider(
+                              create: (_) => KPIManagementController(),
+                            ),
+                          ],
+                          child: const KPIPreacherListPage(),
+                        ),
                   ),
                 );
               },
@@ -75,28 +74,26 @@ class KPIModuleDemo extends StatelessWidget {
             // Preacher Features
             const Text(
               'Preacher Features:',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 12),
-            
+
             ElevatedButton.icon(
               onPressed: () {
                 // For demo: Use a test preacher ID
                 // In production, get this from auth context
                 const testPreacherId = 'TEST_PREACHER_001';
-                
+
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ChangeNotifierProvider(
-                      create: (_) => KPIManagementController(),
-                      child: const KPIDashboardPage(
-                        preacherId: testPreacherId,
-                      ),
-                    ),
+                    builder:
+                        (context) => ChangeNotifierProvider(
+                          create: (_) => KPIManagementController(),
+                          child: const KPIDashboardPage(
+                            preacherId: testPreacherId,
+                          ),
+                        ),
                   ),
                 );
               },
@@ -136,11 +133,26 @@ class KPIModuleDemo extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  _buildStatusItem('✅ Models Created', 'kpi_target.dart, kpi_progress.dart'),
-                  _buildStatusItem('✅ Controller Ready', 'kpi_management_controller.dart'),
-                  _buildStatusItem('✅ Views Integrated', '3 pages: Dashboard, Form, List'),
-                  _buildStatusItem('✅ Dependencies OK', 'provider, intl, cloud_firestore'),
-                  _buildStatusItem('⚠️ Firebase Setup', 'Create Firestore collections'),
+                  _buildStatusItem(
+                    '✅ Models Created',
+                    'kpi_target.dart, kpi_progress.dart',
+                  ),
+                  _buildStatusItem(
+                    '✅ Controller Ready',
+                    'kpi_management_controller.dart',
+                  ),
+                  _buildStatusItem(
+                    '✅ Views Integrated',
+                    '3 pages: Dashboard, Form, List',
+                  ),
+                  _buildStatusItem(
+                    '✅ Dependencies OK',
+                    'provider, intl, cloud_firestore',
+                  ),
+                  _buildStatusItem(
+                    '⚠️ Firebase Setup',
+                    'Create Firestore collections',
+                  ),
                 ],
               ),
             ),
@@ -208,17 +220,11 @@ class KPIModuleDemo extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
           ),
           Text(
             subtitle,
-            style: const TextStyle(
-              fontSize: 12,
-              color: Colors.grey,
-            ),
+            style: const TextStyle(fontSize: 12, color: Colors.grey),
           ),
         ],
       ),

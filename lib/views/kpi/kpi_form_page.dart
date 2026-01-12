@@ -9,10 +9,7 @@ import '../../models/preacher.dart';
 class KPIFormPage extends StatefulWidget {
   final Preacher preacher;
 
-  const KPIFormPage({
-    super.key,
-    required this.preacher,
-  });
+  const KPIFormPage({super.key, required this.preacher});
 
   @override
   State<KPIFormPage> createState() => _KPIFormPageState();
@@ -20,30 +17,34 @@ class KPIFormPage extends StatefulWidget {
 
 class _KPIFormPageState extends State<KPIFormPage> {
   final _formKey = GlobalKey<FormState>();
-  
+
   // Form controllers
-  final TextEditingController _monthlySessionController = TextEditingController();
-  final TextEditingController _totalAttendanceController = TextEditingController();
+  final TextEditingController _monthlySessionController =
+      TextEditingController();
+  final TextEditingController _totalAttendanceController =
+      TextEditingController();
   final TextEditingController _newConvertsController = TextEditingController();
   final TextEditingController _baptismsController = TextEditingController();
-  final TextEditingController _communityProjectsController = TextEditingController();
-  final TextEditingController _charityEventsController = TextEditingController();
+  final TextEditingController _communityProjectsController =
+      TextEditingController();
+  final TextEditingController _charityEventsController =
+      TextEditingController();
   final TextEditingController _youthProgramController = TextEditingController();
-  
+
   // Date range
   DateTime? _startDate;
   DateTime? _endDate;
-  
+
   bool _isEditMode = false;
 
   @override
   void initState() {
     super.initState();
-    
+
     // Set default date range (current month)
     _startDate = DateTime(DateTime.now().year, DateTime.now().month, 1);
     _endDate = DateTime(DateTime.now().year, DateTime.now().month + 1, 0);
-    
+
     // Load existing KPI after build completes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadExistingKPI();
@@ -52,9 +53,13 @@ class _KPIFormPageState extends State<KPIFormPage> {
 
   Future<void> _loadExistingKPI() async {
     final controller = context.read<KPIManagementController>();
-    
-    await controller.loadKPI(widget.preacher.preacherId, _startDate!, _endDate!);
-    
+
+    await controller.loadKPI(
+      widget.preacher.preacherId,
+      _startDate!,
+      _endDate!,
+    );
+
     // If KPI exists, populate form (Edit mode)
     if (controller.currentKPI != null) {
       final kpi = controller.currentKPI!;
@@ -64,9 +69,11 @@ class _KPIFormPageState extends State<KPIFormPage> {
         _totalAttendanceController.text = kpi.totalAttendanceTarget.toString();
         _newConvertsController.text = kpi.newConvertsTarget.toString();
         _baptismsController.text = kpi.baptismsTarget.toString();
-        _communityProjectsController.text = kpi.communityProjectsTarget.toString();
+        _communityProjectsController.text =
+            kpi.communityProjectsTarget.toString();
         _charityEventsController.text = kpi.charityEventsTarget.toString();
-        _youthProgramController.text = kpi.youthProgramAttendanceTarget.toString();
+        _youthProgramController.text =
+            kpi.youthProgramAttendanceTarget.toString();
         _startDate = kpi.startDate;
         _endDate = kpi.endDate;
       });
@@ -98,7 +105,7 @@ class _KPIFormPageState extends State<KPIFormPage> {
     }
 
     final controller = context.read<KPIManagementController>();
-    
+
     final success = await controller.saveKPITargets(
       preacherId: widget.preacher.preacherId,
       monthlySessionTarget: int.parse(_monthlySessionController.text),
@@ -134,7 +141,7 @@ class _KPIFormPageState extends State<KPIFormPage> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
-    
+
     // Navigate back after a delay
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) Navigator.pop(context);
@@ -144,16 +151,17 @@ class _KPIFormPageState extends State<KPIFormPage> {
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Error'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Error'),
+            content: Text(message),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -162,9 +170,10 @@ class _KPIFormPageState extends State<KPIFormPage> {
       context: context,
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365)),
-      initialDateRange: _startDate != null && _endDate != null
-          ? DateTimeRange(start: _startDate!, end: _endDate!)
-          : null,
+      initialDateRange:
+          _startDate != null && _endDate != null
+              ? DateTimeRange(start: _startDate!, end: _endDate!)
+              : null,
     );
 
     if (picked != null) {
@@ -406,10 +415,7 @@ class _KPIFormPageState extends State<KPIFormPage> {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-          ),
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
         ),
         const SizedBox(height: 8),
         TextFormField(
@@ -430,7 +436,10 @@ class _KPIFormPageState extends State<KPIFormPage> {
               borderRadius: BorderRadius.circular(8),
               borderSide: const BorderSide(color: Color(0xFF3B82F6), width: 2),
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
           ),
           validator: (value) {
             if (value == null || value.isEmpty) {

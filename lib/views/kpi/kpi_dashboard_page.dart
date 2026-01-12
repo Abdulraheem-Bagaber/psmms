@@ -7,10 +7,7 @@ import '../../viewmodels/preacher_controller.dart';
 class KPIDashboardPage extends StatefulWidget {
   final String? preacherId;
 
-  const KPIDashboardPage({
-    super.key,
-    this.preacherId,
-  });
+  const KPIDashboardPage({super.key, this.preacherId});
 
   @override
   State<KPIDashboardPage> createState() => _KPIDashboardPageState();
@@ -24,11 +21,13 @@ class _KPIDashboardPageState extends State<KPIDashboardPage> {
   void initState() {
     super.initState();
     _selectedPreacherId = widget.preacherId;
-    
+
     // If preacher ID is provided, load progress
     if (_selectedPreacherId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.read<KPIManagementController>().loadPreacherProgress(_selectedPreacherId!);
+        context.read<KPIManagementController>().loadPreacherProgress(
+          _selectedPreacherId!,
+        );
       });
     }
   }
@@ -63,7 +62,9 @@ class _KPIDashboardPageState extends State<KPIDashboardPage> {
             icon: const Icon(Icons.refresh, color: Colors.black),
             onPressed: () {
               if (_selectedPreacherId != null) {
-                context.read<KPIManagementController>().loadPreacherProgress(_selectedPreacherId!);
+                context.read<KPIManagementController>().loadPreacherProgress(
+                  _selectedPreacherId!,
+                );
               }
             },
           ),
@@ -114,7 +115,7 @@ class _KPIDashboardPageState extends State<KPIDashboardPage> {
 
           final kpi = controller.currentKPI;
           final progress = controller.currentProgress;
-          
+
           if (kpi == null || progress == null) {
             return const Center(child: Text('No data available'));
           }
@@ -174,7 +175,10 @@ class _KPIDashboardPageState extends State<KPIDashboardPage> {
                     children: [
                       _buildPeriodChip('Monthly', _selectedPeriod == 'Monthly'),
                       const SizedBox(width: 12),
-                      _buildPeriodChip('Quarterly', _selectedPeriod == 'Quarterly'),
+                      _buildPeriodChip(
+                        'Quarterly',
+                        _selectedPeriod == 'Quarterly',
+                      ),
                       const SizedBox(width: 12),
                       _buildPeriodChip('Yearly', _selectedPeriod == 'Yearly'),
                     ],
@@ -261,7 +265,8 @@ class _KPIDashboardPageState extends State<KPIDashboardPage> {
             color: isSelected ? const Color(0xFF3B82F6) : Colors.white,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: isSelected ? const Color(0xFF3B82F6) : Colors.grey.shade300,
+              color:
+                  isSelected ? const Color(0xFF3B82F6) : Colors.grey.shade300,
             ),
           ),
           child: Text(
@@ -330,7 +335,10 @@ class _KPIDashboardPageState extends State<KPIDashboardPage> {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: statusColor.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
@@ -369,10 +377,7 @@ class _KPIDashboardPageState extends State<KPIDashboardPage> {
           const SizedBox(height: 8),
           Text(
             '${percentage.toStringAsFixed(1)}% Complete',
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey.shade600,
-            ),
+            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
           ),
         ],
       ),

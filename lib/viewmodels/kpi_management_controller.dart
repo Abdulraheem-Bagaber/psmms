@@ -7,54 +7,65 @@ import '../models/kpi_progress.dart';
 /// Handles KPI target management and progress tracking
 class KPIManagementController extends ChangeNotifier {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
-  
+
   KPITarget? _currentKPI;
   KPIProgress? _currentProgress;
   bool _isLoading = false;
   String? _error;
   String? _successMessage;
-  
+
   // Getters
   KPITarget? get currentKPI => _currentKPI;
   KPIProgress? get currentProgress => _currentProgress;
   bool get isLoading => _isLoading;
   String? get error => _error;
   String? get successMessage => _successMessage;
-  
+
   // Clear messages
   void clearMessages() {
     _error = null;
     _successMessage = null;
     notifyListeners();
   }
-  
+
   // ==================== KPI TARGET MANAGEMENT ====================
-  
+
   // Load KPI for a preacher in a specific period
-  Future<void> loadKPI(String preacherId, DateTime startDate, DateTime endDate) async {
+  Future<void> loadKPI(
+    String preacherId,
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
-    
+
     try {
-      final snapshot = await _db
-          .collection('kpi_targets')
-          .where('preacher_id', isEqualTo: preacherId)
-          .where('start_date', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
-          .where('end_date', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
-          .limit(1)
-          .get();
-      
+      final snapshot =
+          await _db
+              .collection('kpi_targets')
+              .where('preacher_id', isEqualTo: preacherId)
+              .where(
+                'start_date',
+                isLessThanOrEqualTo: Timestamp.fromDate(endDate),
+              )
+              .where(
+                'end_date',
+                isGreaterThanOrEqualTo: Timestamp.fromDate(startDate),
+              )
+              .limit(1)
+              .get();
+
       if (snapshot.docs.isNotEmpty) {
         _currentKPI = KPITarget.fromFirestore(snapshot.docs.first);
-        
+
         // Load corresponding progress
         await _loadProgress(_currentKPI!.id!);
       } else {
         _currentKPI = null;
         _currentProgress = null;
       }
-      
+
       _isLoading = false;
       notifyListeners();
     } catch (e) {
@@ -63,16 +74,17 @@ class KPIManagementController extends ChangeNotifier {
       notifyListeners();
     }
   }
-  
+
   // Load progress for a KPI
   Future<void> _loadProgress(String kpiId) async {
     try {
-      final snapshot = await _db
-          .collection('kpi_progress')
-          .where('kpi_id', isEqualTo: kpiId)
-          .limit(1)
-          .get();
-      
+      final snapshot =
+          await _db
+              .collection('kpi_progress')
+              .where('kpi_id', isEqualTo: kpiId)
+              .limit(1)
+              .get();
+
       if (snapshot.docs.isNotEmpty) {
         _currentProgress = KPIProgress.fromFirestore(snapshot.docs.first);
       } else {
@@ -82,7 +94,7 @@ class KPIManagementController extends ChangeNotifier {
       _error = 'Failed to load progress: $e';
     }
   }
-  
+
   // Save new KPI targets (MUIP Official operation)
   Future<bool> saveKPITargets({
     required String preacherId,
@@ -97,37 +109,47 @@ class KPIManagementController extends ChangeNotifier {
     required DateTime endDate,
   }) async {
     // Validation: All targets must be positive integers
-    if (monthlySessionTarget <= 0 || totalAttendanceTarget <= 0 ||
-        newConvertsTarget <= 0 || baptismsTarget <= 0 ||
-        communityProjectsTarget <= 0 || charityEventsTarget <= 0 ||
+    if (monthlySessionTarget <= 0 ||
+        totalAttendanceTarget <= 0 ||
+        newConvertsTarget <= 0 ||
+        baptismsTarget <= 0 ||
+        communityProjectsTarget <= 0 ||
+        charityEventsTarget <= 0 ||
         youthProgramAttendanceTarget <= 0) {
       _error = 'All KPI target values must be positive integers';
       notifyListeners();
       return false;
     }
-    
+
     // Validation: Performance period must be valid
     if (endDate.isBefore(startDate)) {
       _error = 'End date must be after start date';
       notifyListeners();
       return false;
     }
-    
+
     _isLoading = true;
     _error = null;
     _successMessage = null;
     notifyListeners();
-    
+
     try {
       // Check if KPI already exists
-      final existingSnapshot = await _db
-          .collection('kpi_targets')
-          .where('preacher_id', isEqualTo: preacherId)
-          .where('start_date', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
-          .where('end_date', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
-          .limit(1)
-          .get();
-      
+      final existingSnapshot =
+          await _db
+              .collection('kpi_targets')
+              .where('preacher_id', isEqualTo: preacherId)
+              .where(
+                'start_date',
+                isLessThanOrEqualTo: Timestamp.fromDate(endDate),
+              )
+              .where(
+                'end_date',
+                isGreaterThanOrEqualTo: Timestamp.fromDate(startDate),
+              )
+              .limit(1)
+              .get();
+
       if (existingSnapshot.docs.isNotEmpty) {
         // Update existing KPI
         final docId = existingSnapshot.docs.first.id;
@@ -143,7 +165,7 @@ class KPIManagementController extends ChangeNotifier {
           'end_date': Timestamp.fromDate(endDate),
           'updated_at': FieldValue.serverTimestamp(),
         });
-        
+
         _successMessage = 'KPI targets updated successfully';
       } else {
         // Create new KPI
@@ -159,20 +181,19 @@ class KPIManagementController extends ChangeNotifier {
           startDate: startDate,
           endDate: endDate,
         );
-        
-        final docRef = await _db.collection('kpi_targets').add(kpi.toFirestore());
-        
+
+        final docRef = await _db
+            .collection('kpi_targets')
+            .add(kpi.toFirestore());
+
         // Create corresponding progress record
-        final progress = KPIProgress(
-          kpiId: docRef.id,
-          preacherId: preacherId,
-        );
-        
+        final progress = KPIProgress(kpiId: docRef.id, preacherId: preacherId);
+
         await _db.collection('kpi_progress').add(progress.toFirestore());
-        
+
         _successMessage = 'KPI targets created successfully';
       }
-      
+
       _isLoading = false;
       notifyListeners();
       return true;
@@ -183,24 +204,25 @@ class KPIManagementController extends ChangeNotifier {
       return false;
     }
   }
-  
+
   // ==================== PROGRESS TRACKING (Preacher View) ====================
-  
+
   // Load KPI progress for preacher dashboard
   Future<void> loadPreacherProgress(String preacherId) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
-    
+
     try {
       // Get all KPIs for preacher
-      final kpiSnapshot = await _db
-          .collection('kpi_targets')
-          .where('preacher_id', isEqualTo: preacherId)
-          .orderBy('created_at', descending: true)
-          .limit(1)
-          .get();
-      
+      final kpiSnapshot =
+          await _db
+              .collection('kpi_targets')
+              .where('preacher_id', isEqualTo: preacherId)
+              .orderBy('created_at', descending: true)
+              .limit(1)
+              .get();
+
       if (kpiSnapshot.docs.isEmpty) {
         _currentKPI = null;
         _currentProgress = null;
@@ -209,7 +231,7 @@ class KPIManagementController extends ChangeNotifier {
         _currentKPI = KPITarget.fromFirestore(kpiSnapshot.docs.first);
         await _loadProgress(_currentKPI!.id!);
       }
-      
+
       _isLoading = false;
       notifyListeners();
     } catch (e) {
@@ -218,11 +240,11 @@ class KPIManagementController extends ChangeNotifier {
       notifyListeners();
     }
   }
-  
+
   // Calculate overall progress percentage
   double calculateOverallProgress() {
     if (_currentKPI == null || _currentProgress == null) return 0.0;
-    
+
     final metrics = [
       _currentProgress!.calculateProgress(
         _currentProgress!.sessionsCompleted,
@@ -253,10 +275,10 @@ class KPIManagementController extends ChangeNotifier {
         _currentKPI!.youthProgramAttendanceTarget,
       ),
     ];
-    
+
     return metrics.reduce((a, b) => a + b) / metrics.length;
   }
-  
+
   // Update progress from Activity Management module
   Future<void> updateProgressFromActivity({
     required String preacherId,
@@ -269,20 +291,33 @@ class KPIManagementController extends ChangeNotifier {
     int? youthAttendanceIncrement,
   }) async {
     if (_currentProgress == null) return;
-    
+
     try {
       final updatedProgress = _currentProgress!.copyWith(
-        sessionsCompleted: _currentProgress!.sessionsCompleted + (sessionsIncrement ?? 0),
-        totalAttendanceAchieved: _currentProgress!.totalAttendanceAchieved + (attendanceIncrement ?? 0),
-        newConvertsAchieved: _currentProgress!.newConvertsAchieved + (convertsIncrement ?? 0),
-        baptismsAchieved: _currentProgress!.baptismsAchieved + (baptismsIncrement ?? 0),
-        communityProjectsAchieved: _currentProgress!.communityProjectsAchieved + (projectsIncrement ?? 0),
-        charityEventsAchieved: _currentProgress!.charityEventsAchieved + (eventsIncrement ?? 0),
-        youthProgramAttendanceAchieved: _currentProgress!.youthProgramAttendanceAchieved + (youthAttendanceIncrement ?? 0),
+        sessionsCompleted:
+            _currentProgress!.sessionsCompleted + (sessionsIncrement ?? 0),
+        totalAttendanceAchieved:
+            _currentProgress!.totalAttendanceAchieved +
+            (attendanceIncrement ?? 0),
+        newConvertsAchieved:
+            _currentProgress!.newConvertsAchieved + (convertsIncrement ?? 0),
+        baptismsAchieved:
+            _currentProgress!.baptismsAchieved + (baptismsIncrement ?? 0),
+        communityProjectsAchieved:
+            _currentProgress!.communityProjectsAchieved +
+            (projectsIncrement ?? 0),
+        charityEventsAchieved:
+            _currentProgress!.charityEventsAchieved + (eventsIncrement ?? 0),
+        youthProgramAttendanceAchieved:
+            _currentProgress!.youthProgramAttendanceAchieved +
+            (youthAttendanceIncrement ?? 0),
         lastUpdated: DateTime.now(),
       );
-      
-      await _db.collection('kpi_progress').doc(_currentProgress!.id).update(updatedProgress.toFirestore());
+
+      await _db
+          .collection('kpi_progress')
+          .doc(_currentProgress!.id)
+          .update(updatedProgress.toFirestore());
       _currentProgress = updatedProgress;
       notifyListeners();
     } catch (e) {
@@ -290,7 +325,7 @@ class KPIManagementController extends ChangeNotifier {
       notifyListeners();
     }
   }
-  
+
   // Clear current KPI data
   void clearKPI() {
     _currentKPI = null;

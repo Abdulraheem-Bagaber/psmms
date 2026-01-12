@@ -179,25 +179,29 @@ class MainMenuScreen extends StatelessWidget {
             title: 'Manage KPI Targets',
             subtitle: 'Set and edit KPI targets for preachers.',
             icon: Icons.track_changes,
-            builder: (_) => MultiProvider(
-              providers: [
-                ChangeNotifierProvider(create: (_) => PreacherController()),
-                ChangeNotifierProvider(create: (_) => KPIManagementController()),
-              ],
-              child: const KPIPreacherListPage(),
-            ),
+            builder:
+                (_) => MultiProvider(
+                  providers: [
+                    ChangeNotifierProvider(create: (_) => PreacherController()),
+                    ChangeNotifierProvider(
+                      create: (_) => KPIManagementController(),
+                    ),
+                  ],
+                  child: const KPIPreacherListPage(),
+                ),
           ),
           _buildModuleCard(
             context,
             title: 'Preacher KPI Dashboard',
             subtitle: 'View real-time KPI progress for preachers.',
             icon: Icons.analytics_outlined,
-            builder: (_) => ChangeNotifierProvider(
-              create: (_) => KPIManagementController(),
-              child: const KPIDashboardPage(
-                preacherId: 'PREACHER-001', // Demo preacher
-              ),
-            ),
+            builder:
+                (_) => ChangeNotifierProvider(
+                  create: (_) => KPIManagementController(),
+                  child: const KPIDashboardPage(
+                    preacherId: 'PREACHER-001', // Demo preacher
+                  ),
+                ),
           ),
           const SizedBox(height: 24),
           _buildSectionHeader('Reports & Analytics'),
