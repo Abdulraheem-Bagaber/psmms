@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 enum ReportCategory { activity, payment, kpi, coverage }
 
 class ActivitySummary {

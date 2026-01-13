@@ -17,23 +17,23 @@ class _LoginScreenState extends State<LoginScreen> {
   bool loading = false;
 
   void login() async {
-  setState(() => loading = true);
+    setState(() => loading = true);
 
-  try {
-    await authService.login(
-      email: emailController.text.trim(),
-      password: passwordController.text.trim(),
-    );
+    try {
+      await authService.login(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
 
-    Navigator.pushReplacementNamed(context, '/main');
+      Navigator.pushReplacementNamed(context, '/main');
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
+    }
 
-  } catch (e) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(e.toString())));
+    setState(() => loading = false);
   }
-
-  setState(() => loading = false);
-}
 
   @override
   Widget build(BuildContext context) {
@@ -44,8 +44,8 @@ class _LoginScreenState extends State<LoginScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFF1B5E20),  // Dark Islamic green
-              Color(0xFF2E7D32),  // Medium green
+              Color(0xFF1B5E20), // Dark Islamic green
+              Color(0xFF2E7D32), // Medium green
             ],
           ),
         ),
@@ -82,7 +82,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: const Icon(
                         Icons.mosque,
                         size: 48,
-                        color: Color(0xFFFFD700),  // Gold color
+                        color: Color(0xFFFFD700), // Gold color
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -120,7 +120,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       controller: emailController,
                       decoration: InputDecoration(
                         labelText: 'Email or Username',
-                        prefixIcon: Icon(Icons.email_outlined, color: Colors.grey[600]),
+                        prefixIcon: Icon(
+                          Icons.email_outlined,
+                          color: Colors.grey[600],
+                        ),
                         filled: true,
                         fillColor: const Color(0xFFF5F5F5),
                         border: OutlineInputBorder(
@@ -144,7 +147,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       obscureText: true,
                       decoration: InputDecoration(
                         labelText: 'Password',
-                        prefixIcon: Icon(Icons.lock_outline, color: Colors.grey[600]),
+                        prefixIcon: Icon(
+                          Icons.lock_outline,
+                          color: Colors.grey[600],
+                        ),
                         filled: true,
                         fillColor: const Color(0xFFF5F5F5),
                         border: OutlineInputBorder(
@@ -189,22 +195,23 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           elevation: 0,
                         ),
-                        child: loading
-                            ? const SizedBox(
-                                height: 24,
-                                width: 24,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2.5,
+                        child:
+                            loading
+                                ? const SizedBox(
+                                  height: 24,
+                                  width: 24,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2.5,
+                                  ),
+                                )
+                                : const Text(
+                                  'Login',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
-                              )
-                            : const Text(
-                                'Login',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
                       ),
                     ),
 
@@ -223,7 +230,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (_) => const RegisterScreen()),
+                                builder: (_) => const RegisterScreen(),
+                              ),
                             );
                           },
                           child: const Text(

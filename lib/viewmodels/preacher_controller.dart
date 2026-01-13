@@ -164,11 +164,11 @@ class PreacherController extends ChangeNotifier {
             .collection('activities')
             .where('assignedPreacherId', isEqualTo: preacherId)
             .get();
-    final submissionsSnap =
-        await _db
-            .collection('activity_submissions')
-            .where('preacherId', isEqualTo: preacherId)
-            .get();
+    // final submissionsSnap =
+    //     await _db
+    //         .collection('activity_submissions')
+    //         .where('preacherId', isEqualTo: preacherId)
+    //         .get();
     final paymentsSnap =
         await _db
             .collection('payment')

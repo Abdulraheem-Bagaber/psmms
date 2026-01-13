@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../viewmodels/preacher_controller.dart';
-import '../../viewmodels/kpi_management_controller.dart';
+import '../../viewmodels/kpi_controller.dart';
 import '../../models/preacher.dart';
 import 'kpi_form_page.dart';
 
@@ -51,53 +51,60 @@ class _KPIPreacherListPageState extends State<KPIPreacherListPage> {
           ),
         ),
       ),
-      body: Consumer<PreacherController>(
-        builder: (context, controller, child) {
-          if (controller.isLoading && controller.items.isEmpty) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: Column(
+        children: [
+          // Top Performers Leaderboard
+          _buildTopPerformersSection(context),
+          const Divider(height: 1),
+          // Preacher List
+          Expanded(
+            child: Consumer<PreacherController>(
+              builder: (context, controller, child) {
+                if (controller.isLoading && controller.items.isEmpty) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-          if (controller.error != null && controller.items.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.error_outline,
-                    size: 64,
-                    color: Colors.red.shade300,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(controller.error!),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () => controller.loadInitial(),
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
-            );
-          }
+                if (controller.error != null && controller.items.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          size: 64,
+                          color: Colors.red.shade300,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(controller.error!),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () => controller.loadInitial(),
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  );
+                }
 
-          final preachers = controller.items;
+                final preachers = controller.items;
 
-          if (preachers.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.people_outline,
-                    size: 64,
-                    color: Colors.grey.shade400,
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'No preachers found',
-                    style: TextStyle(fontSize: 18, color: Colors.grey),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
+                if (preachers.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.people_outline,
+                          size: 64,
+                          color: Colors.grey.shade400,
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'No preachers found',
+                          style: TextStyle(fontSize: 18, color: Colors.grey),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
                     'Add preachers to manage their KPIs',
                     style: TextStyle(fontSize: 14, color: Colors.grey),
                   ),
@@ -141,10 +148,11 @@ class _KPIPreacherListPageState extends State<KPIPreacherListPage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => ChangeNotifierProvider(
-                              create: (_) => KPIManagementController(),
-                              child: KPIFormPage(preacher: preacher),
-                            ),
+                            builder:
+                                (context) => ChangeNotifierProvider(
+                                  create: (_) => KPIController(),
+                                  child: KPIFormPage(preacher: preacher),
+                                ),
                           ),
                         );
                       },
@@ -155,6 +163,175 @@ class _KPIPreacherListPageState extends State<KPIPreacherListPage> {
             ],
           );
         },
+      ), // Consumer
+    ), // Expanded
+        ], // Column children
+      ), // Column (body)
+    ); // Scaffold
+  }
+
+  /// Build Top Performers Section
+  Widget _buildTopPerformersSection(BuildContext context) {
+    final kpiController = context.read<KPIController>();
+    
+    return Container(
+      color: Colors.white,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: Row(
+              children: [
+                const Icon(Icons.emoji_events, color: Colors.amber, size: 24),
+                const SizedBox(width: 8),
+                const Text(
+                  'Top Performers',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const Spacer(),
+                TextButton.icon(
+                  onPressed: () async {
+                    await kpiController.updateRankings();
+                    setState(() {}); // Refresh UI
+                  },
+                  icon: const Icon(Icons.refresh, size: 18),
+                  label: const Text('Refresh'),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(
+            height: 100,
+            child: FutureBuilder<List<Map<String, dynamic>>>(
+              future: kpiController.getTopPerformers(limit: 5),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'No performance data yet',
+                      style: TextStyle(color: Colors.grey.shade600),
+                    ),
+                  );
+                }
+                
+                final topPerformers = snapshot.data!;
+                
+                return ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: topPerformers.length,
+                  itemBuilder: (context, index) {
+                    final performer = topPerformers[index];
+                    return _buildPerformerCard(performer, index + 1);
+                  },
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
+      ),
+    );
+  }
+
+  /// Build individual performer card
+  Widget _buildPerformerCard(Map<String, dynamic> performer, int rank) {
+    Color rankColor;
+    String rankEmoji;
+    
+    if (rank == 1) {
+      rankColor = const Color(0xFFFFD700); // Gold
+      rankEmoji = '🥇';
+    } else if (rank == 2) {
+      rankColor = const Color(0xFFC0C0C0); // Silver
+      rankEmoji = '🥈';
+    } else if (rank == 3) {
+      rankColor = const Color(0xFFCD7F32); // Bronze
+      rankEmoji = '🥉';
+    } else {
+      rankColor = Colors.grey.shade400;
+      rankEmoji = '#$rank';
+    }
+
+    Color statusColor;
+    switch (performer['status']) {
+      case 'excellent':
+        statusColor = Colors.green;
+        break;
+      case 'good':
+        statusColor = Colors.blue;
+        break;
+      case 'warning':
+        statusColor = Colors.orange;
+        break;
+      default:
+        statusColor = Colors.grey;
+    }
+
+    return Container(
+      width: 140,
+      margin: const EdgeInsets.only(right: 12),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [rankColor.withOpacity(0.1), Colors.white],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: rankColor, width: 2),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              rankEmoji,
+              style: const TextStyle(fontSize: 24),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              performer['name'],
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: statusColor,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                '${performer['points']} pts',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            Text(
+              '${performer['percentage'].toStringAsFixed(0)}%',
+              style: TextStyle(
+                fontSize: 11,
+                color: Colors.grey.shade700,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

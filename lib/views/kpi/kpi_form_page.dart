@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import '../../viewmodels/kpi_management_controller.dart';
+import '../../viewmodels/kpi_controller.dart';
 import '../../models/preacher.dart';
 
 /// MUIP Official view: Form to set/edit KPI targets for a preacher
@@ -53,7 +53,7 @@ class _KPIFormPageState extends State<KPIFormPage> {
   }
 
   Future<void> _loadExistingKPI() async {
-    final controller = context.read<KPIManagementController>();
+    final controller = context.read<KPIController>();
 
     await controller.loadKPI(
       widget.preacher.preacherId,
@@ -105,7 +105,7 @@ class _KPIFormPageState extends State<KPIFormPage> {
       return;
     }
 
-    final controller = context.read<KPIManagementController>();
+    final controller = context.read<KPIController>();
 
     final success = await controller.saveKPITargets(
       preacherId: widget.preacher.preacherId,

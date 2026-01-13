@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../viewmodels/officer_activity_view_model.dart';
 import '../widgets/map_location_picker.dart';
 

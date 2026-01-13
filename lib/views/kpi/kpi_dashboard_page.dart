@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../viewmodels/kpi_management_controller.dart';
-import '../../viewmodels/preacher_controller.dart';
+import '../../viewmodels/kpi_controller.dart';
+import '../../models/kpi_progress.dart';
 
 /// Preacher view: Display KPI targets and real-time progress
 class KPIDashboardPage extends StatefulWidget {
@@ -25,7 +25,7 @@ class _KPIDashboardPageState extends State<KPIDashboardPage> {
     // If preacher ID is provided, load progress
     if (_selectedPreacherId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.read<KPIManagementController>().loadPreacherProgress(
+        context.read<KPIController>().loadPreacherProgress(
           _selectedPreacherId!,
         );
       });
@@ -62,7 +62,7 @@ class _KPIDashboardPageState extends State<KPIDashboardPage> {
             icon: const Icon(Icons.refresh, color: Colors.black),
             onPressed: () {
               if (_selectedPreacherId != null) {
-                context.read<KPIManagementController>().loadPreacherProgress(
+                context.read<KPIController>().loadPreacherProgress(
                   _selectedPreacherId!,
                 );
               }
@@ -70,7 +70,7 @@ class _KPIDashboardPageState extends State<KPIDashboardPage> {
           ),
         ],
       ),
-      body: Consumer<KPIManagementController>(
+      body: Consumer<KPIController>(
         builder: (context, controller, child) {
           if (controller.isLoading) {
             return const Center(child: CircularProgressIndicator());
@@ -125,6 +125,9 @@ class _KPIDashboardPageState extends State<KPIDashboardPage> {
           return SingleChildScrollView(
             child: Column(
               children: [
+                // Performance Status Card
+                _buildPerformanceCard(progress, context),
+
                 // Header Card with Overall Progress
                 Container(
                   margin: const EdgeInsets.all(16),
@@ -164,6 +167,34 @@ class _KPIDashboardPageState extends State<KPIDashboardPage> {
                           fontSize: 16,
                         ),
                       ),
+                      if (progress.ranking > 0) ...[
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.leaderboard, color: Colors.white, size: 18),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Rank #${progress.ranking}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -402,5 +433,165 @@ class _KPIDashboardPageState extends State<KPIDashboardPage> {
     if (percentage >= 75) return Icons.check_circle;
     if (percentage >= 50) return Icons.warning;
     return Icons.error;
+  }
+
+  /// Build Performance Status Card with Points and Rank
+  Widget _buildPerformanceCard(KPIProgress progress, BuildContext context) {
+    Color bgColor;
+    Color textColor;
+    String emoji;
+    String statusText;
+    
+    switch (progress.performanceStatus) {
+      case 'excellent':
+        bgColor = Colors.green.shade50;
+        textColor = Colors.green.shade900;
+        emoji = '🏆';
+        statusText = 'EXCELLENT PERFORMANCE';
+        break;
+      case 'good':
+        bgColor = Colors.blue.shade50;
+        textColor = Colors.blue.shade900;
+        emoji = '✅';
+        statusText = 'GOOD PERFORMANCE';
+        break;
+      case 'warning':
+        bgColor = Colors.orange.shade50;
+        textColor = Colors.orange.shade900;
+        emoji = '⚠️';
+        statusText = 'WARNING - NEEDS IMPROVEMENT';
+        break;
+      case 'critical':
+        bgColor = Colors.red.shade50;
+        textColor = Colors.red.shade900;
+        emoji = '🚨';
+        statusText = 'CRITICAL - URGENT ATTENTION';
+        break;
+      default:
+        bgColor = Colors.grey.shade50;
+        textColor = Colors.grey.shade900;
+        emoji = 'ℹ️';
+        statusText = 'NO EVALUATION YET';
+    }
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: textColor.withOpacity(0.3), width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: textColor.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Text(emoji, style: const TextStyle(fontSize: 36)),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      statusText,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: textColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: textColor,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '${progress.performancePoints} Points',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        if (progress.ranking > 0) ...[
+                          const SizedBox(width: 8),
+                          Text(
+                            '• Rank #${progress.ranking}',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: textColor,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              if (progress.performanceStatus == 'excellent')
+                const Icon(Icons.emoji_events, color: Colors.amber, size: 32),
+            ],
+          ),
+          if (progress.overallPercentage > 0) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.7),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                progress.performanceStatus == 'excellent'
+                    ? 'MashaAllah! Outstanding work! You have achieved ${progress.overallPercentage.toStringAsFixed(1)}% of your targets!'
+                    : progress.performanceStatus == 'good'
+                        ? 'Good effort! You are at ${progress.overallPercentage.toStringAsFixed(1)}%. Keep pushing forward!'
+                        : progress.performanceStatus == 'warning'
+                            ? 'You need to improve! Currently at ${progress.overallPercentage.toStringAsFixed(1)}%. Please increase your efforts.'
+                            : 'Critical status! Only ${progress.overallPercentage.toStringAsFixed(1)}% completed. Contact your officer immediately.',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: textColor,
+                  height: 1.4,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
+          const SizedBox(height: 8),
+          ElevatedButton.icon(
+            onPressed: () async {
+              final kpiController = context.read<KPIController>();
+              await kpiController.calculatePerformance(_selectedPreacherId!);
+              setState(() {}); // Refresh UI
+            },
+            icon: const Icon(Icons.refresh, size: 18),
+            label: const Text('Update Performance'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: textColor,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

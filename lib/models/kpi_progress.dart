@@ -17,6 +17,12 @@ class KPIProgress {
   final int charityEventsAchieved;
   final int youthProgramAttendanceAchieved;
 
+  // Performance Tracking
+  final double overallPercentage;
+  final String performanceStatus; // 'excellent', 'good', 'warning', 'critical', 'new'
+  final int performancePoints;
+  final int ranking; // Position in leaderboard (1 = top)
+
   // Metadata
   final DateTime lastUpdated;
 
@@ -31,6 +37,10 @@ class KPIProgress {
     this.communityProjectsAchieved = 0,
     this.charityEventsAchieved = 0,
     this.youthProgramAttendanceAchieved = 0,
+    this.overallPercentage = 0.0,
+    this.performanceStatus = 'new',
+    this.performancePoints = 0,
+    this.ranking = 0,
     DateTime? lastUpdated,
   }) : lastUpdated = lastUpdated ?? DateTime.now();
 
@@ -59,6 +69,10 @@ class KPIProgress {
       'community_projects_achieved': communityProjectsAchieved,
       'charity_events_achieved': charityEventsAchieved,
       'youth_program_attendance_achieved': youthProgramAttendanceAchieved,
+      'overall_percentage': overallPercentage,
+      'performance_status': performanceStatus,
+      'performance_points': performancePoints,
+      'ranking': ranking,
       'last_updated': FieldValue.serverTimestamp(),
     };
   }
@@ -78,6 +92,10 @@ class KPIProgress {
       charityEventsAchieved: data['charity_events_achieved'] ?? 0,
       youthProgramAttendanceAchieved:
           data['youth_program_attendance_achieved'] ?? 0,
+      overallPercentage: (data['overall_percentage'] ?? 0.0).toDouble(),
+      performanceStatus: data['performance_status'] ?? 'new',
+      performancePoints: data['performance_points'] ?? 0,
+      ranking: data['ranking'] ?? 0,
       lastUpdated:
           data['last_updated'] != null
               ? (data['last_updated'] as Timestamp).toDate()
@@ -97,6 +115,10 @@ class KPIProgress {
     int? communityProjectsAchieved,
     int? charityEventsAchieved,
     int? youthProgramAttendanceAchieved,
+    double? overallPercentage,
+    String? performanceStatus,
+    int? performancePoints,
+    int? ranking,
     DateTime? lastUpdated,
   }) {
     return KPIProgress(
@@ -114,6 +136,10 @@ class KPIProgress {
           charityEventsAchieved ?? this.charityEventsAchieved,
       youthProgramAttendanceAchieved:
           youthProgramAttendanceAchieved ?? this.youthProgramAttendanceAchieved,
+      overallPercentage: overallPercentage ?? this.overallPercentage,
+      performanceStatus: performanceStatus ?? this.performanceStatus,
+      performancePoints: performancePoints ?? this.performancePoints,
+      ranking: ranking ?? this.ranking,
       lastUpdated: lastUpdated ?? this.lastUpdated,
     );
   }

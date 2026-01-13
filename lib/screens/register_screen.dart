@@ -58,34 +58,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
         'icNumber': icController.text.trim(),
         'phoneNumber': phoneController.text.trim(),
         'email': emailController.text.trim(),
-        'role': selectedRole,          // Preacher / Officer / MUIP Admin
-        'status': 'pending',           // for approval flow later
+        'role': selectedRole, // Preacher / Officer / MUIP Admin
+        'status': 'pending', // for approval flow later
         'createdAt': FieldValue.serverTimestamp(),
       });
 
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Registration successful. Pending approval.')),
+        const SnackBar(
+          content: Text('Registration successful. Pending approval.'),
+        ),
       );
 
       // 3) Go back to Login screen
       Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
       String msg = e.message ?? 'Registration failed.';
-      if (e.code == 'email-already-in-use') msg = 'Email is already registered.';
-      if (e.code == 'weak-password') msg = 'Password is too weak (min 6 chars).';
+      if (e.code == 'email-already-in-use')
+        msg = 'Email is already registered.';
+      if (e.code == 'weak-password')
+        msg = 'Password is too weak (min 6 chars).';
       if (e.code == 'invalid-email') msg = 'Invalid email format.';
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(msg)),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
     } finally {
       if (mounted) setState(() => loading = false);
     }
@@ -115,10 +117,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF1B5E20),
-              Color(0xFF2E7D32),
-            ],
+            colors: [Color(0xFF1B5E20), Color(0xFF2E7D32)],
           ),
         ),
         child: SafeArea(
@@ -188,25 +187,43 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                           TextFormField(
                             controller: fullNameController,
-                            decoration: _inputDeco('Full Name', icon: Icons.person),
-                            validator: (v) =>
-                                (v == null || v.trim().isEmpty) ? 'Full name is required' : null,
+                            decoration: _inputDeco(
+                              'Full Name',
+                              icon: Icons.person,
+                            ),
+                            validator:
+                                (v) =>
+                                    (v == null || v.trim().isEmpty)
+                                        ? 'Full name is required'
+                                        : null,
                           ),
                           const SizedBox(height: 16),
                           TextFormField(
                             controller: icController,
-                            decoration: _inputDeco('IC Number', icon: Icons.badge),
+                            decoration: _inputDeco(
+                              'IC Number',
+                              icon: Icons.badge,
+                            ),
                             keyboardType: TextInputType.number,
-                            validator: (v) =>
-                                (v == null || v.trim().isEmpty) ? 'IC number is required' : null,
+                            validator:
+                                (v) =>
+                                    (v == null || v.trim().isEmpty)
+                                        ? 'IC number is required'
+                                        : null,
                           ),
                           const SizedBox(height: 16),
                           TextFormField(
                             controller: phoneController,
-                            decoration: _inputDeco('Phone Number', icon: Icons.phone),
+                            decoration: _inputDeco(
+                              'Phone Number',
+                              icon: Icons.phone,
+                            ),
                             keyboardType: TextInputType.phone,
-                            validator: (v) =>
-                                (v == null || v.trim().isEmpty) ? 'Phone number is required' : null,
+                            validator:
+                                (v) =>
+                                    (v == null || v.trim().isEmpty)
+                                        ? 'Phone number is required'
+                                        : null,
                           ),
                           const SizedBox(height: 16),
                           TextFormField(
@@ -214,24 +231,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             decoration: _inputDeco('Email', icon: Icons.email),
                             keyboardType: TextInputType.emailAddress,
                             validator: (v) {
-                              if (v == null || v.trim().isEmpty) return 'Email is required';
-                              if (!v.contains('@')) return 'Enter a valid email';
+                              if (v == null || v.trim().isEmpty)
+                                return 'Email is required';
+                              if (!v.contains('@'))
+                                return 'Enter a valid email';
                               return null;
                             },
                           ),
                           const SizedBox(height: 16),
                           TextFormField(
                             controller: passwordController,
-                            decoration: _inputDeco('Password', icon: Icons.lock).copyWith(
+                            decoration: _inputDeco(
+                              'Password',
+                              icon: Icons.lock,
+                            ).copyWith(
                               suffixIcon: IconButton(
-                                onPressed: () => setState(() => obscure = !obscure),
-                                icon: Icon(obscure ? Icons.visibility_off : Icons.visibility),
+                                onPressed:
+                                    () => setState(() => obscure = !obscure),
+                                icon: Icon(
+                                  obscure
+                                      ? Icons.visibility_off
+                                      : Icons.visibility,
+                                ),
                               ),
                             ),
                             obscureText: obscure,
                             validator: (v) {
-                              if (v == null || v.isEmpty) return 'Password is required';
-                              if (v.length < 6) return 'Password must be at least 6 characters';
+                              if (v == null || v.isEmpty)
+                                return 'Password is required';
+                              if (v.length < 6)
+                                return 'Password must be at least 6 characters';
                               return null;
                             },
                           ),
@@ -241,12 +270,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           DropdownButtonFormField<String>(
                             value: selectedRole,
                             decoration: _inputDeco('Role', icon: Icons.work),
-                            items: roles
-                                .map((r) => DropdownMenuItem<String>(
-                                      value: r,
-                                      child: Text(r),
-                                    ))
-                                .toList(),
+                            items:
+                                roles
+                                    .map(
+                                      (r) => DropdownMenuItem<String>(
+                                        value: r,
+                                        child: Text(r),
+                                      ),
+                                    )
+                                    .toList(),
                             onChanged: (val) {
                               if (val == null) return;
                               setState(() => selectedRole = val);
@@ -268,22 +300,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 ),
                                 elevation: 0,
                               ),
-                              child: loading
-                                  ? const SizedBox(
-                                      height: 24,
-                                      width: 24,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2.5,
-                                        color: Colors.white,
+                              child:
+                                  loading
+                                      ? const SizedBox(
+                                        height: 24,
+                                        width: 24,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2.5,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                      : const Text(
+                                        'Register',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                       ),
-                                    )
-                                  : const Text(
-                                      'Register',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
                             ),
                           ),
 
@@ -297,7 +330,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 style: TextStyle(color: Colors.grey[600]),
                               ),
                               TextButton(
-                                onPressed: loading ? null : () => Navigator.pop(context),
+                                onPressed:
+                                    loading
+                                        ? null
+                                        : () => Navigator.pop(context),
                                 child: const Text(
                                   'Login',
                                   style: TextStyle(

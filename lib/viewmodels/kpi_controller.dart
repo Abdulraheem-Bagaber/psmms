@@ -5,7 +5,7 @@ import '../models/kpi_progress.dart';
 
 /// State management controller for KPI operations
 /// Handles KPI target management and progress tracking
-class KPIManagementController extends ChangeNotifier {
+class KPIController extends ChangeNotifier {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   KPITarget? _currentKPI;
@@ -50,11 +50,16 @@ class KPIManagementController extends ChangeNotifier {
 
       if (snapshot.docs.isNotEmpty) {
         // Filter in memory for overlapping date ranges
-        final matchingDocs = snapshot.docs.where((doc) {
-          final kpi = KPITarget.fromFirestore(doc);
-          return kpi.startDate.isBefore(endDate.add(const Duration(days: 1))) &&
-              kpi.endDate.isAfter(startDate.subtract(const Duration(days: 1)));
-        }).toList();
+        final matchingDocs =
+            snapshot.docs.where((doc) {
+              final kpi = KPITarget.fromFirestore(doc);
+              return kpi.startDate.isBefore(
+                    endDate.add(const Duration(days: 1)),
+                  ) &&
+                  kpi.endDate.isAfter(
+                    startDate.subtract(const Duration(days: 1)),
+                  );
+            }).toList();
 
         if (matchingDocs.isNotEmpty) {
           _currentKPI = KPITarget.fromFirestore(matchingDocs.first);
@@ -137,8 +142,8 @@ class KPIManagementController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      print('DEBUG: Saving KPI for preacher ID: $preacherId');  // Debug log
-      
+      print('DEBUG: Saving KPI for preacher ID: $preacherId'); // Debug log
+
       // Check if KPI already exists - fetch all for preacher and filter in memory
       final existingSnapshot =
           await _db
@@ -147,11 +152,16 @@ class KPIManagementController extends ChangeNotifier {
               .get();
 
       // Filter in memory for overlapping date ranges
-      final matchingDocs = existingSnapshot.docs.where((doc) {
-        final kpi = KPITarget.fromFirestore(doc);
-        return kpi.startDate.isBefore(endDate.add(const Duration(days: 1))) &&
-            kpi.endDate.isAfter(startDate.subtract(const Duration(days: 1)));
-      }).toList();
+      final matchingDocs =
+          existingSnapshot.docs.where((doc) {
+            final kpi = KPITarget.fromFirestore(doc);
+            return kpi.startDate.isBefore(
+                  endDate.add(const Duration(days: 1)),
+                ) &&
+                kpi.endDate.isAfter(
+                  startDate.subtract(const Duration(days: 1)),
+                );
+          }).toList();
 
       if (matchingDocs.isNotEmpty) {
         // Update existing KPI
@@ -217,8 +227,8 @@ class KPIManagementController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      print('DEBUG: Loading KPI for preacher ID: $preacherId');  // Debug log
-      
+      print('DEBUG: Loading KPI for preacher ID: $preacherId'); // Debug log
+
       // Get all KPIs for preacher
       final kpiSnapshot =
           await _db
@@ -226,7 +236,9 @@ class KPIManagementController extends ChangeNotifier {
               .where('preacher_id', isEqualTo: preacherId)
               .get();
 
-      print('DEBUG: Found ${kpiSnapshot.docs.length} KPI documents');  // Debug log
+      print(
+        'DEBUG: Found ${kpiSnapshot.docs.length} KPI documents',
+      ); // Debug log
 
       if (kpiSnapshot.docs.isEmpty) {
         _currentKPI = null;
@@ -234,22 +246,26 @@ class KPIManagementController extends ChangeNotifier {
         _error = 'No KPI targets set for this preacher';
       } else {
         // Sort by created_at in memory and get the most recent
-        final sortedDocs = kpiSnapshot.docs.toList()
-          ..sort((a, b) {
-            final aTime = (a.data()['created_at'] as Timestamp?)?.toDate() ?? DateTime(2000);
-            final bTime = (b.data()['created_at'] as Timestamp?)?.toDate() ?? DateTime(2000);
-            return bTime.compareTo(aTime);  // descending order
-          });
-        
+        final sortedDocs =
+            kpiSnapshot.docs.toList()..sort((a, b) {
+              final aTime =
+                  (a.data()['created_at'] as Timestamp?)?.toDate() ??
+                  DateTime(2000);
+              final bTime =
+                  (b.data()['created_at'] as Timestamp?)?.toDate() ??
+                  DateTime(2000);
+              return bTime.compareTo(aTime); // descending order
+            });
+
         _currentKPI = KPITarget.fromFirestore(sortedDocs.first);
-        print('DEBUG: Loaded KPI with ID: ${_currentKPI!.id}');  // Debug log
+        print('DEBUG: Loaded KPI with ID: ${_currentKPI!.id}'); // Debug log
         await _loadProgress(_currentKPI!.id!);
       }
 
       _isLoading = false;
       notifyListeners();
     } catch (e) {
-      print('DEBUG: Error loading KPI: $e');  // Debug log
+      print('DEBUG: Error loading KPI: $e'); // Debug log
       _error = 'Failed to load progress: $e';
       _isLoading = false;
       notifyListeners();
@@ -348,5 +364,216 @@ class KPIManagementController extends ChangeNotifier {
     _error = null;
     _successMessage = null;
     notifyListeners();
+  }
+
+  // ==================== PERFORMANCE & RANKING SYSTEM ====================
+
+  /// Calculate performance and assign points based on achievement percentage
+  Future<Map<String, dynamic>> calculatePerformance(String preacherId) async {
+    try {
+      // Get current KPI target and progress
+      final targetSnapshot =
+          await _db
+              .collection('kpi_targets')
+              .where('preacher_id', isEqualTo: preacherId)
+              .orderBy('created_at', descending: true)
+              .limit(1)
+              .get();
+
+      if (targetSnapshot.docs.isEmpty) {
+        return {'status': 'no_target', 'message': 'No KPI targets set'};
+      }
+
+      final target = KPITarget.fromFirestore(targetSnapshot.docs.first);
+
+      final progressSnapshot =
+          await _db
+              .collection('kpi_progress')
+              .where('preacher_id', isEqualTo: preacherId)
+              .where('kpi_id', isEqualTo: target.id)
+              .get();
+
+      if (progressSnapshot.docs.isEmpty) {
+        return {'status': 'no_progress', 'message': 'No progress recorded'};
+      }
+
+      final progressDoc = progressSnapshot.docs.first;
+      final progress = KPIProgress.fromFirestore(progressDoc);
+
+      // Calculate individual percentages
+      List<double> percentages = [];
+      if (target.monthlySessionTarget > 0) {
+        percentages.add(
+          (progress.sessionsCompleted / target.monthlySessionTarget) * 100,
+        );
+      }
+      if (target.totalAttendanceTarget > 0) {
+        percentages.add(
+          (progress.totalAttendanceAchieved / target.totalAttendanceTarget) *
+              100,
+        );
+      }
+      if (target.newConvertsTarget > 0) {
+        percentages.add(
+          (progress.newConvertsAchieved / target.newConvertsTarget) * 100,
+        );
+      }
+      if (target.baptismsTarget > 0) {
+        percentages.add(
+          (progress.baptismsAchieved / target.baptismsTarget) * 100,
+        );
+      }
+      if (target.communityProjectsTarget > 0) {
+        percentages.add(
+          (progress.communityProjectsAchieved /
+                  target.communityProjectsTarget) *
+              100,
+        );
+      }
+      if (target.charityEventsTarget > 0) {
+        percentages.add(
+          (progress.charityEventsAchieved / target.charityEventsTarget) * 100,
+        );
+      }
+      if (target.youthProgramAttendanceTarget > 0) {
+        percentages.add(
+          (progress.youthProgramAttendanceAchieved /
+                  target.youthProgramAttendanceTarget) *
+              100,
+        );
+      }
+
+      // Calculate overall percentage
+      double overall =
+          percentages.isEmpty
+              ? 0.0
+              : percentages.reduce((a, b) => a + b) / percentages.length;
+
+      // Determine status and points
+      String status;
+      int points;
+      String emoji;
+
+      if (overall >= 90) {
+        status = 'excellent';
+        points = 100;
+        emoji = '🏆';
+      } else if (overall >= 70) {
+        status = 'good';
+        points = 70;
+        emoji = '✅';
+      } else if (overall >= 50) {
+        status = 'warning';
+        points = 40;
+        emoji = '⚠️';
+      } else {
+        status = 'critical';
+        points = 0;
+        emoji = '🚨';
+      }
+
+      // Update progress with performance data
+      await _db.collection('kpi_progress').doc(progressDoc.id).update({
+        'overall_percentage': overall,
+        'performance_status': status,
+        'performance_points': points,
+        'last_updated': FieldValue.serverTimestamp(),
+      });
+
+      return {
+        'status': status,
+        'percentage': overall,
+        'points': points,
+        'emoji': emoji,
+      };
+    } catch (e) {
+      return {'status': 'error', 'message': e.toString()};
+    }
+  }
+
+  /// Update rankings for all preachers based on performance points
+  Future<void> updateRankings() async {
+    try {
+      // Get all progress records sorted by points
+      final progressSnapshot =
+          await _db
+              .collection('kpi_progress')
+              .orderBy('performance_points', descending: true)
+              .orderBy('overall_percentage', descending: true)
+              .get();
+
+      // Update ranking for each preacher
+      int rank = 1;
+      for (var doc in progressSnapshot.docs) {
+        await _db.collection('kpi_progress').doc(doc.id).update({
+          'ranking': rank,
+        });
+        rank++;
+      }
+    } catch (e) {
+      print('Error updating rankings: $e');
+    }
+  }
+
+  /// Get top performers (leaderboard)
+  Future<List<Map<String, dynamic>>> getTopPerformers({int limit = 10}) async {
+    try {
+      final progressSnapshot =
+          await _db
+              .collection('kpi_progress')
+              .orderBy('performance_points', descending: true)
+              .orderBy('overall_percentage', descending: true)
+              .limit(limit)
+              .get();
+
+      List<Map<String, dynamic>> topPerformers = [];
+
+      for (var doc in progressSnapshot.docs) {
+        final progress = KPIProgress.fromFirestore(doc);
+
+        // Get preacher details
+        final preacherSnapshot =
+            await _db.collection('preachers').doc(progress.preacherId).get();
+
+        if (preacherSnapshot.exists) {
+          final preacherData = preacherSnapshot.data() as Map<String, dynamic>;
+          topPerformers.add({
+            'preacherId': progress.preacherId,
+            'name': preacherData['fullName'] ?? 'Unknown',
+            'region': preacherData['region'] ?? 'N/A',
+            'points': progress.performancePoints,
+            'percentage': progress.overallPercentage,
+            'status': progress.performanceStatus,
+            'ranking': progress.ranking,
+          });
+        }
+      }
+
+      return topPerformers;
+    } catch (e) {
+      print('Error getting top performers: $e');
+      return [];
+    }
+  }
+
+  /// Get preacher's current ranking
+  Future<int> getPreacherRanking(String preacherId) async {
+    try {
+      final progressSnapshot =
+          await _db
+              .collection('kpi_progress')
+              .where('preacher_id', isEqualTo: preacherId)
+              .limit(1)
+              .get();
+
+      if (progressSnapshot.docs.isNotEmpty) {
+        final progress = KPIProgress.fromFirestore(progressSnapshot.docs.first);
+        return progress.ranking;
+      }
+      return 0;
+    } catch (e) {
+      print('Error getting ranking: $e');
+      return 0;
+    }
   }
 }

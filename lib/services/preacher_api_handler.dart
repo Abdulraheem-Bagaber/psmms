@@ -13,7 +13,7 @@ class PreacherAPIHandler {
     : _db = firestore ?? FirebaseFirestore.instance;
 
   final FirebaseFirestore _db;
-  final String _collection = 'users';  // Changed to users collection
+  final String _collection = 'users'; // Changed to users collection
 
   Future<PreacherPage> fetchPreachers({
     String? search,
@@ -23,7 +23,8 @@ class PreacherAPIHandler {
     DocumentSnapshot? startAfter,
   }) async {
     // Fetch users where role is 'Preacher'
-    Query query = _db.collection(_collection)
+    Query query = _db
+        .collection(_collection)
         .where('role', isEqualTo: 'Preacher');
 
     if (region != null && region.isNotEmpty && region != 'All') {
@@ -46,17 +47,20 @@ class PreacherAPIHandler {
     final snapshot = await query.limit(limit).get();
     var items =
         snapshot.docs.map((doc) => Preacher.fromFirestore(doc)).toList();
-    
+
     // Sort by fullName in code instead of using orderBy
     items.sort((a, b) => a.fullName.compareTo(b.fullName));
-    
+
     // Apply search filter if provided
     if (search != null && search.isNotEmpty) {
-      items = items.where((p) => 
-        p.fullName.toLowerCase().contains(search.toLowerCase())
-      ).toList();
+      items =
+          items
+              .where(
+                (p) => p.fullName.toLowerCase().contains(search.toLowerCase()),
+              )
+              .toList();
     }
-    
+
     final last = snapshot.docs.isNotEmpty ? snapshot.docs.last : null;
     return PreacherPage(items: items, lastDocument: last);
   }
@@ -79,12 +83,5 @@ class PreacherAPIHandler {
 
   Future<void> createPreacher(Preacher preacher) async {
     await _db.collection(_collection).add(preacher.toFirestore());
-  }
-
-  String _endTextForSearch(String text) {
-    if (text.isEmpty) return text;
-    final lastChar = text.codeUnitAt(text.length - 1);
-    final nextLastChar = String.fromCharCode(lastChar + 1);
-    return text.substring(0, text.length - 1) + nextLastChar;
   }
 }

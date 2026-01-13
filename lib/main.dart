@@ -20,7 +20,7 @@ import 'screens/profile_screen.dart';
 import 'package:provider/provider.dart';
 import 'views/kpi/kpi_preacher_list_page.dart';
 import 'views/kpi/kpi_dashboard_page.dart';
-import 'viewmodels/kpi_management_controller.dart';
+import 'viewmodels/kpi_controller.dart';
 import 'viewmodels/preacher_controller.dart';
 
 void main() async {
@@ -104,11 +104,12 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
-        final doc = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .get();
-        
+        final doc =
+            await FirebaseFirestore.instance
+                .collection('users')
+                .doc(user.uid)
+                .get();
+
         if (doc.exists) {
           setState(() {
             userRole = doc.data()?['role'] ?? 'Preacher';
@@ -169,9 +170,10 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
           ),
         ],
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _buildModulesList(context),
+      body:
+          isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _buildModulesList(context),
     );
   }
 
@@ -259,16 +261,17 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
               ],
             ),
           ),
-        
+
         // Officer-only modules
-        if (userRole == 'Officer' || userRole == 'MUIP Admin') ..._buildOfficerModules(context),
-        
+        if (userRole == 'Officer' || userRole == 'MUIP Admin')
+          ..._buildOfficerModules(context),
+
         // Preacher-only modules
         if (userRole == 'Preacher') ..._buildPreacherModules(context),
-        
+
         // Admin-only modules
         if (userRole == 'MUIP Admin') ..._buildAdminModules(context),
-        
+
         // Development tools (show for all in development)
         const SizedBox(height: 24),
         _buildSectionHeader('Development Tools'),
@@ -279,7 +282,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
           icon: Icons.add_circle,
           builder: (_) => const ActivitySeederPage(),
         ),
-        
+
         // Settings (show for all users)
         const SizedBox(height: 24),
         _buildSectionHeader('Settings'),
@@ -363,13 +366,16 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
         title: 'Manage KPI Targets',
         subtitle: 'Set and edit KPI targets for preachers.',
         icon: Icons.track_changes,
-        builder: (_) => MultiProvider(
-          providers: [
-            ChangeNotifierProvider(create: (_) => PreacherController()),
-            ChangeNotifierProvider(create: (_) => KPIManagementController()),
-          ],
-          child: const KPIPreacherListPage(),
-        ),
+        builder:
+            (_) => MultiProvider(
+              providers: [
+                ChangeNotifierProvider(create: (_) => PreacherController()),
+                ChangeNotifierProvider(
+                  create: (_) => KPIController(),
+                ),
+              ],
+              child: const KPIPreacherListPage(),
+            ),
       ),
     ];
   }
@@ -382,20 +388,22 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
         title: 'Available Activities',
         subtitle: 'Browse and apply for available activities.',
         icon: Icons.event_available,
-        builder: (_) => PreacherAssignActivityScreen.withProvider(
-          preacherId: userId ?? 'PREACHER-001',
-          preacherName: userName ?? 'Ahmad bin Ali',
-        ),
+        builder:
+            (_) => PreacherAssignActivityScreen.withProvider(
+              preacherId: userId ?? 'PREACHER-001',
+              preacherName: userName ?? 'Ahmad bin Ali',
+            ),
       ),
       _buildModuleCard(
         context,
         title: 'My Activities',
         subtitle: 'View assigned activities and submit evidence.',
         icon: Icons.assignment_ind,
-        builder: (_) => PreacherListActivitiesScreen.withProvider(
-          preacherId: userId ?? 'PREACHER-001',
-          preacherName: userName ?? 'Ahmad bin Ali',
-        ),
+        builder:
+            (_) => PreacherListActivitiesScreen.withProvider(
+              preacherId: userId ?? 'PREACHER-001',
+              preacherName: userName ?? 'Ahmad bin Ali',
+            ),
       ),
       const SizedBox(height: 24),
       _buildSectionHeader('My KPI Dashboard'),
@@ -404,12 +412,11 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
         title: 'KPI Dashboard',
         subtitle: 'View your KPI progress and targets.',
         icon: Icons.analytics_outlined,
-        builder: (_) => ChangeNotifierProvider(
-          create: (_) => KPIManagementController(),
-          child: KPIDashboardPage(
-            preacherId: userId ?? 'PREACHER-001',
-          ),
-        ),
+        builder:
+            (_) => ChangeNotifierProvider(
+              create: (_) => KPIController(),
+              child: KPIDashboardPage(preacherId: userId ?? 'PREACHER-001'),
+            ),
       ),
       const SizedBox(height: 24),
       _buildSectionHeader('Payment History'),
@@ -418,9 +425,10 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
         title: 'My Payment History',
         subtitle: 'View your payment history.',
         icon: Icons.history,
-        builder: (_) => PreacherPaymentHistoryScreen.withProvider(
-          preacherId: userId ?? 'PREACHER-001',
-        ),
+        builder:
+            (_) => PreacherPaymentHistoryScreen.withProvider(
+              preacherId: userId ?? 'PREACHER-001',
+            ),
       ),
     ];
   }
@@ -433,13 +441,16 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
         title: 'Manage KPI Targets',
         subtitle: 'Set and edit KPI targets for preachers.',
         icon: Icons.track_changes,
-        builder: (_) => MultiProvider(
-          providers: [
-            ChangeNotifierProvider(create: (_) => PreacherController()),
-            ChangeNotifierProvider(create: (_) => KPIManagementController()),
-          ],
-          child: const KPIPreacherListPage(),
-        ),
+        builder:
+            (_) => MultiProvider(
+              providers: [
+                ChangeNotifierProvider(create: (_) => PreacherController()),
+                ChangeNotifierProvider(
+                  create: (_) => KPIController(),
+                ),
+              ],
+              child: const KPIPreacherListPage(),
+            ),
       ),
       const SizedBox(height: 24),
       _buildSectionHeader('Reports & Analytics'),
@@ -505,7 +516,8 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: onTapOverride ??
+          onTap:
+              onTapOverride ??
               () {
                 Navigator.of(context).push(MaterialPageRoute(builder: builder));
               },
@@ -564,8 +576,6 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     );
   }
 }
-
-
 
 class ActivitySeederPage extends StatelessWidget {
   const ActivitySeederPage({super.key});

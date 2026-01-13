@@ -205,7 +205,7 @@ class ReportAPIHandler {
 
     final paySnapshot = await _db.collection('payment').get();
     for (final doc in paySnapshot.docs) {
-      final data = doc.data() as Map<String, dynamic>;
+      final data = doc.data();
       final amount =
           ((data['amount'] ?? data['paymentAmount']) ?? 0.0).toDouble();
       totalPayments += amount;
@@ -274,7 +274,7 @@ class ReportAPIHandler {
     Set<String> allRegions = {'North', 'Central', 'South', 'East', 'West'};
 
     for (final doc in docs) {
-      final data = doc.data() as Map<String, dynamic>;
+      final data = doc.data();
       final location = data['location'] as String? ?? 'Unknown';
       final preacherId = data['assignedPreacherId'];
 
