@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import '../pages/EditProfilePage.dart';
+
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile'),
-      ),
+      appBar: AppBar(title: const Text('Profile')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -38,7 +37,7 @@ class ProfilePage extends StatelessWidget {
             _infoTile(Icons.work, 'Experience', '5 years'),
 
             const SizedBox(height: 32),
-
+            /*
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -52,7 +51,7 @@ class ProfilePage extends StatelessWidget {
                 },
                 child: const Text('Edit Profile'),
               ),
-            ),
+            ),*/
           ],
         ),
       ),
