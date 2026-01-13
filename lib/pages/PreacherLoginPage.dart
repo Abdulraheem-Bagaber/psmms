@@ -4,6 +4,8 @@ import '../controllers/preacher_controller.dart';
 import '../models/User.dart';
 import 'KPIDashboardPage.dart';
 import '../services/session.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class PreacherLoginPage extends StatefulWidget {
   const PreacherLoginPage({Key? key}) : super(key: key);
 
@@ -31,9 +33,7 @@ class _PreacherLoginPageState extends State<PreacherLoginPage> {
       body: Consumer<PreacherController>(
         builder: (context, controller, child) {
           if (controller.isLoading) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
+            return const Center(child: CircularProgressIndicator());
           }
 
           if (controller.error != null) {
@@ -115,10 +115,7 @@ class _PreacherLoginPageState extends State<PreacherLoginPage> {
                     const SizedBox(height: 8),
                     const Text(
                       'Choose your name to view your KPI dashboard',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white70,
-                      ),
+                      style: TextStyle(fontSize: 16, color: Colors.white70),
                     ),
                     const SizedBox(height: 32),
                     Expanded(
@@ -144,19 +141,37 @@ class _PreacherLoginPageState extends State<PreacherLoginPage> {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
-        onTap: () {
-          Session.preacherId = preacher.id;
+        onTap: () async {
+          // Get the preacher's profile based on user_id matching preacher.id
+          final profileSnapshot = await FirebaseFirestore.instance
+              .collection('preacher_profiles')
+              .where('user_id', isEqualTo: preacher.id)
+              .limit(1)
+              .get();
 
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => MyKPIDashboardPage(preacherId: preacher.id),
-            ),
-          );
+          if (profileSnapshot.docs.isNotEmpty) {
+            final profileId = profileSnapshot.docs.first.id;
+
+            // Save to session (for profile page)
+            Session.preacherId = preacher.id;
+            Session.profileDocId = profileId;
+
+            // Go to KPI Dashboard
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => MyKPIDashboardPage(preacherId: preacher.id),
+              ),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Profile not found for this preacher'),
+              ),
+            );
+          }
         },
         borderRadius: BorderRadius.circular(16),
         child: Padding(
@@ -192,30 +207,20 @@ class _PreacherLoginPageState extends State<PreacherLoginPage> {
                     const SizedBox(height: 4),
                     Text(
                       preacher.email,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                     ),
                     if (preacher.phone != null) ...[
                       const SizedBox(height: 2),
                       Text(
                         preacher.phone!,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[500],
-                        ),
+                        style: TextStyle(fontSize: 12, color: Colors.grey[500]),
                       ),
                     ],
                   ],
                 ),
               ),
               // Arrow
-              Icon(
-                Icons.arrow_forward_ios,
-                color: Colors.grey[400],
-                size: 20,
-              ),
+              Icon(Icons.arrow_forward_ios, color: Colors.grey[400], size: 20),
             ],
           ),
         ),
