@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import '../../models/payment.dart';
-import '../../viewmodels/payment_list_view_model.dart';
+import '../../../models/payment.dart';
+import '../../../viewmodels/payment_list_view_model.dart';
 
 class PaymentHistoryScreen extends StatelessWidget {
   const PaymentHistoryScreen({super.key});

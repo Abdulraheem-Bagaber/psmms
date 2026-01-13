@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../models/payment.dart';
-import '../../viewmodels/payment_form_view_model.dart';
+import '../../../models/payment.dart';
+import '../../../viewmodels/payment_form_view_model.dart';
 
 class PaymentFormScreen extends StatelessWidget {
   const PaymentFormScreen({super.key});
