@@ -20,7 +20,7 @@ import 'screens/dashboard_screen.dart';
 import 'package:provider/provider.dart';
 import 'views/kpi/kpi_preacher_list_page.dart';
 import 'views/kpi/kpi_dashboard_page.dart';
-import 'viewmodels/kpi_management_controller.dart';
+import 'viewmodels/kpi_controller.dart';
 import 'viewmodels/preacher_controller.dart';
 
 void main() async {
@@ -181,6 +181,15 @@ class MainMenuScreen extends StatelessWidget {
             builder: (_) => PreacherDirectoryScreen.withProvider(),
           ),
           const SizedBox(height: 24),
+          _buildSectionHeader('Reports & Analytics'),
+          _buildModuleCard(
+            context,
+            title: 'Reports Dashboard',
+            subtitle: 'Generate activity, payment, KPI, and coverage reports.',
+            icon: Icons.analytics,
+            builder: (_) => ReportingDashboardScreen.withProvider(),
+          ),
+          const SizedBox(height: 24),
           _buildSectionHeader('KPI Management'),
           _buildModuleCard(
             context,
@@ -192,7 +201,7 @@ class MainMenuScreen extends StatelessWidget {
                   providers: [
                     ChangeNotifierProvider(create: (_) => PreacherController()),
                     ChangeNotifierProvider(
-                      create: (_) => KPIManagementController(),
+                      create: (_) => KPIController(),
                     ),
                   ],
                   child: const KPIPreacherListPage(),
@@ -205,20 +214,11 @@ class MainMenuScreen extends StatelessWidget {
             icon: Icons.analytics_outlined,
             builder:
                 (_) => ChangeNotifierProvider(
-                  create: (_) => KPIManagementController(),
+                  create: (_) => KPIController(),
                   child: const KPIDashboardPage(
                     preacherId: 'PREACHER-001', // Demo preacher
                   ),
                 ),
-          ),
-          const SizedBox(height: 24),
-          _buildSectionHeader('Reports & Analytics'),
-          _buildModuleCard(
-            context,
-            title: 'Reports Dashboard',
-            subtitle: 'Generate activity, payment, KPI, and coverage reports.',
-            icon: Icons.analytics,
-            builder: (_) => ReportingDashboardScreen.withProvider(),
           ),
           const SizedBox(height: 24),
           _buildSectionHeader('Development Tools'),

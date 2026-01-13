@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import 'dart:ui';
 import '../models/user_model.dart';
 import '../services/user_service.dart';
@@ -9,6 +10,9 @@ import '../views/activity/officer/officer_list_activities_screen.dart';
 import '../views/activity/preacher/preacher_list_activities_screen.dart';
 import '../views/activity/preacher/preacher_assign_activity_screen.dart';
 import '../views/kpi/kpi_dashboard_page.dart';
+import '../views/kpi/kpi_preacher_list_page.dart';
+import '../viewmodels/kpi_controller.dart';
+import '../viewmodels/preacher_controller.dart';
 import '../views/reports/reporting_dashboard_screen.dart';
 import '../views/payment/preacher/preacher_payment_history_screen.dart';
 import 'profile_screen.dart';
@@ -49,16 +53,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
         return Scaffold(
           body: _buildBody(user),
           bottomNavigationBar: _buildBottomNavBar(user),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const MainMenuScreen()),
-              );
-            },
-            child: const Icon(Icons.apps),
-            tooltip: 'All Modules',
-          ),
         );
       },
     );
@@ -73,8 +67,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
       case 2:
         return _buildPaymentsPage(user);
       case 3:
-        return _buildReportsPage(user);
+        return _buildKPIPage(user);
       case 4:
+        return _buildReportsPage(user);
+      case 5:
         return const ProfileScreen();
       default:
         return _buildDashboardHome(user);
@@ -641,23 +637,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
               );
             },
           ),
-          const SizedBox(height: 12),
-          _buildPremiumActionCard(
-            title: 'KPI Dashboard',
-            subtitle: 'Track your performance',
-            icon: Icons.analytics_rounded,
-            gradient: const LinearGradient(
-              colors: [Color(0xFFf093fb), Color(0xFFf5576c)],
-            ),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const KPIDashboardPage(preacherId: 'PREACHER-001'),
-                ),
-              );
-            },
-          ),
         ],
       ],
     );
@@ -950,6 +929,36 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
+  Widget _buildKPIPage(UserModel user) {
+    // Officers see Manage KPI Targets page, Preachers see their dashboard
+    print('DEBUG KPI Page - User role: ${user.role}');
+    if (user.role.toLowerCase() == 'officer' || user.role.toLowerCase() == 'admin') {
+      print('DEBUG: Showing Officer KPI Management page');
+      return MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => KPIController()),
+          ChangeNotifierProvider(create: (_) => PreacherController()),
+        ],
+        child: const Scaffold(
+          body: KPIPreacherListPage(),
+        ),
+      );
+    } else {
+      // Preacher view
+      print('DEBUG: Showing Preacher KPI Dashboard');
+      return ChangeNotifierProvider(
+        create: (_) => KPIController(),
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text('My KPI Dashboard'),
+            automaticallyImplyLeading: false,
+          ),
+          body: KPIDashboardPage(preacherId: user.uid),
+        ),
+      );
+    }
+  }
+
   Widget _buildReportsPage(UserModel user) {
     return Scaffold(
       appBar: AppBar(
@@ -1003,24 +1012,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
       unselectedItemColor: Colors.grey,
       selectedFontSize: 12,
       unselectedFontSize: 12,
-      items: const [
-        BottomNavigationBarItem(
+      items: [
+        const BottomNavigationBarItem(
           icon: Icon(Icons.dashboard),
           label: 'Home',
         ),
-        BottomNavigationBarItem(
+        const BottomNavigationBarItem(
           icon: Icon(Icons.event),
           label: 'Activities',
         ),
-        BottomNavigationBarItem(
+        const BottomNavigationBarItem(
           icon: Icon(Icons.payment),
           label: 'Payments',
         ),
         BottomNavigationBarItem(
+          icon: const Icon(Icons.track_changes),
+          label: user.role.toLowerCase() == 'officer' ? 'KPI Target' : 'KPI Dashboard',
+        ),
+        const BottomNavigationBarItem(
           icon: Icon(Icons.analytics),
           label: 'Reports',
         ),
-        BottomNavigationBarItem(
+        const BottomNavigationBarItem(
           icon: Icon(Icons.person),
           label: 'Profile',
         ),
