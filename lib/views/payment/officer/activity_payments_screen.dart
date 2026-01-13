@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../models/payment.dart';
-import '../../viewmodels/payment_list_view_model.dart';
+import '../../../models/payment.dart';
+import '../../../viewmodels/payment_list_view_model.dart';
 
 const Color primaryBlue = Color(0xFF0066FF);
 const Color scaffoldBackground = Color(0xFFF2F2F2);

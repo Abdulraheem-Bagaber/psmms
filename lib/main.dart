@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'activity_seeder.dart';
 import 'firebase_options.dart';
-import 'views/payment/activity_payments_screen.dart';
-import 'views/payment/payment_form_screen.dart';
-import 'views/payment/approved_payments_screen.dart';
-import 'views/payment/payment_history_screen.dart';
-import 'views/payment/preacher_payment_history_screen.dart';
+import 'views/payment/officer/activity_payments_screen.dart';
+import 'views/payment/officer/payment_form_screen.dart';
+import 'views/payment/admin/approved_payments_screen.dart';
+import 'views/payment/admin/payment_history_screen.dart';
+import 'views/payment/preacher/preacher_payment_history_screen.dart';
 import 'views/activity/officer/officer_list_activities_screen.dart';
 import 'views/activity/preacher/preacher_assign_activity_screen.dart';
 import 'views/activity/preacher/preacher_list_activities_screen.dart';
@@ -16,6 +16,7 @@ import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'screens/profile_screen.dart';
+import 'screens/dashboard_screen.dart';
 import 'package:provider/provider.dart';
 import 'views/kpi/kpi_preacher_list_page.dart';
 import 'views/kpi/kpi_dashboard_page.dart';
@@ -45,6 +46,7 @@ class PsmmsApp extends StatelessWidget {
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterScreen(),
         '/main': (context) => const MainMenuScreen(),
+        '/dashboard': (context) => const DashboardScreen(),
 
         // keep your existing routes
         '/payment-form': (context) => const PaymentFormScreen(),
@@ -71,7 +73,7 @@ class AuthGate extends StatelessWidget {
         }
 
         if (snapshot.hasData) {
-          return const MainMenuScreen();
+          return const DashboardScreen();
         }
 
         return const LoginScreen();
@@ -86,7 +88,13 @@ class MainMenuScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('PSMMS Modules')),
+      appBar: AppBar(
+        title: const Text('PSMMS Modules'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

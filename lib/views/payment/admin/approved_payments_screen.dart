@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import '../../models/payment.dart';
-import '../../viewmodels/payment_list_view_model.dart';
+import '../../../models/payment.dart';
+import '../../../viewmodels/payment_list_view_model.dart';
+import 'payment_history_screen.dart';
 
 class ApprovedPaymentsScreen extends StatelessWidget {
   const ApprovedPaymentsScreen({super.key});
@@ -32,6 +33,20 @@ class ApprovedPaymentsScreen extends StatelessWidget {
           'Approved Payments',
           style: TextStyle(color: Colors.black),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.history, color: Colors.black),
+            tooltip: 'Payment History',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => PaymentHistoryScreen.withProvider(),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [

@@ -25,7 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
       password: passwordController.text.trim(),
     );
 
-    Navigator.pushReplacementNamed(context, '/main');
+    Navigator.pushReplacementNamed(context, '/dashboard');
 
   } catch (e) {
     ScaffoldMessenger.of(context)
