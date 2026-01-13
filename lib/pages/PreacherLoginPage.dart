@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../controllers/preacher_controller.dart';
 import '../models/User.dart';
 import 'KPIDashboardPage.dart';
-
+import '../services/session.dart';
 class PreacherLoginPage extends StatefulWidget {
   const PreacherLoginPage({Key? key}) : super(key: key);
 
@@ -149,7 +149,8 @@ class _PreacherLoginPageState extends State<PreacherLoginPage> {
       ),
       child: InkWell(
         onTap: () {
-          // Navigate to dashboard with this preacher's ID
+          Session.preacherId = preacher.id;
+
           Navigator.push(
             context,
             MaterialPageRoute(
