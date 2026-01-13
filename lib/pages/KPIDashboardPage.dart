@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../controllers/kpi_controller.dart';
 import '../controllers/preacher_controller.dart';
-
+import '../pages/ProfilePage.dart';
 /// Preacher view: Display KPI targets and real-time progress
 /// Corresponds to Basic Flow Steps 10-12 and Exception Flow [E2]
 class MyKPIDashboardPage extends StatefulWidget {
@@ -336,11 +336,13 @@ class _MyKPIDashboardPageState extends State<MyKPIDashboardPage> {
               );
               break;
             case 4:
-              // Profile - Show coming soon
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Profile page coming soon')),
-              );
-              break;
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const ProfilePage(),
+              ),
+            );
+            break;
           }
         },
         items: const [

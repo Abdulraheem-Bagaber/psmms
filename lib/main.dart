@@ -12,6 +12,7 @@ import 'pages/KPIPreacherListPage.dart';
 import 'pages/KPIDashboardPage.dart';
 import 'pages/PreacherLoginPage.dart';
 import 'utils/populate_firebase_data.dart';
+import 'pages/ProfilePage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,7 +40,12 @@ class MUIPApp extends StatelessWidget {
           useMaterial3: true,
           fontFamily: 'Roboto',
         ),
+
         home: const HomePage(),
+
+        routes: {
+          '/profile': (context) => const ProfilePage(),
+        },
       ),
     );
   }
