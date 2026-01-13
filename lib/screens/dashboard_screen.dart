@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:ui';
 import '../models/user_model.dart';
 import '../services/user_service.dart';
 import '../views/payment/officer/activity_payments_screen.dart' as officer;
@@ -83,108 +84,225 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildDashboardHome(UserModel user) {
     return CustomScrollView(
       slivers: [
+        // Modern gradient header with glass morphism
         SliverAppBar(
-          expandedHeight: 200,
+          expandedHeight: 280,
           pinned: true,
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          flexibleSpace: FlexibleSpaceBar(
+            background: Stack(
+              fit: StackFit.expand,
+              children: [
+                // Premium gradient background
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        const Color(0xFF667eea),
+                        const Color(0xFF764ba2),
+                        const Color(0xFFf093fb),
+                      ],
+                    ),
+                  ),
+                ),
+                // Content
+                SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 50),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Avatar with glow effect
+                        Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.white.withOpacity(0.3),
+                                blurRadius: 30,
+                                spreadRadius: 10,
+                              ),
+                            ],
+                          ),
+                          child: CircleAvatar(
+                            radius: 45,
+                            backgroundColor: Colors.white,
+                            child: user.profileImageUrl != null
+                                ? ClipOval(
+                                    child: Image.network(
+                                      user.profileImageUrl!,
+                                      width: 90,
+                                      height: 90,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  )
+                                : Text(
+                                    user.name.isNotEmpty ? user.name[0].toUpperCase() : 'U',
+                                    style: const TextStyle(
+                                      fontSize: 36,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF667eea),
+                                    ),
+                                  ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        // Welcome text
+                        Text(
+                          'Assalamu\'alaikum',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.9),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w400,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          user.name,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        // Premium role badge
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.25),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.3),
+                              width: 1,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 10,
+                                spreadRadius: 0,
+                              ),
+                            ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(20),
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    user.isPreacher ? Icons.person : user.isAdmin ? Icons.admin_panel_settings : Icons.work,
+                                    color: Colors.white,
+                                    size: 14,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    user.role.toUpperCase(),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 11,
+                                      letterSpacing: 1,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
           actions: [
-            // Temporary role switcher for testing
-            PopupMenuButton<String>(
-              icon: const Icon(Icons.admin_panel_settings),
-              onSelected: (role) async {
+            IconButton(
+              icon: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.admin_panel_settings, size: 20),
+              ),
+              onPressed: () async {
                 final userService = UserService();
                 final currentUser = await userService.getCurrentUser();
-                if (currentUser != null) {
-                  await userService.updateUser(currentUser.copyWith(role: role));
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Role changed to $role. Reload the app.')),
+                if (currentUser != null && mounted) {
+                  showModalBottomSheet(
+                    context: context,
+                    backgroundColor: Colors.transparent,
+                    builder: (context) => Container(
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const SizedBox(height: 12),
+                          Container(
+                            width: 40,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[300],
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          const Text(
+                            'Switch Role (Testing)',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          _buildRoleTile(context, 'Admin', Icons.admin_panel_settings, 'admin', currentUser, userService),
+                          _buildRoleTile(context, 'Officer', Icons.work, 'officer', currentUser, userService),
+                          _buildRoleTile(context, 'Preacher', Icons.person, 'preacher', currentUser, userService),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
+                    ),
                   );
                 }
               },
-              itemBuilder: (context) => [
-                const PopupMenuItem(value: 'admin', child: Text('Admin')),
-                const PopupMenuItem(value: 'officer', child: Text('Officer')),
-                const PopupMenuItem(value: 'preacher', child: Text('Preacher')),
-              ],
             ),
             IconButton(
-              icon: const Icon(Icons.logout),
+              icon: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.logout, size: 20),
+              ),
               onPressed: () async {
                 await FirebaseAuth.instance.signOut();
               },
-              tooltip: 'Logout',
             ),
+            const SizedBox(width: 8),
           ],
-          flexibleSpace: FlexibleSpaceBar(
-            title: Text(
-              'Welcome, ${user.name}',
-              style: const TextStyle(fontSize: 18),
-            ),
-            background: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Theme.of(context).colorScheme.primary,
-                    Theme.of(context).colorScheme.secondary,
-                  ],
-                ),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 40),
-                  CircleAvatar(
-                    radius: 40,
-                    backgroundColor: Colors.white,
-                    child: user.profileImageUrl != null
-                        ? ClipOval(
-                            child: Image.network(
-                              user.profileImageUrl!,
-                              width: 80,
-                              height: 80,
-                              fit: BoxFit.cover,
-                            ),
-                          )
-                        : Text(
-                            user.name.isNotEmpty ? user.name[0].toUpperCase() : 'U',
-                            style: TextStyle(
-                              fontSize: 32,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                          ),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      user.role.toUpperCase(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
         ),
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.fromLTRB(20, 24, 20, 100),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildQuickStats(user),
-                const SizedBox(height: 24),
+                const SizedBox(height: 32),
                 _buildQuickActions(user),
-                const SizedBox(height: 24),
+                const SizedBox(height: 32),
                 _buildRecentActivity(user),
               ],
             ),
@@ -194,54 +312,95 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  Widget _buildRoleTile(BuildContext context, String name, IconData icon, String role, UserModel currentUser, UserService userService) {
+    return ListTile(
+      leading: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: const Color(0xFF667eea).withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Icon(icon, color: const Color(0xFF667eea)),
+      ),
+      title: Text(name, style: const TextStyle(fontWeight: FontWeight.w600)),
+      trailing: currentUser.role.toLowerCase() == role
+          ? const Icon(Icons.check_circle, color: Color(0xFF667eea))
+          : null,
+      onTap: () async {
+        await userService.updateUser(currentUser.copyWith(role: role));
+        Navigator.pop(context);
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Role changed to $name'),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+          );
+        }
+      },
+    );
+  }
+
   Widget _buildQuickStats(UserModel user) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Quick Stats',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          'Overview',
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF1a1a1a),
+            letterSpacing: -0.5,
+          ),
         ),
-        const SizedBox(height: 12),
-        Row(
+        const SizedBox(height: 16),
+        // Premium grid layout
+        GridView.count(
+          crossAxisCount: 2,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: 16,
+          crossAxisSpacing: 16,
+          childAspectRatio: 1.1,
           children: [
-            Expanded(
-              child: _buildStatCard(
-                icon: Icons.event,
-                title: user.isPreacher ? 'My Activities' : 'Total Activities',
-                value: '12',
-                color: Colors.blue,
+            _buildModernStatCard(
+              icon: Icons.event_note_rounded,
+              title: user.isPreacher ? 'My Activities' : 'Total Activities',
+              value: '12',
+              change: '+3',
+              isPositive: true,
+              gradient: const LinearGradient(
+                colors: [Color(0xFF667eea), Color(0xFF764ba2)],
               ),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildStatCard(
-                icon: Icons.payment,
-                title: user.isPreacher ? 'Pending Payments' : 'Pending Approvals',
-                value: '3',
-                color: Colors.orange,
+            _buildModernStatCard(
+              icon: Icons.payments_rounded,
+              title: user.isPreacher ? 'Pending' : 'Approvals',
+              value: '3',
+              subtitle: 'payments',
+              gradient: const LinearGradient(
+                colors: [Color(0xFFf093fb), Color(0xFFf5576c)],
               ),
             ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _buildStatCard(
-                icon: Icons.check_circle,
-                title: user.isPreacher ? 'Completed' : 'Approved',
-                value: '8',
-                color: Colors.green,
+            _buildModernStatCard(
+              icon: Icons.check_circle_rounded,
+              title: user.isPreacher ? 'Completed' : 'Approved',
+              value: '8',
+              change: '+2',
+              isPositive: true,
+              gradient: const LinearGradient(
+                colors: [Color(0xFF4facfe), Color(0xFF00f2fe)],
               ),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildStatCard(
-                icon: Icons.trending_up,
-                title: 'KPI Progress',
-                value: '75%',
-                color: Colors.purple,
+            _buildModernStatCard(
+              icon: Icons.trending_up_rounded,
+              title: 'KPI Progress',
+              value: '75%',
+              isPercentage: true,
+              gradient: const LinearGradient(
+                colors: [Color(0xFF43e97b), Color(0xFF38f9d7)],
               ),
             ),
           ],
@@ -250,37 +409,107 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildStatCard({
+  Widget _buildModernStatCard({
     required IconData icon,
     required String title,
     required String value,
-    required Color color,
+    String? subtitle,
+    String? change,
+    bool? isPositive,
+    bool isPercentage = false,
+    required LinearGradient gradient,
   }) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: gradient,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: gradient.colors.first.withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+            spreadRadius: -5,
+          ),
+        ],
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Icon(icon, color: color, size: 28),
-            const SizedBox(height: 8),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(icon, color: Colors.white, size: 24),
+                ),
+                if (change != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          isPositive! ? Icons.arrow_upward : Icons.arrow_downward,
+                          color: Colors.white,
+                          size: 12,
+                        ),
+                        const SizedBox(width: 2),
+                        Text(
+                          change,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
             ),
-            const SizedBox(height: 4),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 12,
-                color: Colors.grey,
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    height: 1,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.white.withOpacity(0.9),
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (subtitle != null)
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.white.withOpacity(0.7),
+                    ),
+                  ),
+              ],
             ),
           ],
         ),
@@ -294,15 +523,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
       children: [
         const Text(
           'Quick Actions',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF1a1a1a),
+            letterSpacing: -0.5,
+          ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         if (user.isOfficer) ...[
-          _buildActionCard(
+          _buildPremiumActionCard(
             title: 'Review Payments',
             subtitle: 'Approve pending payment requests',
-            icon: Icons.payment,
-            color: Colors.blue,
+            icon: Icons.payments_rounded,
+            gradient: const LinearGradient(
+              colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+            ),
             onTap: () {
               Navigator.push(
                 context,
@@ -312,11 +548,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
               );
             },
           ),
-          _buildActionCard(
+          const SizedBox(height: 12),
+          _buildPremiumActionCard(
             title: 'Manage Activities',
             subtitle: 'Create and manage activities',
-            icon: Icons.event,
-            color: Colors.green,
+            icon: Icons.event_note_rounded,
+            gradient: const LinearGradient(
+              colors: [Color(0xFF43e97b), Color(0xFF38f9d7)],
+            ),
             onTap: () {
               Navigator.push(
                 context,
@@ -328,11 +567,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ],
         if (user.isAdmin) ...[
-          _buildActionCard(
+          _buildPremiumActionCard(
             title: 'Approved Payments',
             subtitle: 'Forward approved payments to Yayasan',
-            icon: Icons.check_circle,
-            color: Colors.green,
+            icon: Icons.check_circle_rounded,
+            gradient: const LinearGradient(
+              colors: [Color(0xFF43e97b), Color(0xFF38f9d7)],
+            ),
             onTap: () {
               Navigator.push(
                 context,
@@ -342,11 +583,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
               );
             },
           ),
-          _buildActionCard(
+          const SizedBox(height: 12),
+          _buildPremiumActionCard(
             title: 'Manage Activities',
             subtitle: 'Create and manage activities',
-            icon: Icons.event,
-            color: Colors.blue,
+            icon: Icons.event_note_rounded,
+            gradient: const LinearGradient(
+              colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+            ),
             onTap: () {
               Navigator.push(
                 context,
@@ -358,11 +602,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ],
         if (user.isPreacher) ...[
-          _buildActionCard(
+          _buildPremiumActionCard(
             title: 'Browse Activities',
             subtitle: 'Find and apply for activities',
-            icon: Icons.search,
-            color: Colors.blue,
+            icon: Icons.search_rounded,
+            gradient: const LinearGradient(
+              colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+            ),
             onTap: () {
               Navigator.push(
                 context,
@@ -375,11 +621,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
               );
             },
           ),
-          _buildActionCard(
+          const SizedBox(height: 12),
+          _buildPremiumActionCard(
             title: 'My Activities',
             subtitle: 'View and submit evidence',
-            icon: Icons.assignment,
-            color: Colors.green,
+            icon: Icons.assignment_rounded,
+            gradient: const LinearGradient(
+              colors: [Color(0xFF43e97b), Color(0xFF38f9d7)],
+            ),
             onTap: () {
               Navigator.push(
                 context,
@@ -392,11 +641,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
               );
             },
           ),
-          _buildActionCard(
+          const SizedBox(height: 12),
+          _buildPremiumActionCard(
             title: 'KPI Dashboard',
             subtitle: 'Track your performance',
-            icon: Icons.analytics,
-            color: Colors.purple,
+            icon: Icons.analytics_rounded,
+            gradient: const LinearGradient(
+              colors: [Color(0xFFf093fb), Color(0xFFf5576c)],
+            ),
             onTap: () {
               Navigator.push(
                 context,
@@ -411,30 +663,90 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildActionCard({
+  Widget _buildPremiumActionCard({
     required String title,
     required String subtitle,
     required IconData icon,
-    required Color color,
+    required LinearGradient gradient,
     required VoidCallback onTap,
   }) {
-    return Card(
-      elevation: 1,
-      margin: const EdgeInsets.only(bottom: 8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: ListTile(
-        leading: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 15,
+            offset: const Offset(0, 4),
           ),
-          child: Icon(icon, color: color),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    gradient: gradient,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: gradient.colors.first.withOpacity(0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Icon(icon, color: Colors.white, size: 28),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: Color(0xFF1a1a1a),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 16,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-        subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-        onTap: onTap,
       ),
     );
   }
@@ -443,85 +755,124 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Recent Activity',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Recent Activity',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1a1a1a),
+                letterSpacing: -0.5,
+              ),
+            ),
+            TextButton(
+              onPressed: () {},
+              child: const Text(
+                'See All',
+                style: TextStyle(
+                  color: Color(0xFF667eea),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 12),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                _buildActivityItem(
-                  icon: Icons.check_circle,
-                  title: 'Activity Completed',
-                  subtitle: 'Friday Sermon at Masjid Al-Nur',
-                  time: '2 hours ago',
-                  color: Colors.green,
-                ),
-                const Divider(),
-                _buildActivityItem(
-                  icon: Icons.payment,
-                  title: user.isPreacher ? 'Payment Received' : 'Payment Approved',
-                  subtitle: 'Monthly activities payment',
-                  time: '1 day ago',
-                  color: Colors.blue,
-                ),
-                const Divider(),
-                _buildActivityItem(
-                  icon: Icons.event_available,
-                  title: user.isPreacher ? 'Activity Assigned' : 'Activity Created',
-                  subtitle: 'Weekend Islamic class',
-                  time: '3 days ago',
-                  color: Colors.orange,
-                ),
-              ],
-            ),
-          ),
+        _buildModernActivityItem(
+          icon: Icons.check_circle_rounded,
+          title: 'Activity Completed',
+          subtitle: 'Friday Sermon at Masjid Al-Nur',
+          time: '2 hours ago',
+          iconColor: const Color(0xFF43e97b),
+          iconBg: const Color(0xFF43e97b).withOpacity(0.1),
+        ),
+        const SizedBox(height: 12),
+        _buildModernActivityItem(
+          icon: Icons.payments_rounded,
+          title: user.isPreacher ? 'Payment Received' : 'Payment Approved',
+          subtitle: 'Monthly activities payment',
+          time: '1 day ago',
+          iconColor: const Color(0xFF667eea),
+          iconBg: const Color(0xFF667eea).withOpacity(0.1),
+        ),
+        const SizedBox(height: 12),
+        _buildModernActivityItem(
+          icon: Icons.event_available_rounded,
+          title: user.isPreacher ? 'Activity Assigned' : 'Activity Created',
+          subtitle: 'Weekend Islamic class',
+          time: '3 days ago',
+          iconColor: const Color(0xFFf5576c),
+          iconBg: const Color(0xFFf5576c).withOpacity(0.1),
         ),
       ],
     );
   }
 
-  Widget _buildActivityItem({
+  Widget _buildModernActivityItem({
     required IconData icon,
     required String title,
     required String subtitle,
     required String time,
-    required Color color,
+    required Color iconColor,
+    required Color iconBg,
   }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 15,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
+              color: iconBg,
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: color, size: 20),
+            child: Icon(icon, color: iconColor, size: 24),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                    color: Color(0xFF1a1a1a),
+                  ),
                 ),
+                const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey[600],
+                  ),
                 ),
               ],
             ),
           ),
           Text(
             time,
-            style: const TextStyle(fontSize: 11, color: Colors.grey),
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey[500],
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ],
       ),
