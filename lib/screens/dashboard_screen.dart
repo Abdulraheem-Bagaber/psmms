@@ -15,6 +15,7 @@ import '../viewmodels/kpi_controller.dart';
 import '../viewmodels/preacher_controller.dart';
 import '../views/reports/reporting_dashboard_screen.dart';
 import '../views/payment/preacher/preacher_payment_history_screen.dart';
+import '../views/preacher/preacher_directory_screen.dart';
 import 'profile_screen.dart';
 import '../main.dart';
 
@@ -43,7 +44,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         if (!snapshot.hasData) {
           return const Scaffold(
             body: Center(
-              child: Text('Unable to load user data. Please try logging in again.'),
+              child: Text(
+                'Unable to load user data. Please try logging in again.',
+              ),
             ),
           );
         }
@@ -67,10 +70,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
       case 2:
         return _buildPaymentsPage(user);
       case 3:
-        return _buildKPIPage(user);
+        return _buildPreacherManagementPage(user);
       case 4:
-        return _buildReportsPage(user);
+        return _buildKPIPage(user);
       case 5:
+        return _buildReportsPage(user);
+      case 6:
         return const ProfileScreen();
       default:
         return _buildDashboardHome(user);
@@ -126,23 +131,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           child: CircleAvatar(
                             radius: 45,
                             backgroundColor: Colors.white,
-                            child: user.profileImageUrl != null
-                                ? ClipOval(
-                                    child: Image.network(
-                                      user.profileImageUrl!,
-                                      width: 90,
-                                      height: 90,
-                                      fit: BoxFit.cover,
+                            child:
+                                user.profileImageUrl != null
+                                    ? ClipOval(
+                                      child: Image.network(
+                                        user.profileImageUrl!,
+                                        width: 90,
+                                        height: 90,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    )
+                                    : Text(
+                                      user.name.isNotEmpty
+                                          ? user.name[0].toUpperCase()
+                                          : 'U',
+                                      style: const TextStyle(
+                                        fontSize: 36,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF667eea),
+                                      ),
                                     ),
-                                  )
-                                : Text(
-                                    user.name.isNotEmpty ? user.name[0].toUpperCase() : 'U',
-                                    style: const TextStyle(
-                                      fontSize: 36,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFF667eea),
-                                    ),
-                                  ),
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -169,7 +177,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         const SizedBox(height: 10),
                         // Premium role badge
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.25),
                             borderRadius: BorderRadius.circular(20),
@@ -193,7 +204,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(
-                                    user.isPreacher ? Icons.person : user.isAdmin ? Icons.admin_panel_settings : Icons.work,
+                                    user.isPreacher
+                                        ? Icons.person
+                                        : user.isAdmin
+                                        ? Icons.admin_panel_settings
+                                        : Icons.work,
                                     color: Colors.white,
                                     size: 14,
                                   ),
@@ -236,39 +251,63 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   showModalBottomSheet(
                     context: context,
                     backgroundColor: Colors.transparent,
-                    builder: (context) => Container(
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const SizedBox(height: 12),
-                          Container(
-                            width: 40,
-                            height: 4,
-                            decoration: BoxDecoration(
-                              color: Colors.grey[300],
-                              borderRadius: BorderRadius.circular(2),
+                    builder:
+                        (context) => Container(
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(20),
                             ),
                           ),
-                          const SizedBox(height: 20),
-                          const Text(
-                            'Switch Role (Testing)',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const SizedBox(height: 12),
+                              Container(
+                                width: 40,
+                                height: 4,
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[300],
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              const Text(
+                                'Switch Role (Testing)',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              _buildRoleTile(
+                                context,
+                                'Admin',
+                                Icons.admin_panel_settings,
+                                'admin',
+                                currentUser,
+                                userService,
+                              ),
+                              _buildRoleTile(
+                                context,
+                                'Officer',
+                                Icons.work,
+                                'officer',
+                                currentUser,
+                                userService,
+                              ),
+                              _buildRoleTile(
+                                context,
+                                'Preacher',
+                                Icons.person,
+                                'preacher',
+                                currentUser,
+                                userService,
+                              ),
+                              const SizedBox(height: 20),
+                            ],
                           ),
-                          const SizedBox(height: 16),
-                          _buildRoleTile(context, 'Admin', Icons.admin_panel_settings, 'admin', currentUser, userService),
-                          _buildRoleTile(context, 'Officer', Icons.work, 'officer', currentUser, userService),
-                          _buildRoleTile(context, 'Preacher', Icons.person, 'preacher', currentUser, userService),
-                          const SizedBox(height: 20),
-                        ],
-                      ),
-                    ),
+                        ),
                   );
                 }
               },
@@ -308,7 +347,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildRoleTile(BuildContext context, String name, IconData icon, String role, UserModel currentUser, UserService userService) {
+  Widget _buildRoleTile(
+    BuildContext context,
+    String name,
+    IconData icon,
+    String role,
+    UserModel currentUser,
+    UserService userService,
+  ) {
     return ListTile(
       leading: Container(
         padding: const EdgeInsets.all(10),
@@ -319,9 +365,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
         child: Icon(icon, color: const Color(0xFF667eea)),
       ),
       title: Text(name, style: const TextStyle(fontWeight: FontWeight.w600)),
-      trailing: currentUser.role.toLowerCase() == role
-          ? const Icon(Icons.check_circle, color: Color(0xFF667eea))
-          : null,
+      trailing:
+          currentUser.role.toLowerCase() == role
+              ? const Icon(Icons.check_circle, color: Color(0xFF667eea))
+              : null,
       onTap: () async {
         await userService.updateUser(currentUser.copyWith(role: role));
         Navigator.pop(context);
@@ -330,7 +377,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             SnackBar(
               content: Text('Role changed to $name'),
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
           );
         }
@@ -447,7 +496,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 if (change != null)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(12),
@@ -456,7 +508,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          isPositive! ? Icons.arrow_upward : Icons.arrow_downward,
+                          isPositive!
+                              ? Icons.arrow_upward
+                              : Icons.arrow_downward,
                           color: Colors.white,
                           size: 12,
                         ),
@@ -609,10 +663,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => PreacherAssignActivityScreen.withProvider(
-                    preacherId: user.uid,
-                    preacherName: user.name,
-                  ),
+                  builder:
+                      (_) => PreacherAssignActivityScreen.withProvider(
+                        preacherId: user.uid,
+                        preacherName: user.name,
+                      ),
                 ),
               );
             },
@@ -629,10 +684,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => PreacherListActivitiesScreen.withProvider(
-                    preacherId: user.uid,
-                    preacherName: user.name,
-                  ),
+                  builder:
+                      (_) => PreacherListActivitiesScreen.withProvider(
+                        preacherId: user.uid,
+                        preacherName: user.name,
+                      ),
                 ),
               );
             },
@@ -702,10 +758,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       const SizedBox(height: 4),
                       Text(
                         subtitle,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 13, color: Colors.grey[600]),
                       ),
                     ],
                   ),
@@ -837,10 +890,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey[600],
-                  ),
+                  style: TextStyle(fontSize: 13, color: Colors.grey[600]),
                 ),
               ],
             ),
@@ -888,10 +938,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => PreacherListActivitiesScreen.withProvider(
-                        preacherId: user.uid,
-                        preacherName: user.name,
-                      ),
+                      builder:
+                          (_) => PreacherListActivitiesScreen.withProvider(
+                            preacherId: user.uid,
+                            preacherName: user.name,
+                          ),
                     ),
                   );
                 },
@@ -904,7 +955,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => OfficerListActivitiesScreen.withProvider(),
+                      builder:
+                          (_) => OfficerListActivitiesScreen.withProvider(),
                     ),
                   );
                 },
@@ -919,9 +971,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildPaymentsPage(UserModel user) {
     if (user.isPreacher) {
-      return PreacherPaymentHistoryScreen.withProvider(
-        preacherId: user.uid,
-      );
+      return PreacherPaymentHistoryScreen.withProvider(preacherId: user.uid);
     } else if (user.isAdmin) {
       return ApprovedPaymentsScreen.withProvider();
     } else {
@@ -929,19 +979,58 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
+  Widget _buildPreacherManagementPage(UserModel user) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Preacher Management'),
+        automaticallyImplyLeading: false,
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.people_alt, size: 64, color: Colors.grey[400]),
+            const SizedBox(height: 16),
+            const Text(
+              'Preacher Management',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Search and review preacher profiles',
+              style: TextStyle(color: Colors.grey[600]),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => PreacherDirectoryScreen.withProvider(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.search),
+              label: const Text('View Directory'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildKPIPage(UserModel user) {
     // Officers see Manage KPI Targets page, Preachers see their dashboard
     print('DEBUG KPI Page - User role: ${user.role}');
-    if (user.role.toLowerCase() == 'officer' || user.role.toLowerCase() == 'admin') {
+    if (user.role.toLowerCase() == 'officer' ||
+        user.role.toLowerCase() == 'admin') {
       print('DEBUG: Showing Officer KPI Management page');
       return MultiProvider(
         providers: [
           ChangeNotifierProvider(create: (_) => KPIController()),
           ChangeNotifierProvider(create: (_) => PreacherController()),
         ],
-        child: const Scaffold(
-          body: KPIPreacherListPage(),
-        ),
+        child: const Scaffold(body: KPIPreacherListPage()),
       );
     } else {
       // Preacher view
@@ -1009,34 +1098,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
       },
       type: BottomNavigationBarType.fixed,
       selectedItemColor: Theme.of(context).colorScheme.primary,
-      unselectedItemColor: Colors.grey,
-      selectedFontSize: 12,
-      unselectedFontSize: 12,
-      items: [
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.dashboard),
-          label: 'Home',
-        ),
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.event),
-          label: 'Activities',
-        ),
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.payment),
-          label: 'Payments',
-        ),
+      unselectedItemColor: const Color(0xFF6B7280),
+      selectedFontSize: 11,
+      unselectedFontSize: 11,
+      showSelectedLabels: true,
+      showUnselectedLabels: true,
+      enableFeedback: true,
+      backgroundColor: Colors.white,
+      elevation: 8,
+      items: const [
+        BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Home'),
+        BottomNavigationBarItem(icon: Icon(Icons.event), label: 'Activities'),
+        BottomNavigationBarItem(icon: Icon(Icons.payment), label: 'Payments'),
         BottomNavigationBarItem(
-          icon: const Icon(Icons.track_changes),
-          label: user.role.toLowerCase() == 'officer' ? 'KPI Target' : 'KPI Dashboard',
+          icon: Icon(Icons.people_alt),
+          label: 'Preachers',
         ),
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.analytics),
-          label: 'Reports',
-        ),
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.person),
-          label: 'Profile',
-        ),
+        BottomNavigationBarItem(icon: Icon(Icons.track_changes), label: 'KPI'),
+        BottomNavigationBarItem(icon: Icon(Icons.analytics), label: 'Reports'),
+        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
       ],
     );
   }

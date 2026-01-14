@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'views/kpi/kpi_preacher_list_page.dart';
 import 'views/kpi/kpi_dashboard_page.dart';
-import 'viewmodels/kpi_management_controller.dart';
+import 'viewmodels/kpi_controller.dart';
 import 'viewmodels/preacher_controller.dart';
 
 /// KPI Module Demo/Test Page
@@ -52,7 +52,7 @@ class KPIModuleDemo extends StatelessWidget {
                               create: (_) => PreacherController(),
                             ),
                             ChangeNotifierProvider(
-                              create: (_) => KPIManagementController(),
+                              create: (_) => KPIController(),
                             ),
                           ],
                           child: const KPIPreacherListPage(),
@@ -89,7 +89,7 @@ class KPIModuleDemo extends StatelessWidget {
                   MaterialPageRoute(
                     builder:
                         (context) => ChangeNotifierProvider(
-                          create: (_) => KPIManagementController(),
+                          create: (_) => KPIController(),
                           child: const KPIDashboardPage(
                             preacherId: testPreacherId,
                           ),
