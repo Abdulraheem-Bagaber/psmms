@@ -481,7 +481,7 @@ class OfficerListActivitiesScreen extends StatelessWidget {
       assignedStream,
       submissionsStream,
       paymentsStream,
-    ]).map((values) => values.fold<int>(0, (sum, count) => sum + count));
+    ]).map((counts) => counts.fold<int>(0, (sum, count) => sum + count));
   }
 
   void _showNotifications(BuildContext context) {

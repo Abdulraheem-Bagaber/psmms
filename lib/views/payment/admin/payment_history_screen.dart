@@ -252,10 +252,13 @@ class PaymentHistoryScreen extends StatelessWidget {
   }
 
   String _getInitials(String name) {
-    final parts = name.trim().split(' ');
-    if (parts.isEmpty) return '';
-    if (parts.length == 1) return parts[0].substring(0, 1).toUpperCase();
-    return (parts[0].substring(0, 1) + parts[parts.length - 1].substring(0, 1))
-        .toUpperCase();
+    final parts = name.trim().split(' ').where((part) => part.isNotEmpty).toList();
+    if (parts.isEmpty) return '?';
+    if (parts.length == 1) {
+      return parts[0].isNotEmpty ? parts[0].substring(0, 1).toUpperCase() : '?';
+    }
+    final firstInitial = parts[0].isNotEmpty ? parts[0].substring(0, 1) : '';
+    final lastInitial = parts[parts.length - 1].isNotEmpty ? parts[parts.length - 1].substring(0, 1) : '';
+    return (firstInitial + lastInitial).toUpperCase();
   }
 }

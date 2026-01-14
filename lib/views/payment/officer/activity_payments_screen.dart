@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../models/payment.dart';
 import '../../../viewmodels/payment_list_view_model.dart';
+import '../../activity/officer/officer_view_activity_screen.dart';
+import '../../../models/activity.dart';
 
 const Color primaryBlue = Color(0xFF0066FF);
 const Color scaffoldBackground = Color(0xFFF2F2F2);
@@ -134,56 +137,96 @@ class ActivityPaymentsScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'ID: ${item.activityId}',
-                style: TextStyle(
-                  color: Colors.grey.shade600,
-                  fontWeight: FontWeight.w600,
+              Expanded(
+                child: Text(
+                  'ID: ${item.activityId}',
+                  style: TextStyle(
+                    color: Colors.grey.shade600,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
                 ),
               ),
               _buildStatusChip(item.status),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           Text(
-            item.preacherName,
+            item.activityName,
             style: const TextStyle(
-              fontSize: 17,
+              fontSize: 18,
               fontWeight: FontWeight.w700,
+              color: Color(0xFF1a1a1a),
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           Row(
             children: [
-              const Icon(Icons.calendar_today_outlined, size: 16),
-              const SizedBox(width: 6),
-              Text(
-                _formatDate(item.activityDate),
-                style: TextStyle(color: Colors.grey.shade700),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              const Icon(Icons.location_on_outlined, size: 16),
-              const SizedBox(width: 6),
+              Icon(Icons.person_outline, size: 18, color: Colors.grey.shade600),
+              const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  item.activityName,
-                  style: TextStyle(color: Colors.grey.shade700),
+                  item.preacherName,
+                  style: TextStyle(
+                    color: Colors.grey.shade800,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          Divider(color: Colors.grey.shade200, height: 1),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Icon(Icons.calendar_today_outlined, size: 18, color: Colors.grey.shade600),
+              const SizedBox(width: 8),
+              Text(
+                _formatDate(item.activityDate),
+                style: TextStyle(color: Colors.grey.shade700, fontSize: 14),
+              ),
+            ],
+          ),
           const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               OutlinedButton(
-                onPressed: () {},
+                onPressed: () async {
+                  // Fetch activity details and navigate
+                  try {
+                    print('Fetching activity with ID: ${item.activityId}');
+                    final activityQuery = await FirebaseFirestore.instance
+                        .collection('activities')
+                        .where('activityId', isEqualTo: item.activityId)
+                        .limit(1)
+                        .get();
+                    
+                    print('Activity found: ${activityQuery.docs.isNotEmpty}');
+                    
+                    if (activityQuery.docs.isNotEmpty && context.mounted) {
+                      final activityDoc = activityQuery.docs.first;
+                      final activity = Activity.fromFirestore(activityDoc);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => OfficerViewActivityScreen.withProvider(activity: activity),
+                        ),
+                      );
+                    } else if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Activity not found with ID: ${item.activityId}')),
+                      );
+                    }
+                  } catch (e) {
+                    print('Error fetching activity: $e');
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error: ${e.toString()}')),
+                      );
+                    }
+                  }
+                },
                 style: OutlinedButton.styleFrom(
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
