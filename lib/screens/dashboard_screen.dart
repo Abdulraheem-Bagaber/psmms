@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
@@ -16,7 +18,7 @@ import '../viewmodels/preacher_controller.dart';
 import '../views/reports/reporting_dashboard_screen.dart';
 import '../views/payment/preacher/preacher_payment_history_screen.dart';
 import '../views/preacher/preacher_directory_screen.dart';
-import 'profile_screen.dart';
+import 'ProfilePage.dart';
 import '../main.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -72,11 +74,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
       case 3:
         return _buildPreacherManagementPage(user);
       case 4:
-        return _buildReportsPage(user);
+        return _buildKPIPage(user);
       case 5:
-        return _buildReportsPage(user);
+        return _buildReportsPage(context, user);
       case 6:
-        return const ProfileScreen();
+        return const ProfilePage();
       default:
         return _buildDashboardHome(user);
     }
@@ -131,23 +133,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           child: CircleAvatar(
                             radius: 45,
                             backgroundColor: Colors.white,
-                            child: user.profileImageUrl != null
-                                ? ClipOval(
-                                    child: Image.network(
-                                      user.profileImageUrl!,
-                                      width: 90,
-                                      height: 90,
-                                      fit: BoxFit.cover,
+                            child:
+                                user.profileImageUrl != null
+                                    ? ClipOval(
+                                      child: Image.network(
+                                        user.profileImageUrl!,
+                                        width: 90,
+                                        height: 90,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    )
+                                    : Text(
+                                      user.name.isNotEmpty
+                                          ? user.name[0].toUpperCase()
+                                          : 'U',
+                                      style: const TextStyle(
+                                        fontSize: 36,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF667eea),
+                                      ),
                                     ),
-                                  )
-                                : Text(
-                                    user.name.isNotEmpty ? user.name[0].toUpperCase() : 'U',
-                                    style: const TextStyle(
-                                      fontSize: 36,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFF667eea),
-                                    ),
-                                  ),
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -174,7 +179,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         const SizedBox(height: 10),
                         // Premium role badge
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.25),
                             borderRadius: BorderRadius.circular(20),
@@ -198,7 +206,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(
-                                    user.isPreacher ? Icons.person : user.isAdmin ? Icons.admin_panel_settings : Icons.work,
+                                    user.isPreacher
+                                        ? Icons.person
+                                        : user.isAdmin
+                                        ? Icons.admin_panel_settings
+                                        : Icons.work,
                                     color: Colors.white,
                                     size: 14,
                                   ),
@@ -300,33 +312,41 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                   );
                 }
-              }
-            },
-            itemBuilder:
-                (context) => [
-                  const PopupMenuItem(
-                    value: 'switch_role',
-                    child: Text('Switch Role'),
-                  ),
-                  const PopupMenuItem(value: 'logout', child: Text('Logout')),
-                ],
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildQuickStats(user),
-            const SizedBox(height: 32),
-            _buildQuickActions(context, user),
-            const SizedBox(height: 32),
-            _buildRecentActivity(user),
-            const SizedBox(height: 100),
+              },
+            ),
+            IconButton(
+              icon: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.logout, size: 20),
+              ),
+              onPressed: () async {
+                await FirebaseAuth.instance.signOut();
+              },
+            ),
+            const SizedBox(width: 8),
           ],
         ),
-      ),
+        SliverToBoxAdapter(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildQuickStats(user),
+                const SizedBox(height: 32),
+                _buildQuickActions(context, user),
+                const SizedBox(height: 32),
+                _buildRecentActivity(user),
+                const SizedBox(height: 100),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -446,6 +466,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     bool? isPositive,
     bool isPercentage = false,
     required LinearGradient gradient,
+    String? status,
+    String? imageUrl,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -462,98 +484,112 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
       child: Container(
         padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Row(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(icon, color: Colors.white, size: 24),
-                ),
-                if (change != null)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          isPositive! ? Icons.arrow_upward : Icons.arrow_downward,
-                          color: Colors.white,
-                          size: 12,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        const SizedBox(width: 2),
-                        Text(
-                          change,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
+                        child: Icon(icon, color: Colors.white, size: 24),
+                      ),
+                      if (change != null)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                isPositive!
+                                    ? Icons.arrow_upward
+                                    : Icons.arrow_downward,
+                                color: Colors.white,
+                                size: 12,
+                              ),
+                              const SizedBox(width: 2),
+                              Text(
+                                change,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
+                    ],
                   ),
-              ],
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    height: 1,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        value,
+                        style: const TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          height: 1,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF1a1a1a),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      if (status != null)
+                        Text(
+                          status,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color:
+                                status == 'Completed'
+                                    ? Colors.green[700]
+                                    : Colors.orange[700],
+                          ),
+                        ),
+                    ],
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF1a1a1a),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  status,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color:
-                        status == 'Completed'
-                            ? Colors.green[700]
-                            : Colors.orange[700],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          Container(
-            width: 80,
-            height: 60,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              image: DecorationImage(
-                image: NetworkImage(imageUrl),
-                fit: BoxFit.cover,
+                ],
               ),
             ),
-          ),
-        ],
+            if (imageUrl != null) ...[
+              const SizedBox(width: 12),
+              Container(
+                width: 80,
+                height: 60,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  image: DecorationImage(
+                    image: NetworkImage(imageUrl),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }
@@ -1154,8 +1190,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         BottomNavigationBarItem(icon: Icon(Icons.event), label: 'Activities'),
         BottomNavigationBarItem(icon: Icon(Icons.payment), label: 'Payments'),
         BottomNavigationBarItem(
-          icon: const Icon(Icons.track_changes),
-          label: user.role.toLowerCase() == 'officer' ? 'KPI Target' : 'KPI Dashboard',
+          icon: Icon(Icons.people_alt),
+          label: 'Preachers',
         ),
         BottomNavigationBarItem(icon: Icon(Icons.track_changes), label: 'KPI'),
         BottomNavigationBarItem(icon: Icon(Icons.analytics), label: 'Reports'),
