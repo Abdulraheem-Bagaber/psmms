@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
-import 'dart:ui';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/user_model.dart';
 import '../services/user_service.dart';
 import '../views/payment/officer/activity_payments_screen.dart' as officer;
@@ -54,25 +54,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
         final user = snapshot.data!;
 
         return Scaffold(
-          body: _buildBody(user),
-          bottomNavigationBar: _buildBottomNavBar(user),
+          body: _buildBody(context, user),
+          bottomNavigationBar: _buildBottomNavBar(context, user),
         );
       },
     );
   }
 
-  Widget _buildBody(UserModel user) {
+  Widget _buildBody(BuildContext context, UserModel user) {
     switch (_selectedIndex) {
       case 0:
         return _buildDashboardHome(user);
       case 1:
-        return _buildActivitiesPage(user);
+        return _buildActivitiesPage(context, user);
       case 2:
-        return _buildPaymentsPage(user);
+        return _buildPaymentsPage(context, user);
       case 3:
         return _buildPreacherManagementPage(user);
       case 4:
-        return _buildKPIPage(user);
+        return _buildReportsPage(user);
       case 5:
         return _buildReportsPage(user);
       case 6:
@@ -131,26 +131,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           child: CircleAvatar(
                             radius: 45,
                             backgroundColor: Colors.white,
-                            child:
-                                user.profileImageUrl != null
-                                    ? ClipOval(
-                                      child: Image.network(
-                                        user.profileImageUrl!,
-                                        width: 90,
-                                        height: 90,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    )
-                                    : Text(
-                                      user.name.isNotEmpty
-                                          ? user.name[0].toUpperCase()
-                                          : 'U',
-                                      style: const TextStyle(
-                                        fontSize: 36,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xFF667eea),
-                                      ),
+                            child: user.profileImageUrl != null
+                                ? ClipOval(
+                                    child: Image.network(
+                                      user.profileImageUrl!,
+                                      width: 90,
+                                      height: 90,
+                                      fit: BoxFit.cover,
                                     ),
+                                  )
+                                : Text(
+                                    user.name.isNotEmpty ? user.name[0].toUpperCase() : 'U',
+                                    style: const TextStyle(
+                                      fontSize: 36,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF667eea),
+                                    ),
+                                  ),
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -177,10 +174,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         const SizedBox(height: 10),
                         // Premium role badge
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 6,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.25),
                             borderRadius: BorderRadius.circular(20),
@@ -204,11 +198,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(
-                                    user.isPreacher
-                                        ? Icons.person
-                                        : user.isAdmin
-                                        ? Icons.admin_panel_settings
-                                        : Icons.work,
+                                    user.isPreacher ? Icons.person : user.isAdmin ? Icons.admin_panel_settings : Icons.work,
                                     color: Colors.white,
                                     size: 14,
                                   ),
@@ -310,40 +300,33 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                   );
                 }
-              },
-            ),
-            IconButton(
-              icon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(Icons.logout, size: 20),
-              ),
-              onPressed: () async {
-                await FirebaseAuth.instance.signOut();
-              },
-            ),
-            const SizedBox(width: 8),
+              }
+            },
+            itemBuilder:
+                (context) => [
+                  const PopupMenuItem(
+                    value: 'switch_role',
+                    child: Text('Switch Role'),
+                  ),
+                  const PopupMenuItem(value: 'logout', child: Text('Logout')),
+                ],
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildQuickStats(user),
+            const SizedBox(height: 32),
+            _buildQuickActions(context, user),
+            const SizedBox(height: 32),
+            _buildRecentActivity(user),
+            const SizedBox(height: 100),
           ],
         ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 24, 20, 100),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildQuickStats(user),
-                const SizedBox(height: 32),
-                _buildQuickActions(user),
-                const SizedBox(height: 32),
-                _buildRecentActivity(user),
-              ],
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 
@@ -496,10 +479,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 if (change != null)
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(12),
@@ -508,9 +488,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          isPositive!
-                              ? Icons.arrow_upward
-                              : Icons.arrow_downward,
+                          isPositive! ? Icons.arrow_upward : Icons.arrow_downward,
                           color: Colors.white,
                           size: 12,
                         ),
@@ -543,31 +521,89 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 const SizedBox(height: 4),
                 Text(
                   title,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.white.withOpacity(0.9),
-                    fontWeight: FontWeight.w500,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF1a1a1a),
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
-                if (subtitle != null)
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.white.withOpacity(0.7),
-                    ),
+                const SizedBox(height: 4),
+                Text(
+                  status,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color:
+                        status == 'Completed'
+                            ? Colors.green[700]
+                            : Colors.orange[700],
                   ),
+                ),
               ],
             ),
-          ],
-        ),
+          ),
+          const SizedBox(width: 12),
+          Container(
+            width: 80,
+            height: 60,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              image: DecorationImage(
+                image: NetworkImage(imageUrl),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildQuickActions(UserModel user) {
+  Widget _buildStatCard(
+    String title,
+    String value,
+    Color color,
+    IconData icon,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(colors: [color, color.withOpacity(0.7)]),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: Colors.white, size: 28),
+          const SizedBox(height: 12),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.white.withOpacity(0.9),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickActions(BuildContext context, UserModel user) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -583,6 +619,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         const SizedBox(height: 16),
         if (user.isOfficer) ...[
           _buildPremiumActionCard(
+            context: context,
             title: 'Review Payments',
             subtitle: 'Approve pending payment requests',
             icon: Icons.payments_rounded,
@@ -600,6 +637,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           const SizedBox(height: 12),
           _buildPremiumActionCard(
+            context: context,
             title: 'Manage Activities',
             subtitle: 'Create and manage activities',
             icon: Icons.event_note_rounded,
@@ -618,6 +656,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ],
         if (user.isAdmin) ...[
           _buildPremiumActionCard(
+            context: context,
             title: 'Approved Payments',
             subtitle: 'Forward approved payments to Yayasan',
             icon: Icons.check_circle_rounded,
@@ -635,6 +674,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           const SizedBox(height: 12),
           _buildPremiumActionCard(
+            context: context,
             title: 'Manage Activities',
             subtitle: 'Create and manage activities',
             icon: Icons.event_note_rounded,
@@ -653,6 +693,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ],
         if (user.isPreacher) ...[
           _buildPremiumActionCard(
+            context: context,
             title: 'Browse Activities',
             subtitle: 'Find and apply for activities',
             icon: Icons.search_rounded,
@@ -674,6 +715,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           const SizedBox(height: 12),
           _buildPremiumActionCard(
+            context: context,
             title: 'My Activities',
             subtitle: 'View and submit evidence',
             icon: Icons.assignment_rounded,
@@ -699,6 +741,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildPremiumActionCard({
+    required BuildContext context,
     required String title,
     required String subtitle,
     required IconData icon,
@@ -908,7 +951,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildActivitiesPage(UserModel user) {
+  Widget _buildActivitiesPage(BuildContext context, UserModel user) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Activities'),
@@ -969,7 +1012,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildPaymentsPage(UserModel user) {
+  Widget _buildPaymentsPage(BuildContext context, UserModel user) {
     if (user.isPreacher) {
       return PreacherPaymentHistoryScreen.withProvider(preacherId: user.uid);
     } else if (user.isAdmin) {
@@ -1048,7 +1091,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-  Widget _buildReportsPage(UserModel user) {
+  Widget _buildReportsPage(BuildContext context, UserModel user) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Reports'),
@@ -1088,7 +1131,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  BottomNavigationBar _buildBottomNavBar(UserModel user) {
+  BottomNavigationBar _buildBottomNavBar(BuildContext context, UserModel user) {
     return BottomNavigationBar(
       currentIndex: _selectedIndex,
       onTap: (index) {
@@ -1111,8 +1154,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         BottomNavigationBarItem(icon: Icon(Icons.event), label: 'Activities'),
         BottomNavigationBarItem(icon: Icon(Icons.payment), label: 'Payments'),
         BottomNavigationBarItem(
-          icon: Icon(Icons.people_alt),
-          label: 'Preachers',
+          icon: const Icon(Icons.track_changes),
+          label: user.role.toLowerCase() == 'officer' ? 'KPI Target' : 'KPI Dashboard',
         ),
         BottomNavigationBarItem(icon: Icon(Icons.track_changes), label: 'KPI'),
         BottomNavigationBarItem(icon: Icon(Icons.analytics), label: 'Reports'),
