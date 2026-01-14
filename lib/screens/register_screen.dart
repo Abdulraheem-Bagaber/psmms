@@ -26,7 +26,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool obscure = true;
 
   String selectedRole = 'Preacher';
-  final List<String> roles = ['Preacher', 'Officer', 'MUIP Admin'];
+  final List<String> roles = ['Preacher', 'Officer'];
 
   @override
   void dispose() {
@@ -44,13 +44,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
     setState(() => loading = true);
 
     try {
-      // 1) Create Firebase Auth account
+      // 1️⃣ Create Firebase Auth account
       await authService.register(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
 
-      // 2) Save user profile in Firestore
+      // 2️⃣ Save user profile in Firestore
       final uid = FirebaseAuth.instance.currentUser!.uid;
 
       await FirebaseFirestore.instance.collection('users').doc(uid).set({
@@ -58,36 +58,34 @@ class _RegisterScreenState extends State<RegisterScreen> {
         'icNumber': icController.text.trim(),
         'phoneNumber': phoneController.text.trim(),
         'email': emailController.text.trim(),
-        'role': selectedRole, // Preacher / Officer / MUIP Admin
-        'status': 'pending', // for approval flow later
+        'role': selectedRole,
+        'status': 'pending',
+        'qualifications': [],
+        'skills': [],
         'createdAt': FieldValue.serverTimestamp(),
       });
+
+      // 3️⃣ IMPORTANT: sign out immediately
+      await FirebaseAuth.instance.signOut();
 
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Registration successful. Pending approval.'),
+          content: Text(
+            'Registration successful. Please wait for admin approval.',
+          ),
+          duration: Duration(seconds: 3),
         ),
       );
 
-      // 3) Go back to Login screen
+      // 4️⃣ Go back to Login screen
       Navigator.pop(context);
-    } on FirebaseAuthException catch (e) {
-      String msg = e.message ?? 'Registration failed.';
-      if (e.code == 'email-already-in-use')
-        msg = 'Email is already registered.';
-      if (e.code == 'weak-password')
-        msg = 'Password is too weak (min 6 chars).';
-      if (e.code == 'invalid-email') msg = 'Invalid email format.';
 
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.toString())));
     } finally {
       if (mounted) setState(() => loading = false);
     }
@@ -98,7 +96,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       labelText: label,
       prefixIcon: icon == null ? null : Icon(icon),
       filled: true,
-      fillColor: const Color(0xFFF5F6FA),
+      fillColor: const Color(0xFFF4F7F6),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
         borderSide: BorderSide.none,
@@ -109,7 +107,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const brandGreen = Color(0xFF2E7D32);
+    const primaryColor = Color(0xFF2FA4A9); // soft teal
+    const secondaryColor = Color(0xFF76C7C0); // sage mint
 
     return Scaffold(
       body: Container(
@@ -117,13 +116,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFF1B5E20), Color(0xFF2E7D32)],
+            colors: [primaryColor, secondaryColor],
           ),
         ),
         child: SafeArea(
           child: Column(
             children: [
-              // App Bar
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Row(
@@ -143,14 +141,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ],
                 ),
               ),
-              // Form Container
               Expanded(
                 child: Container(
                   decoration: const BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(32),
-                      topRight: Radius.circular(32),
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(32),
                     ),
                   ),
                   child: SingleChildScrollView(
@@ -159,130 +155,93 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       key: _formKey,
                       child: Column(
                         children: [
-                          // Icon
                           Container(
                             padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFF1B5E20), Color(0xFF2E7D32)],
-                              ),
+                            decoration: const BoxDecoration(
                               shape: BoxShape.circle,
+                              color: primaryColor,
                             ),
                             child: const Icon(
                               Icons.person_add,
                               size: 40,
-                              color: Color(0xFFFFD700),
+                              color: Colors.white,
                             ),
                           ),
-                          const SizedBox(height: 8),
-                          Text(
+                          const SizedBox(height: 12),
+                          const Text(
                             'Join PSMMS',
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
-                              color: Colors.grey[800],
                             ),
                           ),
                           const SizedBox(height: 24),
 
                           TextFormField(
                             controller: fullNameController,
-                            decoration: _inputDeco(
-                              'Full Name',
-                              icon: Icons.person,
-                            ),
-                            validator:
-                                (v) =>
-                                    (v == null || v.trim().isEmpty)
-                                        ? 'Full name is required'
-                                        : null,
+                            decoration: _inputDeco('Full Name', icon: Icons.person),
+                            validator: (v) =>
+                                v == null || v.isEmpty ? 'Required' : null,
                           ),
                           const SizedBox(height: 16),
+
                           TextFormField(
                             controller: icController,
-                            decoration: _inputDeco(
-                              'IC Number',
-                              icon: Icons.badge,
-                            ),
-                            keyboardType: TextInputType.number,
-                            validator:
-                                (v) =>
-                                    (v == null || v.trim().isEmpty)
-                                        ? 'IC number is required'
-                                        : null,
+                            decoration: _inputDeco('IC Number', icon: Icons.badge),
+                            validator: (v) =>
+                                v == null || v.isEmpty ? 'Required' : null,
                           ),
                           const SizedBox(height: 16),
+
                           TextFormField(
                             controller: phoneController,
-                            decoration: _inputDeco(
-                              'Phone Number',
-                              icon: Icons.phone,
-                            ),
-                            keyboardType: TextInputType.phone,
-                            validator:
-                                (v) =>
-                                    (v == null || v.trim().isEmpty)
-                                        ? 'Phone number is required'
-                                        : null,
+                            decoration: _inputDeco('Phone Number', icon: Icons.phone),
+                            validator: (v) =>
+                                v == null || v.isEmpty ? 'Required' : null,
                           ),
                           const SizedBox(height: 16),
+
                           TextFormField(
                             controller: emailController,
                             decoration: _inputDeco('Email', icon: Icons.email),
-                            keyboardType: TextInputType.emailAddress,
-                            validator: (v) {
-                              if (v == null || v.trim().isEmpty)
-                                return 'Email is required';
-                              if (!v.contains('@'))
-                                return 'Enter a valid email';
-                              return null;
-                            },
+                            validator: (v) =>
+                                v == null || !v.contains('@')
+                                    ? 'Invalid email'
+                                    : null,
                           ),
                           const SizedBox(height: 16),
+
                           TextFormField(
                             controller: passwordController,
-                            decoration: _inputDeco(
-                              'Password',
-                              icon: Icons.lock,
-                            ).copyWith(
+                            obscureText: obscure,
+                            decoration: _inputDeco('Password', icon: Icons.lock)
+                                .copyWith(
                               suffixIcon: IconButton(
-                                onPressed:
-                                    () => setState(() => obscure = !obscure),
                                 icon: Icon(
                                   obscure
                                       ? Icons.visibility_off
                                       : Icons.visibility,
                                 ),
+                                onPressed: () =>
+                                    setState(() => obscure = !obscure),
                               ),
                             ),
-                            obscureText: obscure,
-                            validator: (v) {
-                              if (v == null || v.isEmpty)
-                                return 'Password is required';
-                              if (v.length < 6)
-                                return 'Password must be at least 6 characters';
-                              return null;
-                            },
                           ),
                           const SizedBox(height: 16),
 
-                          // Role dropdown
                           DropdownButtonFormField<String>(
                             value: selectedRole,
                             decoration: _inputDeco('Role', icon: Icons.work),
-                            items:
-                                roles
-                                    .map(
-                                      (r) => DropdownMenuItem<String>(
-                                        value: r,
-                                        child: Text(r),
-                                      ),
-                                    )
-                                    .toList(),
-                            onChanged: (val) {
-                              if (val == null) return;
-                              setState(() => selectedRole = val);
-                            },
+                            items: roles
+                                .map(
+                                  (r) => DropdownMenuItem(
+                                    value: r,
+                                    child: Text(r),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (v) =>
+                                setState(() => selectedRole = v!),
                           ),
 
                           const SizedBox(height: 32),
@@ -293,56 +252,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             child: ElevatedButton(
                               onPressed: loading ? null : register,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: brandGreen,
-                                foregroundColor: Colors.white,
+                                backgroundColor: primaryColor,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(16),
                                 ),
-                                elevation: 0,
                               ),
-                              child:
-                                  loading
-                                      ? const SizedBox(
-                                        height: 24,
-                                        width: 24,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2.5,
-                                          color: Colors.white,
-                                        ),
-                                      )
-                                      : const Text(
-                                        'Register',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
+                              child: loading
+                                  ? const CircularProgressIndicator(
+                                      color: Colors.white,
+                                    )
+                                  : const Text(
+                                      'Register',
+                                      style: TextStyle(fontSize: 16),
+                                    ),
                             ),
-                          ),
-
-                          const SizedBox(height: 16),
-
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Already have an account? ',
-                                style: TextStyle(color: Colors.grey[600]),
-                              ),
-                              TextButton(
-                                onPressed:
-                                    loading
-                                        ? null
-                                        : () => Navigator.pop(context),
-                                child: const Text(
-                                  'Login',
-                                  style: TextStyle(
-                                    color: brandGreen,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ],
                           ),
                         ],
                       ),
