@@ -15,7 +15,7 @@ import 'views/reports/reporting_dashboard_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'screens/profile_screen.dart';
+import 'screens/ProfilePage.dart';
 import 'screens/dashboard_screen.dart';
 import 'package:provider/provider.dart';
 import 'views/kpi/kpi_preacher_list_page.dart';
@@ -237,7 +237,7 @@ class MainMenuScreen extends StatelessWidget {
             title: 'My Profile',
             subtitle: 'View or edit your own profile',
             icon: Icons.person_outline,
-            builder: (_) => const ProfileScreen(),
+            builder: (_) => const ProfilePage(),
           ),
 
           _buildModuleCard(
