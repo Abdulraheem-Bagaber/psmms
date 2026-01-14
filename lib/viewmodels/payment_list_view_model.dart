@@ -49,7 +49,10 @@ class PaymentListViewModel extends ChangeNotifier {
           query = query.where('status', isEqualTo: 'Approved by MUIP Officer');
           break;
         case PaymentListMode.adminHistory:
-          query = query.where('status', whereIn: [
+          query = _db
+              .collection('activities')
+              .where('status', whereIn: [
+            'Pending Payment',
             'Forwarded to Yayasan',
             'Paid',
             'Rejected'
@@ -89,10 +92,11 @@ class PaymentListViewModel extends ChangeNotifier {
   void _applyFilters() {
     List<Payment> result = List.from(_all);
 
-    // For adminHistory mode, ensure only final statuses are shown
+    // For adminHistory mode, ensure only specified statuses are shown
     if (mode == PaymentListMode.adminHistory) {
       result = result
           .where((item) =>
+              item.status == 'Pending Payment' ||
               item.status == 'Forwarded to Yayasan' ||
               item.status == 'Paid' ||
               item.status == 'Rejected')
