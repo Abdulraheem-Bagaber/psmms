@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:async/async.dart';
 import '../../../models/activity.dart';
 import '../../../viewmodels/officer_activity_view_model.dart';
 import 'officer_add_activity_screen.dart';
@@ -36,10 +38,7 @@ class OfficerListActivitiesScreen extends StatelessWidget {
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined, color: Colors.black),
-            onPressed: () {},
-          ),
+          _buildNotificationButton(context),
         ],
       ),
       body: Column(
@@ -357,5 +356,318 @@ class OfficerListActivitiesScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Widget _buildNotificationButton(BuildContext context) {
+    return StreamBuilder<int>(
+      stream: _getNotificationCountStream(),
+      builder: (context, snapshot) {
+        final count = snapshot.data ?? 0;
+        return Stack(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.notifications_outlined, color: Colors.black),
+              onPressed: () => _showNotifications(context),
+            ),
+            if (count > 0)
+              Positioned(
+                right: 8,
+                top: 8,
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: const BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                  constraints: const BoxConstraints(
+                    minWidth: 16,
+                    minHeight: 16,
+                  ),
+                  child: Text(
+                    count > 9 ? '9+' : '$count',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+
+  Stream<int> _getNotificationCountStream() {
+    final db = FirebaseFirestore.instance;
+    
+    final assignedStream = db
+        .collection('activities')
+        .where('status', isEqualTo: 'Assigned')
+        .snapshots()
+        .map((snapshot) => snapshot.docs.length);
+    
+    final submissionsStream = db
+        .collection('activity_submissions')
+        .where('status', isEqualTo: 'Pending')
+        .snapshots()
+        .map((snapshot) => snapshot.docs.length);
+    
+    final paymentsStream = db
+        .collection('payments')
+        .where('status', isEqualTo: 'Pending Payment')
+        .snapshots()
+        .map((snapshot) => snapshot.docs.length);
+    
+    return StreamZip([assignedStream, submissionsStream, paymentsStream])
+        .map((values) => values.fold<int>(0, (sum, count) => sum + count));
+  }
+
+  void _showNotifications(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        minChildSize: 0.5,
+        maxChildSize: 0.9,
+        builder: (context, scrollController) => Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
+            ),
+          ),
+          child: Column(
+            children: [
+              Container(
+                margin: const EdgeInsets.only(top: 12),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Notifications',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {},
+                      child: const Text('Clear All'),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: ListView(
+                  controller: scrollController,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  children: [
+                    _buildNotificationSection(
+                      context,
+                      'Activity Assignments',
+                      Icons.check_circle,
+                      Colors.green,
+                      FirebaseFirestore.instance
+                          .collection('activities')
+                          .where('status', isEqualTo: 'Assigned')
+                          .snapshots(),
+                    ),
+                    _buildNotificationSection(
+                      context,
+                      'Evidence Submissions',
+                      Icons.assignment,
+                      Colors.orange,
+                      FirebaseFirestore.instance
+                          .collection('activity_submissions')
+                          .where('status', isEqualTo: 'Pending')
+                          .snapshots(),
+                    ),
+                    _buildNotificationSection(
+                      context,
+                      'Payment Requests',
+                      Icons.payment,
+                      Colors.blue,
+                      FirebaseFirestore.instance
+                          .collection('payments')
+                          .where('status', isEqualTo: 'Pending Payment')
+                          .snapshots(),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNotificationSection(
+    BuildContext context,
+    String title,
+    IconData icon,
+    Color iconColor,
+    Stream<QuerySnapshot> stream,
+  ) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: stream,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
+        final docs = snapshot.data!.docs;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Text(
+                '$title (${docs.length})',
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey,
+                ),
+              ),
+            ),
+            ...docs.map((doc) {
+              final data = doc.data() as Map<String, dynamic>;
+              final timestamp = data['createdAt'] as Timestamp? ?? 
+                               data['submittedAt'] as Timestamp? ?? 
+                               Timestamp.now();
+              
+              return _buildNotificationItem(
+                icon: icon,
+                iconColor: iconColor,
+                title: data['title'] ?? data['activityId'] ?? 'New notification',
+                message: _getNotificationMessage(title, data),
+                time: _getTimeAgo(timestamp.toDate()),
+                isUnread: true,
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              );
+            }).toList(),
+          ],
+        );
+      },
+    );
+  }
+
+  String _getNotificationMessage(String section, Map<String, dynamic> data) {
+    if (section.contains('Assignment')) {
+      return 'Assigned to ${data['assignedPreacherName'] ?? 'preacher'}';
+    } else if (section.contains('Submission')) {
+      return 'Evidence submitted by ${data['preacherName'] ?? 'preacher'}';
+    } else if (section.contains('Payment')) {
+      return 'Payment request for RM ${data['amount'] ?? '0.00'}';
+    }
+    return 'New notification';
+  }
+
+  Widget _buildNotificationItem({
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required String message,
+    required String time,
+    required bool isUnread,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isUnread ? Colors.blue.shade50 : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade200),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: iconColor.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: iconColor, size: 24),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    message,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey.shade600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    time,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.grey.shade500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (isUnread)
+              Container(
+                width: 8,
+                height: 8,
+                decoration: const BoxDecoration(
+                  color: Colors.blue,
+                  shape: BoxShape.circle,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _getTimeAgo(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inMinutes < 1) return 'Just now';
+    if (difference.inMinutes < 60) return '${difference.inMinutes} min ago';
+    if (difference.inHours < 24) return '${difference.inHours} hour(s) ago';
+    if (difference.inDays < 7) return '${difference.inDays} day(s) ago';
+    return DateFormat('MMM d').format(dateTime);
   }
 }
