@@ -216,19 +216,43 @@ class ApprovedPaymentsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            payment.preacherName,
+            payment.activityName,
             style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF1a1a1a),
             ),
           ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Icon(Icons.person_outline, size: 18, color: Colors.grey[600]),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  payment.preacherName,
+                  style: TextStyle(
+                    color: Colors.grey[800],
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 8),
-          Text(
-            DateFormat('d MMM yyyy').format(payment.activityDate),
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.grey[600],
-            ),
+          Row(
+            children: [
+              Icon(Icons.calendar_today_outlined, size: 18, color: Colors.grey[600]),
+              const SizedBox(width: 8),
+              Text(
+                DateFormat('d MMM yyyy').format(payment.activityDate),
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[700],
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
           Row(
