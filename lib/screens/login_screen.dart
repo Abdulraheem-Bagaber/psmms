@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../services/auth_service.dart';
 import 'register_screen.dart';
+import 'reset_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -30,9 +31,8 @@ class _LoginScreenState extends State<LoginScreen> {
         password: passwordController.text.trim(),
       );
 
-      // 2️⃣ Get current user
       final user = FirebaseAuth.instance.currentUser;
-      if (user == null) throw 'Login failed. Please try again.';
+      if (user == null) throw Exception('Login failed.');
 
       // 3️⃣ Check approval status
       final doc =
@@ -43,33 +43,49 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (!doc.exists) {
         await FirebaseAuth.instance.signOut();
-        throw 'Account record not found.';
+        throw Exception('Account record not found.');
       }
 
-      final status = doc['status'];
+      final data = doc.data()!;
+      final status = data['status'];
 
-      if (status != 'approved') {
+      // 🚫 Pending
+      if (status == 'pending') {
         await FirebaseAuth.instance.signOut();
 
-        String msg =
-            status == 'pending'
-                ? 'Your account is pending admin approval.'
-                : 'Your account has been rejected.';
+        if (!mounted) return;
 
-        // 🔔 Delay toa allow UI to settle before showing SnackBar
-        await Future.delayed(const Duration(milliseconds: 300));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Your account is pending admin approval.\nPlease wait for approval.',
+            ),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+
+      // ❌ Rejected
+      if (status == 'rejected') {
+        await FirebaseAuth.instance.signOut();
+
+        final reason = data['rejectionReason'];
 
         if (!mounted) return;
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(msg),
+            content: Text(
+              reason != null && reason.toString().isNotEmpty
+                  ? 'Your application was rejected.\nReason: $reason'
+                  : 'Your application was rejected.\nPlease submit a new application.',
+            ),
             behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 3),
+            duration: const Duration(seconds: 4),
           ),
         );
-
-        return; // 🚫 stop navigation
+        return;
       }
 
       // ✅ Approved user
@@ -103,8 +119,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   'Preacher System Monitoring\nManagement System',
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-
                 const SizedBox(height: 32),
 
                 TextField(
@@ -135,12 +151,16 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
 
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {},
-                    child: const Text('Forgot Password?'),
-                  ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const ResetPasswordScreen(),
+                      ),
+                    );
+                  },
+                  child: const Text('Forgot Password?'),
                 ),
 
                 const SizedBox(height: 20),
