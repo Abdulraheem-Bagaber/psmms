@@ -43,7 +43,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         if (!snapshot.hasData) {
           return const Scaffold(
             body: Center(
-              child: Text('Unable to load user data. Please try logging in again.'),
+              child: Text(
+                'Unable to load user data. Please try logging in again.',
+              ),
             ),
           );
         }
@@ -102,7 +104,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_outlined, color: Color(0xFF1a1a1a)),
+            icon: const Icon(
+              Icons.notifications_outlined,
+              color: Color(0xFF1a1a1a),
+            ),
             onPressed: () {},
           ),
           PopupMenuButton(
@@ -117,53 +122,75 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   showModalBottomSheet(
                     context: context,
                     backgroundColor: Colors.transparent,
-                    builder: (context) => Container(
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const SizedBox(height: 12),
-                          Container(
-                            width: 40,
-                            height: 4,
-                            decoration: BoxDecoration(
-                              color: Colors.grey[300],
-                              borderRadius: BorderRadius.circular(2),
+                    builder:
+                        (context) => Container(
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(20),
                             ),
                           ),
-                          const SizedBox(height: 20),
-                          const Text(
-                            'Switch Role (Testing)',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const SizedBox(height: 12),
+                              Container(
+                                width: 40,
+                                height: 4,
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[300],
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              const Text(
+                                'Switch Role (Testing)',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              _buildRoleTile(
+                                context,
+                                'Admin',
+                                Icons.admin_panel_settings,
+                                'admin',
+                                currentUser,
+                                userService,
+                              ),
+                              _buildRoleTile(
+                                context,
+                                'Officer',
+                                Icons.work,
+                                'officer',
+                                currentUser,
+                                userService,
+                              ),
+                              _buildRoleTile(
+                                context,
+                                'Preacher',
+                                Icons.person,
+                                'preacher',
+                                currentUser,
+                                userService,
+                              ),
+                              const SizedBox(height: 20),
+                            ],
                           ),
-                          const SizedBox(height: 16),
-                          _buildRoleTile(context, 'Admin', Icons.admin_panel_settings, 'admin', currentUser, userService),
-                          _buildRoleTile(context, 'Officer', Icons.work, 'officer', currentUser, userService),
-                          _buildRoleTile(context, 'Preacher', Icons.person, 'preacher', currentUser, userService),
-                          const SizedBox(height: 20),
-                        ],
-                      ),
-                    ),
+                        ),
                   );
                 }
               }
             },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'switch_role',
-                child: Text('Switch Role'),
-              ),
-              const PopupMenuItem(
-                value: 'logout',
-                child: Text('Logout'),
-              ),
-            ],
+            itemBuilder:
+                (context) => [
+                  const PopupMenuItem(
+                    value: 'switch_role',
+                    child: Text('Switch Role'),
+                  ),
+                  const PopupMenuItem(value: 'logout', child: Text('Logout')),
+                ],
           ),
         ],
       ),
@@ -184,7 +211,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildRoleTile(BuildContext context, String name, IconData icon, String role, UserModel currentUser, UserService userService) {
+  Widget _buildRoleTile(
+    BuildContext context,
+    String name,
+    IconData icon,
+    String role,
+    UserModel currentUser,
+    UserService userService,
+  ) {
     return ListTile(
       leading: Container(
         padding: const EdgeInsets.all(10),
@@ -195,9 +229,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
         child: Icon(icon, color: const Color(0xFF667eea)),
       ),
       title: Text(name, style: const TextStyle(fontWeight: FontWeight.w600)),
-      trailing: currentUser.role.toLowerCase() == role
-          ? const Icon(Icons.check_circle, color: Color(0xFF667eea))
-          : null,
+      trailing:
+          currentUser.role.toLowerCase() == role
+              ? const Icon(Icons.check_circle, color: Color(0xFF667eea))
+              : null,
       onTap: () async {
         await userService.updateUser(currentUser.copyWith(role: role));
         Navigator.pop(context);
@@ -206,7 +241,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             SnackBar(
               content: Text('Role changed to $name'),
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
           );
         }
@@ -235,34 +272,49 @@ class _DashboardScreenState extends State<DashboardScreen> {
         final user = userSnapshot.data!;
 
         return StreamBuilder<QuerySnapshot>(
-          stream: FirebaseFirestore.instance
-              .collection('activities')
-              .where('assignedTo', isEqualTo: user.uid)
-              .snapshots(),
+          stream:
+              FirebaseFirestore.instance
+                  .collection('activities')
+                  .where('assignedTo', isEqualTo: user.uid)
+                  .snapshots(),
           builder: (context, activitiesSnapshot) {
-            final activitiesCount = activitiesSnapshot.hasData ? activitiesSnapshot.data!.docs.length : 0;
+            final activitiesCount =
+                activitiesSnapshot.hasData
+                    ? activitiesSnapshot.data!.docs.length
+                    : 0;
 
             return StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('payments')
-                  .where('preacherId', isEqualTo: user.uid)
-                  .orderBy('createdAt', descending: true)
-                  .limit(1)
-                  .snapshots(),
+              stream:
+                  FirebaseFirestore.instance
+                      .collection('payments')
+                      .where('preacherId', isEqualTo: user.uid)
+                      .orderBy('createdAt', descending: true)
+                      .limit(1)
+                      .snapshots(),
               builder: (context, paymentsSnapshot) {
-                final latestPayment = paymentsSnapshot.hasData && paymentsSnapshot.data!.docs.isNotEmpty
-                    ? paymentsSnapshot.data!.docs.first
-                    : null;
+                final latestPayment =
+                    paymentsSnapshot.hasData &&
+                            paymentsSnapshot.data!.docs.isNotEmpty
+                        ? paymentsSnapshot.data!.docs.first
+                        : null;
 
                 return StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance
-                      .collection('activity_submissions')
-                      .where('preacherId', isEqualTo: user.uid)
-                      .where('status', isEqualTo: 'Approved')
-                      .snapshots(),
+                  stream:
+                      FirebaseFirestore.instance
+                          .collection('activity_submissions')
+                          .where('preacherId', isEqualTo: user.uid)
+                          .where('status', isEqualTo: 'Approved')
+                          .snapshots(),
                   builder: (context, submissionsSnapshot) {
-                    final completedActivities = submissionsSnapshot.hasData ? submissionsSnapshot.data!.docs.length : 0;
-                    final kpiScore = activitiesCount > 0 ? ((completedActivities / activitiesCount) * 100).toInt() : 0;
+                    final completedActivities =
+                        submissionsSnapshot.hasData
+                            ? submissionsSnapshot.data!.docs.length
+                            : 0;
+                    final kpiScore =
+                        activitiesCount > 0
+                            ? ((completedActivities / activitiesCount) * 100)
+                                .toInt()
+                            : 0;
 
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -276,25 +328,31 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: const Color(0xFFB5D8D5),
-                                image: user.profileImageUrl != null
-                                    ? DecorationImage(
-                                        image: NetworkImage(user.profileImageUrl!),
-                                        fit: BoxFit.cover,
-                                      )
-                                    : null,
+                                image:
+                                    user.profileImageUrl != null
+                                        ? DecorationImage(
+                                          image: NetworkImage(
+                                            user.profileImageUrl!,
+                                          ),
+                                          fit: BoxFit.cover,
+                                        )
+                                        : null,
                               ),
-                              child: user.profileImageUrl == null
-                                  ? Center(
-                                      child: Text(
-                                        user.name.isNotEmpty ? user.name[0].toUpperCase() : 'U',
-                                        style: const TextStyle(
-                                          fontSize: 36,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
+                              child:
+                                  user.profileImageUrl == null
+                                      ? Center(
+                                        child: Text(
+                                          user.name.isNotEmpty
+                                              ? user.name[0].toUpperCase()
+                                              : 'U',
+                                          style: const TextStyle(
+                                            fontSize: 36,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                          ),
                                         ),
-                                      ),
-                                    )
-                                  : null,
+                                      )
+                                      : null,
                             ),
                             const SizedBox(width: 16),
                             Expanded(
@@ -341,7 +399,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: const Color(0xFFE8E8E8)),
+                                  border: Border.all(
+                                    color: const Color(0xFFE8E8E8),
+                                  ),
                                 ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -374,7 +434,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: const Color(0xFFE8E8E8)),
+                                  border: Border.all(
+                                    color: const Color(0xFFE8E8E8),
+                                  ),
                                 ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -425,13 +487,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               ),
                               const SizedBox(height: 12),
                               Text(
-                                latestPayment != null && latestPayment['status'] == 'Approved' ? 'Paid' : 'Pending',
+                                latestPayment != null &&
+                                        latestPayment['status'] == 'Approved'
+                                    ? 'Paid'
+                                    : 'Pending',
                                 style: TextStyle(
                                   fontSize: 28,
                                   fontWeight: FontWeight.bold,
-                                  color: latestPayment != null && latestPayment['status'] == 'Approved'
-                                      ? const Color(0xFF10B981)
-                                      : const Color(0xFFF59E0B),
+                                  color:
+                                      latestPayment != null &&
+                                              latestPayment['status'] ==
+                                                  'Approved'
+                                          ? const Color(0xFF10B981)
+                                          : const Color(0xFFF59E0B),
                                 ),
                               ),
                             ],
@@ -455,93 +523,107 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(color: const Color(0xFFE8E8E8)),
                           ),
-                          child: latestPayment != null
-                              ? Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Payment for ${_formatDate(latestPayment['createdAt'])}',
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 14,
-                                        color: Color(0xFF1a1a1a),
+                          child:
+                              latestPayment != null
+                                  ? Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Payment for ${_formatDate(latestPayment['createdAt'])}',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 14,
+                                          color: Color(0xFF1a1a1a),
+                                        ),
                                       ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      'Amount: RM ${latestPayment['amount']?.toStringAsFixed(2) ?? '0.00'}',
-                                      style: TextStyle(
-                                        color: Colors.grey[600],
-                                        fontSize: 12,
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'Amount: RM ${latestPayment['amount']?.toStringAsFixed(2) ?? '0.00'}',
+                                        style: TextStyle(
+                                          color: Colors.grey[600],
+                                          fontSize: 12,
+                                        ),
                                       ),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    if (latestPayment['receiptUrl'] != null)
-                                      GestureDetector(
-                                        onTap: () {
-                                          // View receipt image
-                                        },
-                                        child: Container(
+                                      const SizedBox(height: 12),
+                                      if (latestPayment['receiptUrl'] != null)
+                                        GestureDetector(
+                                          onTap: () {
+                                            // View receipt image
+                                          },
+                                          child: Container(
+                                            height: 100,
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              color: Colors.grey[100],
+                                              image: DecorationImage(
+                                                image: NetworkImage(
+                                                  latestPayment['receiptUrl'],
+                                                ),
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
+                                          ),
+                                        )
+                                      else
+                                        Container(
                                           height: 100,
                                           decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(8),
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
                                             color: Colors.grey[100],
-                                            image: DecorationImage(
-                                              image: NetworkImage(latestPayment['receiptUrl']),
-                                              fit: BoxFit.cover,
+                                          ),
+                                          child: const Center(
+                                            child: Icon(
+                                              Icons.receipt,
+                                              size: 40,
+                                              color: Colors.grey,
                                             ),
                                           ),
                                         ),
-                                      )
-                                    else
-                                      Container(
-                                        height: 100,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(8),
-                                          color: Colors.grey[100],
+                                      const SizedBox(height: 16),
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder:
+                                                  (context) =>
+                                                      const PreacherPaymentHistoryScreen(),
+                                            ),
+                                          );
+                                        },
+                                        style: TextButton.styleFrom(
+                                          padding: EdgeInsets.zero,
+                                          minimumSize: Size.zero,
+                                          tapTargetSize:
+                                              MaterialTapTargetSize.shrinkWrap,
                                         ),
-                                        child: const Center(
-                                          child: Icon(Icons.receipt, size: 40, color: Colors.grey),
-                                        ),
-                                      ),
-                                    const SizedBox(height: 16),
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => const PreacherPaymentHistoryScreen(),
+                                        child: const Text(
+                                          'View Details',
+                                          style: TextStyle(
+                                            color: Color(0xFF0066FF),
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w600,
                                           ),
-                                        );
-                                      },
-                                      style: TextButton.styleFrom(
-                                        padding: EdgeInsets.zero,
-                                        minimumSize: Size.zero,
-                                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                      ),
-                                      child: const Text(
-                                        'View Details',
-                                        style: TextStyle(
-                                          color: Color(0xFF0066FF),
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w600,
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                )
-                              : Center(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(24),
-                                    child: Text(
-                                      'No payments yet',
-                                      style: TextStyle(
-                                        color: Colors.grey[500],
-                                        fontSize: 14,
+                                    ],
+                                  )
+                                  : Center(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(24),
+                                      child: Text(
+                                        'No payments yet',
+                                        style: TextStyle(
+                                          color: Colors.grey[500],
+                                          fontSize: 14,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
                         ),
                         const SizedBox(height: 24),
                         // Submit Activity Button
@@ -552,10 +634,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => PreacherListActivitiesScreen.withProvider(
-                                    preacherId: user.uid,
-                                    preacherName: user.name,
-                                  ),
+                                  builder:
+                                      (context) =>
+                                          PreacherListActivitiesScreen.withProvider(
+                                            preacherId: user.uid,
+                                            preacherName: user.name,
+                                          ),
                                 ),
                               );
                             },
@@ -567,7 +651,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               ),
                               elevation: 0,
                             ),
-                            icon: const Icon(Icons.add, color: Colors.white, size: 20),
+                            icon: const Icon(
+                              Icons.add,
+                              color: Colors.white,
+                              size: 20,
+                            ),
                             label: const Text(
                               'Submit Activity',
                               style: TextStyle(
@@ -599,28 +687,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
   // Officer Dashboard - Middle Layout
   Widget _buildOfficerStats() {
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('users')
-          .where('role', isEqualTo: 'preacher')
-          .where('isApproved', isEqualTo: false)
-          .snapshots(),
+      stream:
+          FirebaseFirestore.instance
+              .collection('users')
+              .where('role', isEqualTo: 'preacher')
+              .where('isApproved', isEqualTo: false)
+              .snapshots(),
       builder: (context, preacherAppsSnapshot) {
-        final preacherAppsCount = preacherAppsSnapshot.hasData ? preacherAppsSnapshot.data!.docs.length : 0;
+        final preacherAppsCount =
+            preacherAppsSnapshot.hasData
+                ? preacherAppsSnapshot.data!.docs.length
+                : 0;
 
         return StreamBuilder<QuerySnapshot>(
-          stream: FirebaseFirestore.instance
-              .collection('activity_submissions')
-              .where('status', isEqualTo: 'Pending')
-              .snapshots(),
+          stream:
+              FirebaseFirestore.instance
+                  .collection('activity_submissions')
+                  .where('status', isEqualTo: 'Pending')
+                  .snapshots(),
           builder: (context, reportsSnapshot) {
-            final reportsCount = reportsSnapshot.hasData ? reportsSnapshot.data!.docs.length : 0;
+            final reportsCount =
+                reportsSnapshot.hasData ? reportsSnapshot.data!.docs.length : 0;
 
             return StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('activity_submissions')
-                  .orderBy('submittedAt', descending: true)
-                  .limit(3)
-                  .snapshots(),
+              stream:
+                  FirebaseFirestore.instance
+                      .collection('activity_submissions')
+                      .orderBy('submittedAt', descending: true)
+                      .limit(3)
+                      .snapshots(),
               builder: (context, recentActivitiesSnapshot) {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -673,7 +768,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     backgroundColor: Colors.white,
                                     foregroundColor: const Color(0xFF1a1a1a),
                                     elevation: 0,
-                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 8,
+                                    ),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(8),
                                     ),
@@ -697,7 +795,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               borderRadius: BorderRadius.circular(12),
                               color: Colors.grey[200],
                             ),
-                            child: Icon(Icons.people_outline, size: 48, color: Colors.grey[400]),
+                            child: Icon(
+                              Icons.people_outline,
+                              size: 48,
+                              color: Colors.grey[400],
+                            ),
                           ),
                         ],
                       ),
@@ -739,7 +841,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => const OfficerListActivitiesScreen(),
+                                        builder:
+                                            (context) =>
+                                                const OfficerListActivitiesScreen(),
                                       ),
                                     );
                                   },
@@ -747,7 +851,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     backgroundColor: Colors.white,
                                     foregroundColor: const Color(0xFF1a1a1a),
                                     elevation: 0,
-                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 8,
+                                    ),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(8),
                                     ),
@@ -771,89 +878,98 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               borderRadius: BorderRadius.circular(12),
                               color: Colors.grey[200],
                             ),
-                            child: Icon(Icons.assignment_outlined, size: 48, color: Colors.grey[400]),
+                            child: Icon(
+                              Icons.assignment_outlined,
+                              size: 48,
+                              color: Colors.grey[400],
+                            ),
                           ),
                         ],
                       ),
                     ),
-        const SizedBox(height: 24),
-        // KPI Setup Section
-        const Text(
-          'KPI Setup',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF1a1a1a),
-          ),
-        ),
-        const SizedBox(height: 16),
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: const Color(0xFFFAFAFA),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFE0E0E0)),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+                    const SizedBox(height: 24),
+                    // KPI Setup Section
                     const Text(
-                      'Set KPI for Preachers',
+                      'KPI Setup',
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 18,
                         fontWeight: FontWeight.w600,
                         color: Color(0xFF1a1a1a),
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Define key performance indicators',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFAFAFA),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFE0E0E0)),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Set KPI for Preachers',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFF1a1a1a),
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Define key performance indicators',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                ElevatedButton(
+                                  onPressed: () {},
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.white,
+                                    foregroundColor: const Color(0xFF1a1a1a),
+                                    elevation: 0,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 8,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    'Setup',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Container(
+                            width: 100,
+                            height: 100,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              image: const DecorationImage(
+                                image: NetworkImage(
+                                  'https://images.unsplash.com/photo-1477281765962-ef34e8bb0967?w=400',
+                                ),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: const Color(0xFF1a1a1a),
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: const Text(
-                        'Setup',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 16),
-              Container(
-                width: 100,
-                height: 100,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  image: const DecorationImage(
-                    image: NetworkImage('https://images.unsplash.com/photo-1477281765962-ef34e8bb0967?w=400'),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
                     const SizedBox(height: 24),
                     // Recent Activities Section
                     const Text(
@@ -872,59 +988,98 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: const Color(0xFFE8E8E8)),
                       ),
-                      child: recentActivitiesSnapshot.hasData && recentActivitiesSnapshot.data!.docs.isNotEmpty
-                          ? Column(
-                              children: recentActivitiesSnapshot.data!.docs.asMap().entries.map((entry) {
-                                final index = entry.key;
-                                final submission = entry.value;
-                                return Column(
-                                  children: [
-                                    if (index > 0) const Divider(height: 24),
-                                    FutureBuilder<DocumentSnapshot>(
-                                      future: FirebaseFirestore.instance
-                                          .collection('users')
-                                          .doc(submission['preacherId'])
-                                          .get(),
-                                      builder: (context, userSnapshot) {
-                                        final preacherName = userSnapshot.hasData && userSnapshot.data!.exists
-                                            ? userSnapshot.data!['name'] ?? 'Unknown'
-                                            : 'Unknown';
-                                        return FutureBuilder<DocumentSnapshot>(
-                                          future: FirebaseFirestore.instance
-                                              .collection('activities')
-                                              .doc(submission['activityId'])
-                                              .get(),
-                                          builder: (context, activitySnapshot) {
-                                            final activityTitle = activitySnapshot.hasData && activitySnapshot.data!.exists
-                                                ? activitySnapshot.data!['title'] ?? 'Unknown Activity'
-                                                : 'Unknown Activity';
-                                            return _buildOfficerActivityItem(
-                                              'Preacher: $preacherName',
-                                              '$activityTitle - ${submission['status']}',
-                                              userSnapshot.hasData && userSnapshot.data!.exists && userSnapshot.data!['profileImageUrl'] != null
-                                                  ? userSnapshot.data!['profileImageUrl']
-                                                  : 'https://i.pravatar.cc/150?u=$preacherName',
-                                            );
-                                          },
-                                        );
-                                      },
+                      child:
+                          recentActivitiesSnapshot.hasData &&
+                                  recentActivitiesSnapshot.data!.docs.isNotEmpty
+                              ? Column(
+                                children:
+                                    recentActivitiesSnapshot.data!.docs.asMap().entries.map((
+                                      entry,
+                                    ) {
+                                      final index = entry.key;
+                                      final submission = entry.value;
+                                      return Column(
+                                        children: [
+                                          if (index > 0)
+                                            const Divider(height: 24),
+                                          FutureBuilder<DocumentSnapshot>(
+                                            future:
+                                                FirebaseFirestore.instance
+                                                    .collection('users')
+                                                    .doc(
+                                                      submission['preacherId'],
+                                                    )
+                                                    .get(),
+                                            builder: (context, userSnapshot) {
+                                              final preacherName =
+                                                  userSnapshot.hasData &&
+                                                          userSnapshot
+                                                              .data!
+                                                              .exists
+                                                      ? userSnapshot
+                                                              .data!['name'] ??
+                                                          'Unknown'
+                                                      : 'Unknown';
+                                              return FutureBuilder<
+                                                DocumentSnapshot
+                                              >(
+                                                future:
+                                                    FirebaseFirestore.instance
+                                                        .collection(
+                                                          'activities',
+                                                        )
+                                                        .doc(
+                                                          submission['activityId'],
+                                                        )
+                                                        .get(),
+                                                builder: (
+                                                  context,
+                                                  activitySnapshot,
+                                                ) {
+                                                  final activityTitle =
+                                                      activitySnapshot
+                                                                  .hasData &&
+                                                              activitySnapshot
+                                                                  .data!
+                                                                  .exists
+                                                          ? activitySnapshot
+                                                                  .data!['title'] ??
+                                                              'Unknown Activity'
+                                                          : 'Unknown Activity';
+                                                  return _buildOfficerActivityItem(
+                                                    'Preacher: $preacherName',
+                                                    '$activityTitle - ${submission['status']}',
+                                                    userSnapshot.hasData &&
+                                                            userSnapshot
+                                                                .data!
+                                                                .exists &&
+                                                            userSnapshot
+                                                                    .data!['profileImageUrl'] !=
+                                                                null
+                                                        ? userSnapshot
+                                                            .data!['profileImageUrl']
+                                                        : 'https://i.pravatar.cc/150?u=$preacherName',
+                                                  );
+                                                },
+                                              );
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    }).toList(),
+                              )
+                              : Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(24),
+                                  child: Text(
+                                    'No recent activities',
+                                    style: TextStyle(
+                                      color: Colors.grey[500],
+                                      fontSize: 14,
                                     ),
-                                  ],
-                                );
-                              }).toList(),
-                            )
-                          : Center(
-                              child: Padding(
-                                padding: const EdgeInsets.all(24),
-                                child: Text(
-                                  'No recent activities',
-                                  style: TextStyle(
-                                    color: Colors.grey[500],
-                                    fontSize: 14,
                                   ),
                                 ),
                               ),
-                            ),
                     ),
                   ],
                 );
@@ -936,13 +1091,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildOfficerActivityItem(String name, String status, String avatarUrl) {
+  Widget _buildOfficerActivityItem(
+    String name,
+    String status,
+    String avatarUrl,
+  ) {
     return Row(
       children: [
-        CircleAvatar(
-          radius: 20,
-          backgroundImage: NetworkImage(avatarUrl),
-        ),
+        CircleAvatar(radius: 20, backgroundImage: NetworkImage(avatarUrl)),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
@@ -959,10 +1115,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               const SizedBox(height: 2),
               Text(
                 status,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
               ),
             ],
           ),
@@ -974,19 +1127,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
   // Admin Dashboard - Right Layout
   Widget _buildAdminStats() {
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('users')
-          .where('role', isEqualTo: 'preacher')
-          .where('isApproved', isEqualTo: false)
-          .snapshots(),
+      stream:
+          FirebaseFirestore.instance
+              .collection('users')
+              .where('role', isEqualTo: 'preacher')
+              .where('isApproved', isEqualTo: false)
+              .snapshots(),
       builder: (context, pendingSnapshot) {
-        final pendingCount = pendingSnapshot.hasData ? pendingSnapshot.data!.docs.length : 0;
+        final pendingCount =
+            pendingSnapshot.hasData ? pendingSnapshot.data!.docs.length : 0;
 
         return StreamBuilder<QuerySnapshot>(
-          stream: FirebaseFirestore.instance
-              .collection('payments')
-              .where('status', isEqualTo: 'Approved')
-              .snapshots(),
+          stream:
+              FirebaseFirestore.instance
+                  .collection('payments')
+                  .where('status', isEqualTo: 'Approved')
+                  .snapshots(),
           builder: (context, paymentsSnapshot) {
             double totalPayments = 0.0;
             if (paymentsSnapshot.hasData) {
@@ -996,27 +1152,40 @@ class _DashboardScreenState extends State<DashboardScreen> {
             }
 
             return StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('activities')
-                  .snapshots(),
+              stream:
+                  FirebaseFirestore.instance
+                      .collection('activities')
+                      .snapshots(),
               builder: (context, activitiesSnapshot) {
                 return StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance
-                      .collection('activity_submissions')
-                      .where('status', isEqualTo: 'Approved')
-                      .snapshots(),
+                  stream:
+                      FirebaseFirestore.instance
+                          .collection('activity_submissions')
+                          .where('status', isEqualTo: 'Approved')
+                          .snapshots(),
                   builder: (context, submissionsSnapshot) {
-                    final totalActivities = activitiesSnapshot.hasData ? activitiesSnapshot.data!.docs.length : 0;
-                    final completedActivities = submissionsSnapshot.hasData ? submissionsSnapshot.data!.docs.length : 0;
-                    final overallKPI = totalActivities > 0 ? ((completedActivities / totalActivities) * 100).toInt() : 0;
+                    final totalActivities =
+                        activitiesSnapshot.hasData
+                            ? activitiesSnapshot.data!.docs.length
+                            : 0;
+                    final completedActivities =
+                        submissionsSnapshot.hasData
+                            ? submissionsSnapshot.data!.docs.length
+                            : 0;
+                    final overallKPI =
+                        totalActivities > 0
+                            ? ((completedActivities / totalActivities) * 100)
+                                .toInt()
+                            : 0;
 
                     return StreamBuilder<QuerySnapshot>(
-                      stream: FirebaseFirestore.instance
-                          .collection('users')
-                          .where('role', isEqualTo: 'preacher')
-                          .where('isApproved', isEqualTo: true)
-                          .limit(3)
-                          .snapshots(),
+                      stream:
+                          FirebaseFirestore.instance
+                              .collection('users')
+                              .where('role', isEqualTo: 'preacher')
+                              .where('isApproved', isEqualTo: true)
+                              .limit(3)
+                              .snapshots(),
                       builder: (context, preachersSnapshot) {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1032,7 +1201,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           'Pending\nRegistrations',
@@ -1064,7 +1234,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           'Total Payments',
@@ -1129,17 +1300,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               ),
                             ),
                             const SizedBox(height: 16),
-                            if (preachersSnapshot.hasData && preachersSnapshot.data!.docs.isNotEmpty)
+                            if (preachersSnapshot.hasData &&
+                                preachersSnapshot.data!.docs.isNotEmpty)
                               ...preachersSnapshot.data!.docs.map((preacher) {
-                                final preacherData = preacher.data() as Map<String, dynamic>;
-                                final isActive = preacherData['isActive'] ?? true;
+                                final preacherData =
+                                    preacher.data() as Map<String, dynamic>;
+                                final isActive =
+                                    preacherData['isActive'] ?? true;
                                 return Padding(
                                   padding: const EdgeInsets.only(bottom: 12),
                                   child: _buildAdminPreacherItem(
                                     'Preacher ${preacher.id.substring(0, 4)}',
                                     preacherData['name'] ?? 'Unknown',
                                     isActive ? 'Active' : 'Inactive',
-                                    preacherData['profileImageUrl'] ?? 'https://i.pravatar.cc/150?u=${preacher.id}',
+                                    preacherData['profileImageUrl'] ??
+                                        'https://i.pravatar.cc/150?u=${preacher.id}',
                                   ),
                                 );
                               }).toList()
@@ -1168,30 +1343,46 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             ),
                             const SizedBox(height: 16),
                             StreamBuilder<QuerySnapshot>(
-                              stream: FirebaseFirestore.instance
-                                  .collection('activities')
-                                  .orderBy('createdAt', descending: true)
-                                  .limit(2)
-                                  .snapshots(),
+                              stream:
+                                  FirebaseFirestore.instance
+                                      .collection('activities')
+                                      .orderBy('createdAt', descending: true)
+                                      .limit(2)
+                                      .snapshots(),
                               builder: (context, activitiesListSnapshot) {
-                                if (activitiesListSnapshot.hasData && activitiesListSnapshot.data!.docs.isNotEmpty) {
+                                if (activitiesListSnapshot.hasData &&
+                                    activitiesListSnapshot
+                                        .data!
+                                        .docs
+                                        .isNotEmpty) {
                                   return Column(
-                                    children: activitiesListSnapshot.data!.docs.asMap().entries.map((entry) {
-                                      final index = entry.key;
-                                      final activity = entry.value;
-                                      final activityData = activity.data() as Map<String, dynamic>;
-                                      return Column(
-                                        children: [
-                                          if (index > 0) const SizedBox(height: 12),
-                                          _buildAdminActivityItem(
-                                            'Activity ${activity.id.substring(0, 4)}',
-                                            activityData['title'] ?? 'Unknown Activity',
-                                            activityData['status'] ?? 'Pending',
-                                            activityData['imageUrl'] ?? 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=400',
-                                          ),
-                                        ],
-                                      );
-                                    }).toList(),
+                                    children:
+                                        activitiesListSnapshot.data!.docs
+                                            .asMap()
+                                            .entries
+                                            .map((entry) {
+                                              final index = entry.key;
+                                              final activity = entry.value;
+                                              final activityData =
+                                                  activity.data()
+                                                      as Map<String, dynamic>;
+                                              return Column(
+                                                children: [
+                                                  if (index > 0)
+                                                    const SizedBox(height: 12),
+                                                  _buildAdminActivityItem(
+                                                    'Activity ${activity.id.substring(0, 4)}',
+                                                    activityData['title'] ??
+                                                        'Unknown Activity',
+                                                    activityData['status'] ??
+                                                        'Pending',
+                                                    activityData['imageUrl'] ??
+                                                        'https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=400',
+                                                  ),
+                                                ],
+                                              );
+                                            })
+                                            .toList(),
                                   );
                                 } else {
                                   return Center(
@@ -1223,7 +1414,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildAdminPreacherItem(String id, String name, String status, String avatarUrl) {
+  Widget _buildAdminPreacherItem(
+    String id,
+    String name,
+    String status,
+    String avatarUrl,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -1233,10 +1429,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 24,
-            backgroundImage: NetworkImage(avatarUrl),
-          ),
+          CircleAvatar(radius: 24, backgroundImage: NetworkImage(avatarUrl)),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -1244,10 +1437,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               children: [
                 Text(
                   id,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: Colors.grey,
-                  ),
+                  style: const TextStyle(fontSize: 11, color: Colors.grey),
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -1263,7 +1453,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   status,
                   style: TextStyle(
                     fontSize: 11,
-                    color: status == 'Active' ? Colors.green[700] : Colors.grey[600],
+                    color:
+                        status == 'Active'
+                            ? Colors.green[700]
+                            : Colors.grey[600],
                   ),
                 ),
               ],
@@ -1274,7 +1467,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildAdminActivityItem(String id, String title, String status, String imageUrl) {
+  Widget _buildAdminActivityItem(
+    String id,
+    String title,
+    String status,
+    String imageUrl,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -1290,10 +1488,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               children: [
                 Text(
                   id,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: Colors.grey,
-                  ),
+                  style: const TextStyle(fontSize: 11, color: Colors.grey),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -1309,7 +1504,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   status,
                   style: TextStyle(
                     fontSize: 11,
-                    color: status == 'Completed' ? Colors.green[700] : Colors.orange[700],
+                    color:
+                        status == 'Completed'
+                            ? Colors.green[700]
+                            : Colors.orange[700],
                   ),
                 ),
               ],
@@ -1332,13 +1530,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildStatCard(String title, String value, Color color, IconData icon) {
+  Widget _buildStatCard(
+    String title,
+    String value,
+    Color color,
+    IconData icon,
+  ) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [color, color.withOpacity(0.7)],
-        ),
+        gradient: LinearGradient(colors: [color, color.withOpacity(0.7)]),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -1475,10 +1676,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => PreacherAssignActivityScreen.withProvider(
-                    preacherId: user.uid,
-                    preacherName: user.name,
-                  ),
+                  builder:
+                      (_) => PreacherAssignActivityScreen.withProvider(
+                        preacherId: user.uid,
+                        preacherName: user.name,
+                      ),
                 ),
               );
             },
@@ -1496,10 +1698,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => PreacherListActivitiesScreen.withProvider(
-                    preacherId: user.uid,
-                    preacherName: user.name,
-                  ),
+                  builder:
+                      (_) => PreacherListActivitiesScreen.withProvider(
+                        preacherId: user.uid,
+                        preacherName: user.name,
+                      ),
                 ),
               );
             },
@@ -1570,10 +1773,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       const SizedBox(height: 4),
                       Text(
                         subtitle,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 13, color: Colors.grey[600]),
                       ),
                     ],
                   ),
@@ -1705,10 +1905,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey[600],
-                  ),
+                  style: TextStyle(fontSize: 13, color: Colors.grey[600]),
                 ),
               ],
             ),
@@ -1756,10 +1953,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => PreacherListActivitiesScreen.withProvider(
-                        preacherId: user.uid,
-                        preacherName: user.name,
-                      ),
+                      builder:
+                          (_) => PreacherListActivitiesScreen.withProvider(
+                            preacherId: user.uid,
+                            preacherName: user.name,
+                          ),
                     ),
                   );
                 },
@@ -1772,7 +1970,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => OfficerListActivitiesScreen.withProvider(),
+                      builder:
+                          (_) => OfficerListActivitiesScreen.withProvider(),
                     ),
                   );
                 },
@@ -1787,9 +1986,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildPaymentsPage(BuildContext context, UserModel user) {
     if (user.isPreacher) {
-      return PreacherPaymentHistoryScreen.withProvider(
-        preacherId: user.uid,
-      );
+      return PreacherPaymentHistoryScreen.withProvider(preacherId: user.uid);
     } else if (user.isAdmin) {
       return ApprovedPaymentsScreen.withProvider();
     } else {
@@ -1800,16 +1997,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildKPIPage(UserModel user) {
     // Officers see Manage KPI Targets page, Preachers see their dashboard
     print('DEBUG KPI Page - User role: ${user.role}');
-    if (user.role.toLowerCase() == 'officer' || user.role.toLowerCase() == 'admin') {
+    if (user.role.toLowerCase() == 'officer' ||
+        user.role.toLowerCase() == 'admin') {
       print('DEBUG: Showing Officer KPI Management page');
       return MultiProvider(
         providers: [
           ChangeNotifierProvider(create: (_) => KPIController()),
           ChangeNotifierProvider(create: (_) => PreacherController()),
         ],
-        child: const Scaffold(
-          body: KPIPreacherListPage(),
-        ),
+        child: const Scaffold(body: KPIPreacherListPage()),
       );
     } else {
       // Preacher view
@@ -1895,7 +2091,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
         BottomNavigationBarItem(
           icon: const Icon(Icons.track_changes),
-          label: user.role.toLowerCase() == 'officer' ? 'KPI Target' : 'KPI Dashboard',
+          label:
+              user.role.toLowerCase() == 'officer'
+                  ? 'KPI Target'
+                  : 'KPI Dashboard',
         ),
         const BottomNavigationBarItem(
           icon: Icon(Icons.analytics),
