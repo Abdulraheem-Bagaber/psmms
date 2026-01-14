@@ -200,9 +200,7 @@ class MainMenuScreen extends StatelessWidget {
                 (_) => MultiProvider(
                   providers: [
                     ChangeNotifierProvider(create: (_) => PreacherController()),
-                    ChangeNotifierProvider(
-                      create: (_) => KPIController(),
-                    ),
+                    ChangeNotifierProvider(create: (_) => KPIController()),
                   ],
                   child: const KPIPreacherListPage(),
                 ),

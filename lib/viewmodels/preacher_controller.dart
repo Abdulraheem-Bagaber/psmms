@@ -34,6 +34,8 @@ class PreacherController extends ChangeNotifier {
   final FirebaseFirestore _db;
 
   List<Preacher> _items = [];
+  List<Preacher> _preachers = []; // Alias for compatibility
+  List<Preacher> _filteredPreachers = []; // For search/filter results
   bool _isLoading = false;
   bool _isLoadingMore = false;
   bool _hasMore = true;
@@ -44,11 +46,14 @@ class PreacherController extends ChangeNotifier {
   String? _error;
 
   Preacher? _selected;
+  Preacher? _selectedPreacher; // Alias for compatibility
   PreacherMetrics? _metrics;
   bool _isDetailLoading = false;
   String? _detailError;
 
   List<Preacher> get items => _items;
+  List<Preacher> get preachers => _preachers; // Alias getter
+  List<Preacher> get filteredPreachers => _filteredPreachers;
   bool get isLoading => _isLoading;
   bool get isLoadingMore => _isLoadingMore;
   bool get hasMore => _hasMore;
@@ -58,6 +63,7 @@ class PreacherController extends ChangeNotifier {
   String get specialization => _specialization;
 
   Preacher? get selected => _selected;
+  Preacher? get selectedPreacher => _selectedPreacher; // Alias getter
   PreacherMetrics? get metrics => _metrics;
   bool get isDetailLoading => _isDetailLoading;
   String? get detailError => _detailError;
@@ -74,6 +80,8 @@ class PreacherController extends ChangeNotifier {
         limit: 20,
       );
       _items = page.items;
+      _preachers = page.items; // Sync alias
+      _filteredPreachers = page.items; // Sync filtered list
       _lastDoc = page.lastDocument;
       _hasMore = page.items.length == 20;
       _isLoading = false;
@@ -83,6 +91,11 @@ class PreacherController extends ChangeNotifier {
       _error = 'Failed to load preachers: $e';
       notifyListeners();
     }
+  }
+
+  /// Loads all preachers - alias for loadInitial() for compatibility
+  Future<void> loadPreachers() async {
+    await loadInitial();
   }
 
   Future<void> loadMore() async {
@@ -114,6 +127,12 @@ class PreacherController extends ChangeNotifier {
     loadInitial();
   }
 
+  /// Searches preachers by query - wrapper for compatibility
+  Future<void> searchPreachers(String query) async {
+    _search = query.trim();
+    await loadInitial();
+  }
+
   void onRegionChanged(String value) {
     _region = value;
     loadInitial();
@@ -126,6 +145,7 @@ class PreacherController extends ChangeNotifier {
 
   Future<void> selectPreacher(Preacher preacher) async {
     _selected = preacher;
+    _selectedPreacher = preacher; // Sync alias
     _metrics = null;
     _detailError = null;
     _isDetailLoading = true;
@@ -143,6 +163,15 @@ class PreacherController extends ChangeNotifier {
     }
   }
 
+  /// Clears the currently selected preacher
+  void clearSelection() {
+    _selected = null;
+    _selectedPreacher = null;
+    _metrics = null;
+    _detailError = null;
+    notifyListeners();
+  }
+
   Future<void> refreshSelected() async {
     final target = _selected;
     if (target == null) return;
@@ -156,6 +185,17 @@ class PreacherController extends ChangeNotifier {
   Future<void> updateProfile(String docId, Map<String, dynamic> data) async {
     await _api.updatePreacher(docId, data);
     await refreshSelected();
+  }
+
+  /// Gets a preacher by ID from Firestore
+  Future<Preacher?> getPreacherById(String id) async {
+    try {
+      return await _api.getPreacherById(id);
+    } catch (e) {
+      _error = 'Failed to get preacher: $e';
+      notifyListeners();
+      return null;
+    }
   }
 
   Future<PreacherMetrics> _computeMetrics(String preacherId) async {
