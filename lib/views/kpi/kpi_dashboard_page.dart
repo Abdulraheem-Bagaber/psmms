@@ -277,41 +277,52 @@ class _KPIDashboardPageState extends State<KPIDashboardPage> {
                         target: kpi.totalAttendanceTarget,
                         icon: Icons.people,
                       ),
-                      const SizedBox(height: 12),
-                      _buildKPICard(
-                        title: 'New Member Registrations',
-                        current: progress.newConvertsAchieved,
-                        target: kpi.newConvertsTarget,
-                        icon: Icons.person_add,
-                      ),
-                      const SizedBox(height: 12),
-                      _buildKPICard(
-                        title: 'Baptisms Performed',
-                        current: progress.baptismsAchieved,
-                        target: kpi.baptismsTarget,
-                        icon: Icons.water_drop,
-                      ),
-                      const SizedBox(height: 12),
-                      _buildKPICard(
-                        title: 'Community Projects',
-                        current: progress.communityProjectsAchieved,
-                        target: kpi.communityProjectsTarget,
-                        icon: Icons.handshake,
-                      ),
-                      const SizedBox(height: 12),
-                      _buildKPICard(
-                        title: 'Charity Events Organized',
-                        current: progress.charityEventsAchieved,
-                        target: kpi.charityEventsTarget,
-                        icon: Icons.volunteer_activism,
-                      ),
-                      const SizedBox(height: 12),
-                      _buildKPICard(
-                        title: 'Youth Program Attendance',
-                        current: progress.youthProgramAttendanceAchieved,
-                        target: kpi.youthProgramAttendanceTarget,
-                        icon: Icons.groups,
-                      ),
+                      // Only show optional KPIs if they have targets > 0
+                      if (kpi.newConvertsTarget > 0) ...[
+                        const SizedBox(height: 12),
+                        _buildKPICard(
+                          title: 'New Member Registrations',
+                          current: progress.newConvertsAchieved,
+                          target: kpi.newConvertsTarget,
+                          icon: Icons.person_add,
+                        ),
+                      ],
+                      if (kpi.baptismsTarget > 0) ...[
+                        const SizedBox(height: 12),
+                        _buildKPICard(
+                          title: 'Baptisms Performed',
+                          current: progress.baptismsAchieved,
+                          target: kpi.baptismsTarget,
+                          icon: Icons.water_drop,
+                        ),
+                      ],
+                      if (kpi.communityProjectsTarget > 0) ...[
+                        const SizedBox(height: 12),
+                        _buildKPICard(
+                          title: 'Community Projects',
+                          current: progress.communityProjectsAchieved,
+                          target: kpi.communityProjectsTarget,
+                          icon: Icons.handshake,
+                        ),
+                      ],
+                      if (kpi.charityEventsTarget > 0) ...[
+                        const SizedBox(height: 12),
+                        _buildKPICard(
+                          title: 'Charity Events Organized',
+                          current: progress.charityEventsAchieved,
+                          target: kpi.charityEventsTarget,
+                          icon: Icons.volunteer_activism,
+                        ),
+                      ],
+                      if (kpi.youthProgramAttendanceTarget > 0) ...[
+                        const SizedBox(height: 12),
+                        _buildKPICard(
+                          title: 'Youth Program Attendance',
+                          current: progress.youthProgramAttendanceAchieved,
+                          target: kpi.youthProgramAttendanceTarget,
+                          icon: Icons.groups,
+                        ),
+                      ],
                     ],
                   ),
                 ),

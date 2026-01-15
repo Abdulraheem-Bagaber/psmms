@@ -86,6 +86,8 @@ class KPIController extends ChangeNotifier {
   // Load progress for a KPI
   Future<void> _loadProgress(String kpiId) async {
     try {
+      print('DEBUG: Loading progress for KPI ID: $kpiId'); // Debug log
+      
       final snapshot =
           await _db
               .collection('kpi_progress')
@@ -93,12 +95,34 @@ class KPIController extends ChangeNotifier {
               .limit(1)
               .get();
 
+      print('DEBUG: Found ${snapshot.docs.length} progress documents'); // Debug log
+
       if (snapshot.docs.isNotEmpty) {
         _currentProgress = KPIProgress.fromFirestore(snapshot.docs.first);
+        print('DEBUG: Loaded existing progress'); // Debug log
       } else {
-        _currentProgress = null;
+        // No progress record exists - create one automatically
+        print('DEBUG: No progress found, creating new progress record'); // Debug log
+        
+        if (_currentKPI != null) {
+          final newProgress = KPIProgress(
+            preacherId: _currentKPI!.preacherId,
+          );
+          
+          // Add kpi_id when saving to Firestore
+          final progressData = newProgress.toFirestore();
+          progressData['kpi_id'] = kpiId;
+          
+          final docRef = await _db.collection('kpi_progress').add(progressData);
+          _currentProgress = newProgress.copyWith(id: docRef.id);
+          
+          print('DEBUG: Created progress with ID: ${docRef.id}'); // Debug log
+        } else {
+          _currentProgress = null;
+        }
       }
     } catch (e) {
+      print('DEBUG: Error loading progress: $e'); // Debug log
       _error = 'Failed to load progress: $e';
     }
   }
