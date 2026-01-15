@@ -2126,6 +2126,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           icon: Icon(Icons.event),
           label: 'Activities',
         ),
+
         const BottomNavigationBarItem(
           icon: Icon(Icons.payment),
           label: 'Payments',
@@ -2140,6 +2141,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
         const BottomNavigationBarItem(
           icon: Icon(Icons.analytics),
           label: 'Reports',
+        ),
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.people_alt),
+          label: 'Preachers',
         ),
 
         if (user.isAdmin)
