@@ -15,7 +15,8 @@ class Activity {
   final String? assignedPreacherId;
   final String? assignedPreacherName;
   final int? expectedAttendance; // Number of expected attendees
-  final String status; // "Available", "Assigned", "Submitted", "Pending Payment", "Rejected"
+  final String
+  status; // "Available", "Assigned", "Submitted", "Pending Payment", "Rejected"
   final String urgency; // "Normal", "Urgent"
   final DateTime createdAt;
   final DateTime updatedAt;

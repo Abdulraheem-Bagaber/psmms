@@ -76,10 +76,11 @@ class AuthGate extends StatelessWidget {
         if (snapshot.hasData) {
           // User is logged in, but we need to check approval status
           return FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-            future: FirebaseFirestore.instance
-                .collection('users')
-                .doc(snapshot.data!.uid)
-                .get(),
+            future:
+                FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(snapshot.data!.uid)
+                    .get(),
             builder: (context, userSnapshot) {
               if (userSnapshot.connectionState == ConnectionState.waiting) {
                 return const Scaffold(
@@ -87,7 +88,9 @@ class AuthGate extends StatelessWidget {
                 );
               }
 
-              if (userSnapshot.hasError || !userSnapshot.hasData || !userSnapshot.data!.exists) {
+              if (userSnapshot.hasError ||
+                  !userSnapshot.hasData ||
+                  !userSnapshot.data!.exists) {
                 // User document not found, logout
                 print('❌ AuthGate: User document not found or error');
                 FirebaseAuth.instance.signOut();
@@ -96,10 +99,10 @@ class AuthGate extends StatelessWidget {
 
               final userData = userSnapshot.data!.data();
               print('👤 AuthGate: User data: $userData');
-              
+
               final status = userData?['status'];
               print('✅ AuthGate: User status = $status');
-              
+
               if (status != 'approved' && status != 'active') {
                 // Not approved, logout and show login
                 print('🚫 AuthGate: Status not approved, signing out');
@@ -238,9 +241,7 @@ class MainMenuScreen extends StatelessWidget {
                 (_) => MultiProvider(
                   providers: [
                     ChangeNotifierProvider(create: (_) => PreacherController()),
-                    ChangeNotifierProvider(
-                      create: (_) => KPIController(),
-                    ),
+                    ChangeNotifierProvider(create: (_) => KPIController()),
                   ],
                   child: const KPIPreacherListPage(),
                 ),

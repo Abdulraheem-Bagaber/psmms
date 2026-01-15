@@ -35,10 +35,11 @@ class _LoginScreenState extends State<LoginScreen> {
       if (user == null) throw 'Login failed. Please try again.';
 
       // 3️⃣ Check approval status
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
+      final doc =
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .get();
 
       if (!doc.exists) {
         await FirebaseAuth.instance.signOut();
@@ -72,10 +73,10 @@ class _LoginScreenState extends State<LoginScreen> {
       }
 
       // ✅ Approved user - AuthGate will handle navigation automatically
-
     } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(e.toString())));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
     } finally {
       if (mounted) setState(() => loading = false);
     }
@@ -93,19 +94,12 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Logo / Title
-                const Icon(
-                  Icons.mosque,
-                  size: 64,
-                  color: Colors.teal,
-                ),
+                const Icon(Icons.mosque, size: 64, color: Colors.teal),
                 const SizedBox(height: 12),
                 const Text(
                   'Preacher System Monitoring\nManagement System',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
 
                 const SizedBox(height: 32),
@@ -156,13 +150,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     child:
                         loading
                             ? const SizedBox(
-                                height: 24,
-                                width: 24,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
+                              height: 24,
+                              width: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
                             : const Text('Login'),
                   ),
                 ),
@@ -173,9 +167,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (_) => const RegisterScreen(),
-                      ),
+                      MaterialPageRoute(builder: (_) => const RegisterScreen()),
                     );
                   },
                   child: const Text('Create new account'),

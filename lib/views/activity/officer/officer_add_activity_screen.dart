@@ -24,10 +24,12 @@ class _OfficerAddActivityContent extends StatefulWidget {
   const _OfficerAddActivityContent();
 
   @override
-  State<_OfficerAddActivityContent> createState() => _OfficerAddActivityContentState();
+  State<_OfficerAddActivityContent> createState() =>
+      _OfficerAddActivityContentState();
 }
 
-class _OfficerAddActivityContentState extends State<_OfficerAddActivityContent> {
+class _OfficerAddActivityContentState
+    extends State<_OfficerAddActivityContent> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _locationController = TextEditingController();
@@ -50,10 +52,7 @@ class _OfficerAddActivityContentState extends State<_OfficerAddActivityContent> 
     'Religious Gathering',
   ];
 
-  final List<String> _urgencyLevels = [
-    'Normal',
-    'Urgent',
-  ];
+  final List<String> _urgencyLevels = ['Normal', 'Urgent'];
 
   @override
   void dispose() {
@@ -153,24 +152,30 @@ class _OfficerAddActivityContentState extends State<_OfficerAddActivityContent> 
                       ),
                       elevation: 0,
                     ),
-                    onPressed: viewModel.isLoading ? null : () => _handleSave(context, viewModel),
-                    child: viewModel.isLoading
-                        ? const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.5,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    onPressed:
+                        viewModel.isLoading
+                            ? null
+                            : () => _handleSave(context, viewModel),
+                    child:
+                        viewModel.isLoading
+                            ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            )
+                            : const Text(
+                              'Save Activity',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
-                          )
-                        : const Text(
-                            'Save Activity',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
                   ),
                 ),
               ],
@@ -188,9 +193,7 @@ class _OfficerAddActivityContentState extends State<_OfficerAddActivityContent> 
         labelText: 'Activity Type *',
         filled: true,
         fillColor: Colors.white,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: Colors.grey.shade300),
@@ -200,12 +203,10 @@ class _OfficerAddActivityContentState extends State<_OfficerAddActivityContent> 
           borderSide: const BorderSide(color: Color(0xFF0066FF)),
         ),
       ),
-      items: _activityTypes.map((type) {
-        return DropdownMenuItem(
-          value: type,
-          child: Text(type),
-        );
-      }).toList(),
+      items:
+          _activityTypes.map((type) {
+            return DropdownMenuItem(value: type, child: Text(type));
+          }).toList(),
       onChanged: (value) {
         if (value != null) {
           setState(() => _activityType = value);
@@ -226,9 +227,7 @@ class _OfficerAddActivityContentState extends State<_OfficerAddActivityContent> 
           labelText: 'Urgency Level *',
           filled: true,
           fillColor: Colors.white,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(color: Colors.grey.shade300),
@@ -238,22 +237,25 @@ class _OfficerAddActivityContentState extends State<_OfficerAddActivityContent> 
             borderSide: const BorderSide(color: Color(0xFF0066FF)),
           ),
         ),
-        items: _urgencyLevels.map((urgency) {
-          return DropdownMenuItem(
-            value: urgency,
-            child: Row(
-              children: [
-                Icon(
-                  urgency == 'Urgent' ? Icons.priority_high : Icons.low_priority,
-                  color: urgency == 'Urgent' ? Colors.red : Colors.grey,
-                  size: 20,
+        items:
+            _urgencyLevels.map((urgency) {
+              return DropdownMenuItem(
+                value: urgency,
+                child: Row(
+                  children: [
+                    Icon(
+                      urgency == 'Urgent'
+                          ? Icons.priority_high
+                          : Icons.low_priority,
+                      color: urgency == 'Urgent' ? Colors.red : Colors.grey,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(urgency),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                Text(urgency),
-              ],
-            ),
-          );
-        }).toList(),
+              );
+            }).toList(),
         onChanged: (value) {
           setState(() {
             _urgency = value!;
@@ -269,9 +271,13 @@ class _OfficerAddActivityContentState extends State<_OfficerAddActivityContent> 
         final result = await Navigator.push<Map<String, dynamic>>(
           context,
           MaterialPageRoute(
-            builder: (_) => MapLocationPicker(
-              initialAddress: _locationController.text.isEmpty ? null : _locationController.text,
-            ),
+            builder:
+                (_) => MapLocationPicker(
+                  initialAddress:
+                      _locationController.text.isEmpty
+                          ? null
+                          : _locationController.text,
+                ),
           ),
         );
 
@@ -291,9 +297,7 @@ class _OfficerAddActivityContentState extends State<_OfficerAddActivityContent> 
             suffixIcon: const Icon(Icons.map),
             filled: true,
             fillColor: Colors.white,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(color: Colors.grey.shade300),
@@ -332,9 +336,7 @@ class _OfficerAddActivityContentState extends State<_OfficerAddActivityContent> 
         suffixIcon: suffixIcon != null ? Icon(suffixIcon) : null,
         filled: true,
         fillColor: Colors.white,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: Colors.grey.shade300),
@@ -371,9 +373,7 @@ class _OfficerAddActivityContentState extends State<_OfficerAddActivityContent> 
           labelText: 'Date *',
           filled: true,
           fillColor: Colors.white,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(color: Colors.grey.shade300),
@@ -384,9 +384,7 @@ class _OfficerAddActivityContentState extends State<_OfficerAddActivityContent> 
           ),
           suffixIcon: const Icon(Icons.calendar_today),
         ),
-        child: Text(
-          DateFormat('dd/MM/yyyy').format(_selectedDate),
-        ),
+        child: Text(DateFormat('dd/MM/yyyy').format(_selectedDate)),
       ),
     );
   }
@@ -416,9 +414,7 @@ class _OfficerAddActivityContentState extends State<_OfficerAddActivityContent> 
           labelText: label,
           filled: true,
           fillColor: Colors.white,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(color: Colors.grey.shade300),
@@ -434,16 +430,21 @@ class _OfficerAddActivityContentState extends State<_OfficerAddActivityContent> 
     );
   }
 
-  Future<void> _handleSave(BuildContext context, OfficerActivityViewModel viewModel) async {
+  Future<void> _handleSave(
+    BuildContext context,
+    OfficerActivityViewModel viewModel,
+  ) async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
-    final startTimeStr = '${_startTime.hour.toString().padLeft(2, '0')}:${_startTime.minute.toString().padLeft(2, '0')}';
-    final endTimeStr = '${_endTime.hour.toString().padLeft(2, '0')}:${_endTime.minute.toString().padLeft(2, '0')}';
+    final startTimeStr =
+        '${_startTime.hour.toString().padLeft(2, '0')}:${_startTime.minute.toString().padLeft(2, '0')}';
+    final endTimeStr =
+        '${_endTime.hour.toString().padLeft(2, '0')}:${_endTime.minute.toString().padLeft(2, '0')}';
 
     final expectedAttendance = int.tryParse(_attendanceController.text.trim());
-    
+
     final success = await viewModel.createActivity(
       activityType: _activityType,
       title: _titleController.text.trim(),
@@ -471,7 +472,9 @@ class _OfficerAddActivityContentState extends State<_OfficerAddActivityContent> 
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(viewModel.errorMessage ?? 'Failed to create activity'),
+            content: Text(
+              viewModel.errorMessage ?? 'Failed to create activity',
+            ),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),

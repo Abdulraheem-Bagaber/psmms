@@ -42,8 +42,11 @@ class PreacherAPIHandler {
       query = query.startAfterDocument(startAfter);
     }
 
-    final snapshot = await query.limit(limit * 3).get(); // Fetch more to account for filtering
-    
+    final snapshot =
+        await query
+            .limit(limit * 3)
+            .get(); // Fetch more to account for filtering
+
     // Filter by role (case-insensitive) and create Preacher objects
     var items = <Preacher>[];
     for (var doc in snapshot.docs) {

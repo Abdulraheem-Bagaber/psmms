@@ -43,12 +43,14 @@ class PreacherActivityViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final snapshot = await _db
-          .collection('activities')
-          .where('status', isEqualTo: 'Available')
-          .get();
+      final snapshot =
+          await _db
+              .collection('activities')
+              .where('status', isEqualTo: 'Available')
+              .get();
 
-      _availableActivities = snapshot.docs.map((doc) => Activity.fromFirestore(doc)).toList();
+      _availableActivities =
+          snapshot.docs.map((doc) => Activity.fromFirestore(doc)).toList();
       _applyAvailableFilters();
       _isLoading = false;
       notifyListeners();
@@ -67,13 +69,17 @@ class PreacherActivityViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final snapshot = await _db
-          .collection('activities')
-          .where('assignedPreacherId', isEqualTo: preacherId)
-          .get();
+      final snapshot =
+          await _db
+              .collection('activities')
+              .where('assignedPreacherId', isEqualTo: preacherId)
+              .get();
 
-      _myActivities = snapshot.docs.map((doc) => Activity.fromFirestore(doc)).toList();
-      print('Loaded ${_myActivities.length} activities for preacher $preacherId'); // Debug
+      _myActivities =
+          snapshot.docs.map((doc) => Activity.fromFirestore(doc)).toList();
+      print(
+        'Loaded ${_myActivities.length} activities for preacher $preacherId',
+      ); // Debug
       _applyMyActivitiesFilters();
       _isLoading = false;
       notifyListeners();
@@ -102,11 +108,15 @@ class PreacherActivityViewModel extends ChangeNotifier {
     // Apply search
     if (_searchQuery.isNotEmpty) {
       final query = _searchQuery.toLowerCase();
-      result = result.where((a) =>
-        a.title.toLowerCase().contains(query) ||
-        a.location.toLowerCase().contains(query) ||
-        a.topic.toLowerCase().contains(query)
-      ).toList();
+      result =
+          result
+              .where(
+                (a) =>
+                    a.title.toLowerCase().contains(query) ||
+                    a.location.toLowerCase().contains(query) ||
+                    a.topic.toLowerCase().contains(query),
+              )
+              .toList();
     }
 
     // Apply filter type
@@ -138,7 +148,9 @@ class PreacherActivityViewModel extends ChangeNotifier {
   void _applyMyActivitiesFilters() {
     List<Activity> result = List.from(_myActivities);
 
-    print('Filtering ${_myActivities.length} activities with status filter: $_myActivitiesStatus'); // Debug
+    print(
+      'Filtering ${_myActivities.length} activities with status filter: $_myActivitiesStatus',
+    ); // Debug
 
     // Filter by status
     if (_myActivitiesStatus == 'Upcoming') {
@@ -149,9 +161,14 @@ class PreacherActivityViewModel extends ChangeNotifier {
       result = result.where((a) => a.status == 'Submitted').toList();
       print('Found ${result.length} Submitted activities'); // Debug
     } else if (_myActivitiesStatus == 'Approved') {
-      result = result.where((a) => 
-        a.status == 'Approved' || a.status == 'Approved by MUIP Officer'
-      ).toList();
+      result =
+          result
+              .where(
+                (a) =>
+                    a.status == 'Approved' ||
+                    a.status == 'Approved by MUIP Officer',
+              )
+              .toList();
     } else if (_myActivitiesStatus == 'Rejected') {
       result = result.where((a) => a.status == 'Rejected').toList();
     }
@@ -161,13 +178,20 @@ class PreacherActivityViewModel extends ChangeNotifier {
   }
 
   // Apply for activity
-  Future<bool> applyForActivity(String activityId, String activityDocId, String preacherId, String preacherName) async {
+  Future<bool> applyForActivity(
+    String activityId,
+    String activityDocId,
+    String preacherId,
+    String preacherName,
+  ) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      print('Applying for activity: $activityDocId with preacher: $preacherId'); // Debug
+      print(
+        'Applying for activity: $activityDocId with preacher: $preacherId',
+      ); // Debug
       await _db.collection('activities').doc(activityDocId).update({
         'assignedPreacherId': preacherId,
         'assignedPreacherName': preacherName,
@@ -177,13 +201,13 @@ class PreacherActivityViewModel extends ChangeNotifier {
 
       print('Successfully applied! Now reloading...'); // Debug
       _isLoading = false;
-      
+
       // Reload both available and my activities
       await loadAvailableActivities();
       if (_currentPreacherId != null) {
         await loadMyActivities(_currentPreacherId!);
       }
-      
+
       return true;
     } catch (error) {
       _isLoading = false;
@@ -197,10 +221,8 @@ class PreacherActivityViewModel extends ChangeNotifier {
   // Image selection
   Future<void> pickImages() async {
     try {
-      final List<XFile> images = await _picker.pickMultiImage(
-        imageQuality: 80,
-      );
-      
+      final List<XFile> images = await _picker.pickMultiImage(imageQuality: 80);
+
       if (images.isNotEmpty) {
         // Limit to 3 photos
         _selectedImages = images.take(3).toList();
@@ -265,9 +287,12 @@ class PreacherActivityViewModel extends ChangeNotifier {
     for (int i = 0; i < _selectedImages.length; i++) {
       try {
         final file = File(_selectedImages[i].path);
-        final fileName = '${activityId}_${DateTime.now().millisecondsSinceEpoch}_$i.jpg';
-        final ref = _storage.ref().child('activity_submissions/$activityId/$fileName');
-        
+        final fileName =
+            '${activityId}_${DateTime.now().millisecondsSinceEpoch}_$i.jpg';
+        final ref = _storage.ref().child(
+          'activity_submissions/$activityId/$fileName',
+        );
+
         await ref.putFile(file);
         final url = await ref.getDownloadURL();
         photoUrls.add(url);
@@ -346,11 +371,12 @@ class PreacherActivityViewModel extends ChangeNotifier {
   // Get activity submission for viewing
   Future<ActivitySubmission?> getActivitySubmission(String activityId) async {
     try {
-      final snapshot = await _db
-          .collection('activity_submissions')
-          .where('activityId', isEqualTo: activityId)
-          .limit(1)
-          .get();
+      final snapshot =
+          await _db
+              .collection('activity_submissions')
+              .where('activityId', isEqualTo: activityId)
+              .limit(1)
+              .get();
 
       if (snapshot.docs.isNotEmpty) {
         return ActivitySubmission.fromFirestore(snapshot.docs.first);

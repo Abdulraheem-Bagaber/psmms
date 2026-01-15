@@ -51,11 +51,15 @@ class PreacherUploadEvidenceScreen extends StatelessWidget {
         ),
         actions: [
           TextButton(
-            onPressed: viewModel.isLoading ? null : () => _handleSubmit(context, viewModel),
+            onPressed:
+                viewModel.isLoading
+                    ? null
+                    : () => _handleSubmit(context, viewModel),
             child: Text(
               'Done',
               style: TextStyle(
-                color: viewModel.isLoading ? Colors.grey : const Color(0xFF0066FF),
+                color:
+                    viewModel.isLoading ? Colors.grey : const Color(0xFF0066FF),
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -87,10 +91,7 @@ class PreacherUploadEvidenceScreen extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       activity.location,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                     ),
                   ],
                 ),
@@ -98,22 +99,17 @@ class PreacherUploadEvidenceScreen extends StatelessWidget {
               const SizedBox(height: 24),
               const Text(
                 'Select one or more photos',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 8),
               Text(
                 'Accepted formats: JPG, PNG. Maximum file size: 5MB',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 13, color: Colors.grey[600]),
               ),
               const SizedBox(height: 16),
               InkWell(
-                onTap: viewModel.isLoading ? null : () => viewModel.pickImages(),
+                onTap:
+                    viewModel.isLoading ? null : () => viewModel.pickImages(),
                 child: Container(
                   height: 120,
                   decoration: BoxDecoration(
@@ -151,10 +147,7 @@ class PreacherUploadEvidenceScreen extends StatelessWidget {
               if (viewModel.selectedImages.isNotEmpty) ...[
                 const Text(
                   'Selected Images',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 12),
                 GridView.builder(
@@ -173,7 +166,9 @@ class PreacherUploadEvidenceScreen extends StatelessWidget {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(12),
                             image: DecorationImage(
-                              image: FileImage(File(viewModel.selectedImages[index].path)),
+                              image: FileImage(
+                                File(viewModel.selectedImages[index].path),
+                              ),
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -214,28 +209,33 @@ class PreacherUploadEvidenceScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  onPressed: (viewModel.selectedImages.isNotEmpty && !viewModel.isLoading)
-                      ? () => _handleSubmit(context, viewModel)
-                      : null,
-                  child: viewModel.isLoading
-                      ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  onPressed:
+                      (viewModel.selectedImages.isNotEmpty &&
+                              !viewModel.isLoading)
+                          ? () => _handleSubmit(context, viewModel)
+                          : null,
+                  child:
+                      viewModel.isLoading
+                          ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          )
+                          : Text(
+                            viewModel.selectedImages.isEmpty
+                                ? 'Select Photos First'
+                                : 'Upload ${viewModel.selectedImages.length} Photo${viewModel.selectedImages.length > 1 ? 's' : ''}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        )
-                      : Text(
-                          viewModel.selectedImages.isEmpty
-                              ? 'Select Photos First'
-                              : 'Upload ${viewModel.selectedImages.length} Photo${viewModel.selectedImages.length > 1 ? 's' : ''}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
                 ),
               ),
               if (viewModel.errorMessage != null) ...[
@@ -271,7 +271,10 @@ class PreacherUploadEvidenceScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _handleSubmit(BuildContext context, PreacherActivityViewModel viewModel) async {
+  Future<void> _handleSubmit(
+    BuildContext context,
+    PreacherActivityViewModel viewModel,
+  ) async {
     if (viewModel.selectedImages.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -303,7 +306,9 @@ class PreacherUploadEvidenceScreen extends StatelessWidget {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(viewModel.errorMessage ?? 'Failed to submit evidence'),
+            content: Text(
+              viewModel.errorMessage ?? 'Failed to submit evidence',
+            ),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),
