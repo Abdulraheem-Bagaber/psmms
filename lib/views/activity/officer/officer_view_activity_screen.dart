@@ -76,7 +76,10 @@ class OfficerViewActivityScreen extends StatelessWidget {
                   ],
                 ),
               const SizedBox(height: 16),
-              if (activity.status == 'Submitted')
+              if (activity.status == 'Submitted' ||
+                  activity.status == 'Approved' ||
+                  activity.status == 'Approved by MUIP Officer' ||
+                  activity.status == 'Rejected')
                 FutureBuilder<ActivitySubmission?>(
                   future: viewModel.getActivitySubmission(activity.activityId),
                   builder: (context, snapshot) {
@@ -366,64 +369,65 @@ class OfficerViewActivityScreen extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 24),
-        Row(
-          children: [
-            Expanded(
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+        if (activity.status == 'Submitted')
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    elevation: 0,
                   ),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  elevation: 0,
-                ),
-                onPressed:
-                    viewModel.isLoading
-                        ? null
-                        : () => _showRejectDialog(
-                          context,
-                          viewModel,
-                          submission.id,
-                        ),
-                child: const Text(
-                  'Reject',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  elevation: 0,
-                ),
-                onPressed:
-                    viewModel.isLoading
-                        ? null
-                        : () =>
-                            _handleApprove(context, viewModel, submission.id),
-                child: const Text(
-                  'Approve',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                  onPressed:
+                      viewModel.isLoading
+                          ? null
+                          : () => _showRejectDialog(
+                            context,
+                            viewModel,
+                            submission.id,
+                          ),
+                  child: const Text(
+                    'Reject',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
-        ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    elevation: 0,
+                  ),
+                  onPressed:
+                      viewModel.isLoading
+                          ? null
+                          : () =>
+                              _handleApprove(context, viewModel, submission.id),
+                  child: const Text(
+                    'Approve',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
       ],
     );
   }

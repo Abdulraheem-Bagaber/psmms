@@ -178,6 +178,7 @@ class OfficerActivityViewModel extends ChangeNotifier {
     required String topic,
     required String specialRequirements,
     required String urgency,
+    int? expectedAttendance,
   }) async {
     _isLoading = true;
     _errorMessage = null;
@@ -195,6 +196,7 @@ class OfficerActivityViewModel extends ChangeNotifier {
         'topic': topic,
         'specialRequirements': specialRequirements,
         'urgency': urgency,
+        'expectedAttendance': expectedAttendance,
         'updatedAt': FieldValue.serverTimestamp(),
       });
 

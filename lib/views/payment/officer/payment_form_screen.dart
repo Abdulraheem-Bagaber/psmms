@@ -158,12 +158,6 @@ class _PaymentFormContent extends StatelessWidget {
           _buildCardHeader(icon: Icons.payments_rounded, title: 'Payment Information'),
           const SizedBox(height: 16),
           TextFormField(
-            readOnly: true,
-            initialValue: viewModel.recommendedAmountText,
-            decoration: _buildInputDecoration('Recommended Amount'),
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
             controller: viewModel.paymentAmountController,
             onChanged: viewModel.onPaymentAmountChanged,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),

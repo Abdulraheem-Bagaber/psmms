@@ -51,6 +51,7 @@ class PaymentListViewModel extends ChangeNotifier {
             'status',
             whereIn: [
               'Pending Payment',
+              'Approved by MUIP Officer',
               'Forwarded to Yayasan',
               'Paid',
               'Rejected',
@@ -98,9 +99,23 @@ class PaymentListViewModel extends ChangeNotifier {
               .where(
                 (item) =>
                     item.status == 'Pending Payment' ||
+                    item.status == 'Approved by MUIP Officer' ||
                     item.status == 'Forwarded to Yayasan' ||
                     item.status == 'Paid' ||
                     item.status == 'Rejected',
+              )
+              .toList();
+    }
+
+    // For preacherHistory mode, show only Pending, Approved, and Forwarded statuses
+    if (mode == PaymentListMode.preacherHistory) {
+      result =
+          result
+              .where(
+                (item) =>
+                    item.status == 'Pending Payment' ||
+                    item.status == 'Approved by MUIP Officer' ||
+                    item.status == 'Forwarded to Yayasan',
               )
               .toList();
     }
@@ -177,24 +192,7 @@ class PaymentListViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final paymentId = await _generatePaymentId();
-
-      await _db.collection('payment').add({
-        'paymentId': paymentId,
-        'activityId': payment.activityId,
-        'activityName': payment.activityName,
-        'preacherId': payment.preacherId,
-        'preacherName': payment.preacherName,
-        'activityDate': Timestamp.fromDate(payment.activityDate),
-        'amount': payment.amount,
-        'paymentAmount': payment.amount,
-        'status': 'Forwarded to Yayasan',
-        'previousPaymentId': payment.id,
-        'createdAt': FieldValue.serverTimestamp(),
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-
-      // Update the original payment document status
+      // Update the existing payment document status only (no duplication)
       await _db.collection('payment').doc(payment.id).update({
         'status': 'Forwarded to Yayasan',
         'updatedAt': FieldValue.serverTimestamp(),

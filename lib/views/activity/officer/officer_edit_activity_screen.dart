@@ -39,6 +39,7 @@ class _OfficerEditActivityContentState extends State<_OfficerEditActivityContent
   late TextEditingController _venueController;
   late TextEditingController _topicController;
   late TextEditingController _requirementsController;
+  late TextEditingController _attendanceController;
 
   late String _activityType;
   late String _urgency;
@@ -67,6 +68,9 @@ class _OfficerEditActivityContentState extends State<_OfficerEditActivityContent
     _venueController = TextEditingController(text: widget.activity.venue);
     _topicController = TextEditingController(text: widget.activity.topic);
     _requirementsController = TextEditingController(text: widget.activity.specialRequirements);
+    _attendanceController = TextEditingController(
+      text: widget.activity.expectedAttendance?.toString() ?? '',
+    );
     
     _activityType = widget.activity.activityType;
     _urgency = widget.activity.urgency;
@@ -92,6 +96,7 @@ class _OfficerEditActivityContentState extends State<_OfficerEditActivityContent
     _venueController.dispose();
     _topicController.dispose();
     _requirementsController.dispose();
+    _attendanceController.dispose();
     super.dispose();
   }
 
@@ -277,6 +282,14 @@ class _OfficerEditActivityContentState extends State<_OfficerEditActivityContent
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
+                  controller: _attendanceController,
+                  decoration: _inputDecoration('Expected Attendance').copyWith(
+                    hintText: 'Number of expected attendees (for KPI tracking)',
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
                   controller: _requirementsController,
                   decoration: _inputDecoration('Special Requirements'),
                   maxLines: 4,
@@ -340,6 +353,8 @@ class _OfficerEditActivityContentState extends State<_OfficerEditActivityContent
   Future<void> _handleUpdate(BuildContext context, OfficerActivityViewModel viewModel) async {
     if (!_formKey.currentState!.validate()) return;
 
+    final expectedAttendance = int.tryParse(_attendanceController.text.trim());
+
     final success = await viewModel.updateActivity(
       widget.activity.id,
       activityType: _activityType,
@@ -352,6 +367,7 @@ class _OfficerEditActivityContentState extends State<_OfficerEditActivityContent
       topic: _topicController.text.trim(),
       specialRequirements: _requirementsController.text.trim(),
       urgency: _urgency,
+      expectedAttendance: expectedAttendance,
     );
 
     if (context.mounted) {
