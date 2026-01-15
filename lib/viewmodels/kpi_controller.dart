@@ -116,15 +116,9 @@ class KPIController extends ChangeNotifier {
     required DateTime startDate,
     required DateTime endDate,
   }) async {
-    // Validation: All targets must be positive integers
-    if (monthlySessionTarget <= 0 ||
-        totalAttendanceTarget <= 0 ||
-        newConvertsTarget <= 0 ||
-        baptismsTarget <= 0 ||
-        communityProjectsTarget <= 0 ||
-        charityEventsTarget <= 0 ||
-        youthProgramAttendanceTarget <= 0) {
-      _error = 'All KPI target values must be positive integers';
+    // Validation: At least Monthly Sessions and Total Attendance must be positive
+    if (monthlySessionTarget <= 0 || totalAttendanceTarget <= 0) {
+      _error = 'Monthly Sermons and Total Attendance must be positive numbers';
       notifyListeners();
       return false;
     }
@@ -236,16 +230,58 @@ class KPIController extends ChangeNotifier {
     try {
       print('DEBUG: Loading KPI for preacher ID: $preacherId'); // Debug log
 
-      // Get all KPIs for preacher
-      final kpiSnapshot =
+      // STRATEGY 1: Get all KPIs for preacher by direct ID match
+      var kpiSnapshot =
           await _db
               .collection('kpi_targets')
               .where('preacher_id', isEqualTo: preacherId)
               .get();
 
       print(
-        'DEBUG: Found ${kpiSnapshot.docs.length} KPI documents',
+        'DEBUG: Found ${kpiSnapshot.docs.length} KPI documents for preacher_id=$preacherId',
       ); // Debug log
+
+      // STRATEGY 2: If no KPIs found, try to find by matching user email/name
+      // This handles cases where KPI was set for a different user document with same identity
+      if (kpiSnapshot.docs.isEmpty) {
+        print('DEBUG: No direct match, checking for user document...'); // Debug log
+        
+        // Get current user's email/name
+        final userDoc = await _db.collection('users').doc(preacherId).get();
+        if (userDoc.exists) {
+          final userEmail = userDoc.data()?['email'] as String?;
+          final userName = userDoc.data()?['name'] as String?;
+          print('DEBUG: User email=$userEmail, name=$userName'); // Debug log
+          
+          if (userEmail != null) {
+            // Find other user documents with same email
+            final matchingUsers = await _db
+                .collection('users')
+                .where('email', isEqualTo: userEmail)
+                .where('role', isEqualTo: 'preacher')
+                .get();
+            
+            print('DEBUG: Found ${matchingUsers.docs.length} users with email $userEmail'); // Debug log
+            
+            // Try to find KPIs for these matching users
+            for (var matchingUser in matchingUsers.docs) {
+              if (matchingUser.id != preacherId) {
+                print('DEBUG: Checking alternate user ID: ${matchingUser.id}'); // Debug log
+                final altKpiSnapshot = await _db
+                    .collection('kpi_targets')
+                    .where('preacher_id', isEqualTo: matchingUser.id)
+                    .get();
+                
+                if (altKpiSnapshot.docs.isNotEmpty) {
+                  print('DEBUG: Found ${altKpiSnapshot.docs.length} KPIs for alternate ID'); // Debug log
+                  kpiSnapshot = altKpiSnapshot;
+                  break;
+                }
+              }
+            }
+          }
+        }
+      }
 
       if (kpiSnapshot.docs.isEmpty) {
         _currentKPI = null;
@@ -265,7 +301,7 @@ class KPIController extends ChangeNotifier {
             });
 
         _currentKPI = KPITarget.fromFirestore(sortedDocs.first);
-        print('DEBUG: Loaded KPI with ID: ${_currentKPI!.id}'); // Debug log
+        print('DEBUG: Loaded KPI with ID: ${_currentKPI!.id}, preacher_id: ${_currentKPI!.preacherId}'); // Debug log
         await _loadProgress(_currentKPI!.id!);
       }
 
