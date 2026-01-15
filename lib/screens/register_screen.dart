@@ -59,7 +59,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         'phoneNumber': phoneController.text.trim(),
         'email': emailController.text.trim(),
         'role': selectedRole,
-        'status': 'pending',
+        'status': 'approved',
         'qualifications': [],
         'skills': [],
         'createdAt': FieldValue.serverTimestamp(),
@@ -73,7 +73,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Registration successful. Please wait for admin approval.',
+            'Registration successful! You can now log in.',
           ),
           duration: Duration(seconds: 3),
         ),

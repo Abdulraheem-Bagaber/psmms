@@ -73,10 +73,40 @@ class _LoginScreenState extends State<LoginScreen> {
       }
 
       // ✅ Approved user - AuthGate will handle navigation automatically
+    } on FirebaseAuthException catch (e) {
+      String errorMessage;
+      
+      if (e.code == 'user-not-found') {
+        errorMessage = 'No account found with this email. Please register first.';
+      } else if (e.code == 'wrong-password') {
+        errorMessage = 'Wrong password. Please try again.';
+      } else if (e.code == 'invalid-email') {
+        errorMessage = 'Invalid email address format.';
+      } else if (e.code == 'invalid-credential') {
+        errorMessage = 'Wrong email or password. Please check and try again.';
+      } else {
+        errorMessage = 'Login failed: ${e.message}';
+      }
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      };
     } finally {
       if (mounted) setState(() => loading = false);
     }

@@ -5,7 +5,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'activity_seeder.dart';
 import 'firebase_options.dart';
-import 'debug_kpi_check.dart';
 import 'views/payment/officer/activity_payments_screen.dart';
 import 'views/payment/officer/payment_form_screen.dart';
 import 'views/payment/admin/approved_payments_screen.dart';
@@ -269,13 +268,7 @@ class MainMenuScreen extends StatelessWidget {
             icon: Icons.data_object,
             builder: (_) => const ActivitySeederPage(),
           ),
-          _buildModuleCard(
-            context,
-            title: 'DEBUG: Check KPI Data',
-            subtitle: 'View all KPI targets in Firestore.',
-            icon: Icons.bug_report,
-            builder: (_) => const DebugKPICheck(),
-          ),
+
           const SizedBox(height: 24),
           _buildSectionHeader('Settings'),
 
