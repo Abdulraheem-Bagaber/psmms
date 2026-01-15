@@ -1,6 +1,8 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../models/activity.dart';
 import '../../../viewmodels/preacher_activity_view_model.dart';
 
@@ -160,18 +162,31 @@ class PreacherUploadEvidenceScreen extends StatelessWidget {
                   ),
                   itemCount: viewModel.selectedImages.length,
                   itemBuilder: (context, index) {
+                    final imageFile = viewModel.selectedImages[index];
                     return Stack(
                       children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            image: DecorationImage(
-                              image: FileImage(
-                                File(viewModel.selectedImages[index].path),
+                        FutureBuilder<Widget>(
+                          future: _buildImageWidget(imageFile),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData) {
+                              return Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                clipBehavior: Clip.antiAlias,
+                                child: snapshot.data,
+                              );
+                            }
+                            return Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                color: Colors.grey[300],
                               ),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
+                              child: const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
+                          },
                         ),
                         Positioned(
                           top: 4,
@@ -314,6 +329,44 @@ class PreacherUploadEvidenceScreen extends StatelessWidget {
           ),
         );
       }
+    }
+  }
+
+  Future<Widget> _buildImageWidget(XFile imageFile) async {
+    if (kIsWeb) {
+      // On web, use network image from data URL
+      final bytes = await imageFile.readAsBytes();
+      return Image.memory(
+        bytes,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
+      );
+    } else {
+      // On mobile, use network image from file path
+      return Image.network(
+        imageFile.path,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
+        errorBuilder: (context, error, stackTrace) {
+          // Fallback to memory if network fails
+          return FutureBuilder<Uint8List>(
+            future: imageFile.readAsBytes(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return Image.memory(
+                  snapshot.data!,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: double.infinity,
+                );
+              }
+              return const SizedBox();
+            },
+          );
+        },
+      );
     }
   }
 }

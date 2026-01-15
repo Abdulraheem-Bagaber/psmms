@@ -549,7 +549,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                         ),
                                       ),
                                       const SizedBox(height: 12),
-                                      if (latestPayment['receiptUrl'] != null)
+                                      if (latestPayment.data() != null && 
+                                          (latestPayment.data() as Map<String, dynamic>).containsKey('receiptUrl') &&
+                                          latestPayment['receiptUrl'] != null)
                                         GestureDetector(
                                           onTap: () {
                                             // View receipt image
@@ -765,7 +767,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 const SizedBox(height: 12),
                                 ElevatedButton(
                                   onPressed: () {
-                                    // Navigate to preacher applications screen
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => const PendingApprovalPage(),
+                                      ),
+                                    );
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.white,
@@ -1197,34 +1204,45 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             Row(
                               children: [
                                 Expanded(
-                                  child: Container(
-                                    padding: const EdgeInsets.all(20),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFF3F4F6),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Pending\nRegistrations',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.grey[700],
-                                            height: 1.3,
-                                          ),
+                                  child: InkWell(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => const PendingApprovalPage(),
                                         ),
-                                        const SizedBox(height: 12),
-                                        Text(
-                                          '$pendingCount',
-                                          style: const TextStyle(
-                                            fontSize: 32,
-                                            fontWeight: FontWeight.bold,
-                                            color: Color(0xFF1a1a1a),
+                                      );
+                                    },
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(20),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFF3F4F6),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Pending\nRegistrations',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey[700],
+                                              height: 1.3,
+                                            ),
                                           ),
-                                        ),
-                                      ],
+                                          const SizedBox(height: 12),
+                                          Text(
+                                            '$pendingCount',
+                                            style: const TextStyle(
+                                              fontSize: 32,
+                                              fontWeight: FontWeight.bold,
+                                              color: Color(0xFF1a1a1a),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),

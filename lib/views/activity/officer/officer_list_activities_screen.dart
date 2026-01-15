@@ -31,7 +31,13 @@ class OfficerListActivitiesScreen extends StatelessWidget {
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.menu, color: Colors.black),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () {
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              '/dashboard',
+              (route) => false,
+            );
+          },
         ),
         title: const Text(
           'Manage Activities',
@@ -527,7 +533,10 @@ class OfficerListActivitiesScreen extends StatelessWidget {
                               ),
                             ),
                             TextButton(
-                              onPressed: () {},
+                              onPressed: () => Navigator.pop(context),
+                              style: TextButton.styleFrom(
+                                foregroundColor: const Color(0xFF0066FF),
+                              ),
                               child: const Text('Clear All'),
                             ),
                           ],
@@ -610,17 +619,20 @@ class OfficerListActivitiesScreen extends StatelessWidget {
             ...docs.map((doc) {
               final data = doc.data() as Map<String, dynamic>;
               final timestamp =
-                  data['createdAt'] as Timestamp? ??
                   data['submittedAt'] as Timestamp? ??
+                  data['updatedAt'] as Timestamp? ??
+                  data['createdAt'] as Timestamp? ??
                   Timestamp.now();
+              
+              final activityTitle =
+                  data['title'] ?? data['activityName'] ?? data['activityId'] ?? 'Activity';
 
               return _buildNotificationItem(
                 icon: icon,
                 iconColor: iconColor,
-                title:
-                    data['title'] ?? data['activityId'] ?? 'New notification',
+                title: activityTitle,
                 message: _getNotificationMessage(title, data),
-                time: _getTimeAgo(timestamp.toDate()),
+                time: DateFormat('MMM dd').format(timestamp.toDate()),
                 isUnread: true,
                 onTap: () {
                   Navigator.pop(context);

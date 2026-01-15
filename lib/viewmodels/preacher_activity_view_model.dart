@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -286,18 +285,29 @@ class PreacherActivityViewModel extends ChangeNotifier {
 
     for (int i = 0; i < _selectedImages.length; i++) {
       try {
-        final file = File(_selectedImages[i].path);
+        final bytes = await _selectedImages[i].readAsBytes();
         final fileName =
             '${activityId}_${DateTime.now().millisecondsSinceEpoch}_$i.jpg';
         final ref = _storage.ref().child(
           'activity_submissions/$activityId/$fileName',
         );
 
-        await ref.putFile(file);
+        // Set metadata for better compatibility, especially on web
+        final metadata = SettableMetadata(
+          contentType: 'image/jpeg',
+          customMetadata: {
+            'uploadedBy': 'preacher',
+            'activityId': activityId,
+          },
+        );
+
+        await ref.putData(bytes, metadata);
         final url = await ref.getDownloadURL();
         photoUrls.add(url);
+        print('Successfully uploaded image $i: $url');
       } catch (error) {
         print('Failed to upload image $i: $error');
+        _errorMessage = 'Upload failed: $error';
       }
     }
 
