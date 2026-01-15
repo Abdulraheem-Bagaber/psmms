@@ -15,6 +15,7 @@ import '../viewmodels/kpi_controller.dart';
 import '../viewmodels/preacher_controller.dart';
 import '../views/reports/reporting_dashboard_screen.dart';
 import '../views/payment/preacher/preacher_payment_history_screen.dart';
+import '../views/preacher/preacher_directory_screen.dart';
 import 'ProfilePage.dart';
 import 'PendingApprovalPage.dart';
 import '../main.dart';
@@ -74,8 +75,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
       case 4:
         return _buildReportsPage(context, user);
       case 5:
-        return const PendingApprovalPage();
+        return _buildPreacherManagementPage(user);
       case 6:
+        return const PendingApprovalPage();
+      case 7:
         return const ProfilePage();
       default:
         return _buildDashboardHome(user);
@@ -1988,6 +1991,46 @@ class _DashboardScreenState extends State<DashboardScreen> {
     } else {
       return officer.ActivityPaymentsScreen.withProvider();
     }
+  }
+
+  Widget _buildPreacherManagementPage(UserModel user) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Preacher Management'),
+        automaticallyImplyLeading: false,
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.people_alt, size: 64, color: Colors.grey[400]),
+            const SizedBox(height: 16),
+            const Text(
+              'Preacher Management',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Search and review preacher profiles',
+              style: TextStyle(color: Colors.grey[600]),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => PreacherDirectoryScreen.withProvider(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.search),
+              label: const Text('View Directory'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildKPIPage(UserModel user) {
