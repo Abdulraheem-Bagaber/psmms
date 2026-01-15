@@ -62,11 +62,11 @@ class PreacherViewActivityScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    
+
                     // Status Badge
                     _buildStatusBadge(activity.status),
                     const SizedBox(height: 20),
-                    
+
                     // Schedule
                     _buildSectionLabel('Schedule'),
                     const SizedBox(height: 8),
@@ -79,7 +79,7 @@ class PreacherViewActivityScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    
+
                     // Topic
                     _buildSectionLabel('Topic'),
                     const SizedBox(height: 8),
@@ -92,7 +92,7 @@ class PreacherViewActivityScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    
+
                     // Location
                     _buildSectionLabel('Location'),
                     const SizedBox(height: 8),
@@ -105,7 +105,7 @@ class PreacherViewActivityScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    
+
                     // Map Image with Button
                     InkWell(
                       onTap: () async {
@@ -222,7 +222,7 @@ class PreacherViewActivityScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    
+
                     if (activity.specialRequirements.isNotEmpty) ...[
                       const SizedBox(height: 20),
                       _buildSectionLabel('Special Instructions'),
@@ -236,13 +236,16 @@ class PreacherViewActivityScreen extends StatelessWidget {
                         ),
                       ),
                     ],
-                    
+
                     if (activity.status == 'Submitted') ...[
                       const SizedBox(height: 20),
                       FutureBuilder<ActivitySubmission?>(
-                        future: viewModel.getActivitySubmission(activity.activityId),
+                        future: viewModel.getActivitySubmission(
+                          activity.activityId,
+                        ),
                         builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
                             return const Center(
                               child: Padding(
                                 padding: EdgeInsets.all(20),
@@ -257,14 +260,14 @@ class PreacherViewActivityScreen extends StatelessWidget {
                         },
                       ),
                     ],
-                    
+
                     const SizedBox(height: 20),
                   ],
                 ),
               ),
             ),
           ),
-          
+
           // Bottom button
           if (activity.status == 'Assigned')
             Container(
@@ -286,11 +289,12 @@ class PreacherViewActivityScreen extends StatelessWidget {
                     final result = await Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => PreacherUploadEvidenceScreen.withProvider(
-                          activity: activity,
-                          preacherId: activity.assignedPreacherId ?? '',
-                          preacherName: activity.assignedPreacherName ?? '',
-                        ),
+                        builder:
+                            (_) => PreacherUploadEvidenceScreen.withProvider(
+                              activity: activity,
+                              preacherId: activity.assignedPreacherId ?? '',
+                              preacherName: activity.assignedPreacherName ?? '',
+                            ),
                       ),
                     );
                     if (result == true && context.mounted) {
@@ -308,10 +312,7 @@ class PreacherViewActivityScreen extends StatelessWidget {
                   ),
                   child: const Text(
                     'Submit Report',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                 ),
               ),
@@ -407,10 +408,7 @@ class PreacherViewActivityScreen extends StatelessWidget {
         const SizedBox(height: 12),
         Text(
           'Submitted: ${DateFormat('dd MMM yyyy, h:mm a').format(submission.submittedAt)}',
-          style: const TextStyle(
-            fontSize: 14,
-            color: Color(0xFF64748B),
-          ),
+          style: const TextStyle(fontSize: 14, color: Color(0xFF64748B)),
         ),
       ],
     );

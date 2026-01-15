@@ -295,10 +295,7 @@ class PreacherActivityViewModel extends ChangeNotifier {
         // Set metadata for better compatibility, especially on web
         final metadata = SettableMetadata(
           contentType: 'image/jpeg',
-          customMetadata: {
-            'uploadedBy': 'preacher',
-            'activityId': activityId,
-          },
+          customMetadata: {'uploadedBy': 'preacher', 'activityId': activityId},
         );
 
         await ref.putData(bytes, metadata);

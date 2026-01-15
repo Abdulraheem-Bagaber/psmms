@@ -64,7 +64,11 @@ class PreacherListActivitiesScreen extends StatelessWidget {
               children: [
                 const Icon(Icons.notifications_outlined, color: Colors.black87),
                 if (viewModel.myActivities
-                    .where((a) => a.status == 'Approved' || a.status == 'Approved by MUIP Officer')
+                    .where(
+                      (a) =>
+                          a.status == 'Approved' ||
+                          a.status == 'Approved by MUIP Officer',
+                    )
                     .isNotEmpty)
                   Positioned(
                     right: 0,
@@ -133,19 +137,21 @@ class PreacherListActivitiesScreen extends StatelessWidget {
     for (var tab in tabs) {
       final status = tab['status']!;
       final firebaseStatus = tab['firebaseStatus']!;
-      
+
       if (firebaseStatus == 'Approved') {
-        counts[status] = viewModel.myActivities
-            .where(
-              (a) =>
-                  a.status == 'Approved' ||
-                  a.status == 'Approved by MUIP Officer',
-            )
-            .length;
+        counts[status] =
+            viewModel.myActivities
+                .where(
+                  (a) =>
+                      a.status == 'Approved' ||
+                      a.status == 'Approved by MUIP Officer',
+                )
+                .length;
       } else {
-        counts[status] = viewModel.myActivities
-            .where((a) => a.status == firebaseStatus)
-            .length;
+        counts[status] =
+            viewModel.myActivities
+                .where((a) => a.status == firebaseStatus)
+                .length;
       }
     }
 
@@ -155,38 +161,44 @@ class PreacherListActivitiesScreen extends StatelessWidget {
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
-          children: tabs.map((tab) {
-            final status = tab['status']!;
-            final isSelected = viewModel.myActivitiesStatus == status;
-            final count = counts[status] ?? 0;
-            
-            return Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: GestureDetector(
-                onTap: () => viewModel.onMyActivitiesStatusChanged(status),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 18,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? const Color(0xFF0066FF)
-                        : const Color(0xFFEFF1F3),
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: Text(
-                    count > 0 ? '$status ($count)' : status,
-                    style: TextStyle(
-                      color: isSelected ? Colors.white : const Color(0xFF64748B),
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                      fontSize: 14,
+          children:
+              tabs.map((tab) {
+                final status = tab['status']!;
+                final isSelected = viewModel.myActivitiesStatus == status;
+                final count = counts[status] ?? 0;
+
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: GestureDetector(
+                    onTap: () => viewModel.onMyActivitiesStatusChanged(status),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color:
+                            isSelected
+                                ? const Color(0xFF0066FF)
+                                : const Color(0xFFEFF1F3),
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: Text(
+                        count > 0 ? '$status ($count)' : status,
+                        style: TextStyle(
+                          color:
+                              isSelected
+                                  ? Colors.white
+                                  : const Color(0xFF64748B),
+                          fontWeight:
+                              isSelected ? FontWeight.w600 : FontWeight.w500,
+                          fontSize: 14,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-            );
-          }).toList(),
+                );
+              }).toList(),
         ),
       ),
     );
@@ -297,7 +309,7 @@ class PreacherListActivitiesScreen extends StatelessWidget {
               ],
             ),
           ),
-          
+
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             child: Row(
@@ -306,7 +318,7 @@ class PreacherListActivitiesScreen extends StatelessWidget {
                 // Left side - Activity icon
                 _getActivityIcon(activity.title),
                 const SizedBox(width: 12),
-                
+
                 // Middle - Content
                 Expanded(
                   child: Column(
@@ -322,7 +334,7 @@ class PreacherListActivitiesScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      
+
                       // Date
                       Text(
                         _formatDate(activity.activityDate),
@@ -332,7 +344,7 @@ class PreacherListActivitiesScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      
+
                       // Location
                       Text(
                         activity.location,
@@ -347,13 +359,13 @@ class PreacherListActivitiesScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                
+
                 // Right side - Action icon
                 _buildActionIcon(activity.status),
               ],
             ),
           ),
-          
+
           // Action button at bottom
           if (activity.status == 'Assigned')
             Padding(
@@ -366,16 +378,19 @@ class PreacherListActivitiesScreen extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) =>
-                                PreacherViewActivityScreen.withProvider(
-                              activity: activity,
-                            ),
+                            builder:
+                                (_) => PreacherViewActivityScreen.withProvider(
+                                  activity: activity,
+                                ),
                           ),
                         );
                       },
                       style: OutlinedButton.styleFrom(
                         foregroundColor: const Color(0xFF0066FF),
-                        side: const BorderSide(color: Color(0xFF0066FF), width: 1.5),
+                        side: const BorderSide(
+                          color: Color(0xFF0066FF),
+                          width: 1.5,
+                        ),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -397,12 +412,13 @@ class PreacherListActivitiesScreen extends StatelessWidget {
                         final result = await Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) =>
-                                PreacherUploadEvidenceScreen.withProvider(
-                              activity: activity,
-                              preacherId: preacherId,
-                              preacherName: preacherName,
-                            ),
+                            builder:
+                                (_) =>
+                                    PreacherUploadEvidenceScreen.withProvider(
+                                      activity: activity,
+                                      preacherId: preacherId,
+                                      preacherName: preacherName,
+                                    ),
                           ),
                         );
                         if (result == true) {
@@ -430,8 +446,8 @@ class PreacherListActivitiesScreen extends StatelessWidget {
                 ],
               ),
             ),
-          
-          if (activity.status == 'Submitted' || 
+
+          if (activity.status == 'Submitted' ||
               activity.status == 'Approved' ||
               activity.status == 'Approved by MUIP Officer')
             Padding(
@@ -443,10 +459,10 @@ class PreacherListActivitiesScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) =>
-                            PreacherViewActivityScreen.withProvider(
-                          activity: activity,
-                        ),
+                        builder:
+                            (_) => PreacherViewActivityScreen.withProvider(
+                              activity: activity,
+                            ),
                       ),
                     );
                   },
@@ -456,10 +472,7 @@ class PreacherListActivitiesScreen extends StatelessWidget {
                   ),
                   child: const Text(
                     'View Details',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                   ),
                 ),
               ),
@@ -516,10 +529,7 @@ class PreacherListActivitiesScreen extends StatelessWidget {
           Container(
             width: 8,
             height: 8,
-            decoration: BoxDecoration(
-              color: dotColor,
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: dotColor, shape: BoxShape.circle),
           ),
           const SizedBox(width: 8),
           Text(
@@ -615,15 +625,8 @@ class PreacherListActivitiesScreen extends StatelessWidget {
     return Container(
       width: 48,
       height: 48,
-      decoration: BoxDecoration(
-        color: bgColor,
-        shape: BoxShape.circle,
-      ),
-      child: Icon(
-        icon,
-        color: iconColor,
-        size: 22,
-      ),
+      decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
+      child: Icon(icon, color: iconColor, size: 22),
     );
   }
 
@@ -632,17 +635,19 @@ class PreacherListActivitiesScreen extends StatelessWidget {
     Color color;
 
     final lowerTitle = title.toLowerCase();
-    
+
     if (lowerTitle.contains('sermon') || lowerTitle.contains('friday')) {
       icon = Icons.menu_book_outlined;
       color = const Color(0xFF1E293B);
-    } else if (lowerTitle.contains('youth') || lowerTitle.contains('mentorship')) {
+    } else if (lowerTitle.contains('youth') ||
+        lowerTitle.contains('mentorship')) {
       icon = Icons.menu_book_outlined;
       color = const Color(0xFF1E293B);
     } else if (lowerTitle.contains('charity') || lowerTitle.contains('drive')) {
       icon = Icons.menu_book_outlined;
       color = const Color(0xFF1E293B);
-    } else if (lowerTitle.contains('community') || lowerTitle.contains('outreach')) {
+    } else if (lowerTitle.contains('community') ||
+        lowerTitle.contains('outreach')) {
       icon = Icons.menu_book_outlined;
       color = const Color(0xFF1E293B);
     } else {
@@ -669,126 +674,142 @@ class PreacherListActivitiesScreen extends StatelessWidget {
     return '$day $month $year, $time';
   }
 
-  void _showNotifications(BuildContext context, PreacherActivityViewModel viewModel) {
-    final approvedActivities = viewModel.myActivities
-        .where((a) => a.status == 'Approved' || a.status == 'Approved by MUIP Officer')
-        .toList();
-    
-    final upcomingActivities = viewModel.myActivities
-        .where((a) => a.status == 'Assigned' && 
-                     a.activityDate.isAfter(DateTime.now()) &&
-                     a.activityDate.isBefore(DateTime.now().add(const Duration(days: 7))))
-        .toList();
+  void _showNotifications(
+    BuildContext context,
+    PreacherActivityViewModel viewModel,
+  ) {
+    final approvedActivities =
+        viewModel.myActivities
+            .where(
+              (a) =>
+                  a.status == 'Approved' ||
+                  a.status == 'Approved by MUIP Officer',
+            )
+            .toList();
+
+    final upcomingActivities =
+        viewModel.myActivities
+            .where(
+              (a) =>
+                  a.status == 'Assigned' &&
+                  a.activityDate.isAfter(DateTime.now()) &&
+                  a.activityDate.isBefore(
+                    DateTime.now().add(const Duration(days: 7)),
+                  ),
+            )
+            .toList();
 
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (context) => Container(
-        height: MediaQuery.of(context).size.height * 0.7,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
-        ),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.notifications_active,
-                    color: Color(0xFF0066FF),
-                    size: 24,
-                  ),
-                  const SizedBox(width: 12),
-                  const Text(
-                    'Notifications',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF1E293B),
-                    ),
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
+      builder:
+          (context) => Container(
+            height: MediaQuery.of(context).size.height * 0.7,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
               ),
             ),
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.all(20),
-                children: [
-                  if (approvedActivities.isNotEmpty) ...[
-                    _buildNotificationSection(
-                      'Approved Activities',
-                      'Your activities have been approved',
-                      Icons.check_circle_outline,
-                      const Color(0xFF4CAF50),
-                      approvedActivities.length,
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
                     ),
-                    const SizedBox(height: 12),
-                  ],
-                  if (upcomingActivities.isNotEmpty) ...[
-                    _buildNotificationSection(
-                      'Upcoming Activities',
-                      'You have activities starting soon',
-                      Icons.calendar_today_outlined,
-                      const Color(0xFF0066FF),
-                      upcomingActivities.length,
-                    ),
-                    const SizedBox(height: 12),
-                  ],
-                  if (approvedActivities.isEmpty && upcomingActivities.isEmpty)
-                    const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(40),
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.notifications_none,
-                              size: 64,
-                              color: Color(0xFFCBD5E1),
-                            ),
-                            SizedBox(height: 16),
-                            Text(
-                              'No notifications',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Color(0xFF64748B),
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.notifications_active,
+                        color: Color(0xFF0066FF),
+                        size: 24,
+                      ),
+                      const SizedBox(width: 12),
+                      const Text(
+                        'Notifications',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF1E293B),
                         ),
                       ),
-                    ),
-                ],
-              ),
+                      const Spacer(),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.all(20),
+                    children: [
+                      if (approvedActivities.isNotEmpty) ...[
+                        _buildNotificationSection(
+                          'Approved Activities',
+                          'Your activities have been approved',
+                          Icons.check_circle_outline,
+                          const Color(0xFF4CAF50),
+                          approvedActivities.length,
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+                      if (upcomingActivities.isNotEmpty) ...[
+                        _buildNotificationSection(
+                          'Upcoming Activities',
+                          'You have activities starting soon',
+                          Icons.calendar_today_outlined,
+                          const Color(0xFF0066FF),
+                          upcomingActivities.length,
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+                      if (approvedActivities.isEmpty &&
+                          upcomingActivities.isEmpty)
+                        const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(40),
+                            child: Column(
+                              children: [
+                                Icon(
+                                  Icons.notifications_none,
+                                  size: 64,
+                                  color: Color(0xFFCBD5E1),
+                                ),
+                                SizedBox(height: 16),
+                                Text(
+                                  'No notifications',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Color(0xFF64748B),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 
@@ -804,10 +825,7 @@ class PreacherListActivitiesScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: color.withOpacity(0.3),
-          width: 1,
-        ),
+        border: Border.all(color: color.withOpacity(0.3), width: 1),
       ),
       child: Row(
         children: [
@@ -817,11 +835,7 @@ class PreacherListActivitiesScreen extends StatelessWidget {
               color: color,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(
-              icon,
-              color: Colors.white,
-              size: 24,
-            ),
+            child: Icon(icon, color: Colors.white, size: 24),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -865,4 +879,5 @@ class PreacherListActivitiesScreen extends StatelessWidget {
         ],
       ),
     );
-  }}
+  }
+}

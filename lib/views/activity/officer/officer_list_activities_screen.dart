@@ -623,9 +623,12 @@ class OfficerListActivitiesScreen extends StatelessWidget {
                   data['updatedAt'] as Timestamp? ??
                   data['createdAt'] as Timestamp? ??
                   Timestamp.now();
-              
+
               final activityTitle =
-                  data['title'] ?? data['activityName'] ?? data['activityId'] ?? 'Activity';
+                  data['title'] ??
+                  data['activityName'] ??
+                  data['activityId'] ??
+                  'Activity';
 
               return _buildNotificationItem(
                 icon: icon,

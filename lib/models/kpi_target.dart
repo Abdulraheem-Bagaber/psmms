@@ -14,7 +14,7 @@ class KPITarget {
   final int targetKhidmat;
   final double targetDonations;
   final int targetActivities;
-  
+
   // Additional fields for backward compatibility
   final int monthlySessionTarget;
   final int totalAttendanceTarget;
@@ -157,12 +157,15 @@ class KPITarget {
       targetDonations: targetDonations ?? this.targetDonations,
       targetActivities: targetActivities ?? this.targetActivities,
       monthlySessionTarget: monthlySessionTarget ?? this.monthlySessionTarget,
-      totalAttendanceTarget: totalAttendanceTarget ?? this.totalAttendanceTarget,
+      totalAttendanceTarget:
+          totalAttendanceTarget ?? this.totalAttendanceTarget,
       newConvertsTarget: newConvertsTarget ?? this.newConvertsTarget,
       baptismsTarget: baptismsTarget ?? this.baptismsTarget,
-      communityProjectsTarget: communityProjectsTarget ?? this.communityProjectsTarget,
+      communityProjectsTarget:
+          communityProjectsTarget ?? this.communityProjectsTarget,
       charityEventsTarget: charityEventsTarget ?? this.charityEventsTarget,
-      youthProgramAttendanceTarget: youthProgramAttendanceTarget ?? this.youthProgramAttendanceTarget,
+      youthProgramAttendanceTarget:
+          youthProgramAttendanceTarget ?? this.youthProgramAttendanceTarget,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
       createdAt: createdAt ?? this.createdAt,

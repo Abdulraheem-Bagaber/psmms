@@ -60,11 +60,12 @@ class _PendingApprovalPageState extends State<PendingApprovalPage> {
           // Pending list
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('users')
-                  .where('status', isEqualTo: 'pending')
-                  .orderBy('createdAt', descending: true)
-                  .snapshots(),
+              stream:
+                  FirebaseFirestore.instance
+                      .collection('users')
+                      .where('status', isEqualTo: 'pending')
+                      .orderBy('createdAt', descending: true)
+                      .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -75,22 +76,31 @@ class _PendingApprovalPageState extends State<PendingApprovalPage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.people_outline, size: 64, color: Colors.grey[400]),
+                        Icon(
+                          Icons.people_outline,
+                          size: 64,
+                          color: Colors.grey[400],
+                        ),
                         const SizedBox(height: 16),
                         Text(
                           'No pending registrations',
-                          style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 16,
+                          ),
                         ),
                       ],
                     ),
                   );
                 }
 
-                final docs = snapshot.data!.docs.where((doc) {
-                  final data = doc.data() as Map<String, dynamic>;
-                  final name = (data['fullName'] ?? '').toString().toLowerCase();
-                  return name.contains(searchQuery);
-                }).toList();
+                final docs =
+                    snapshot.data!.docs.where((doc) {
+                      final data = doc.data() as Map<String, dynamic>;
+                      final name =
+                          (data['fullName'] ?? '').toString().toLowerCase();
+                      return name.contains(searchQuery);
+                    }).toList();
 
                 if (docs.isEmpty) {
                   return Center(
@@ -107,10 +117,12 @@ class _PendingApprovalPageState extends State<PendingApprovalPage> {
                   itemBuilder: (context, index) {
                     final doc = docs[index];
                     final data = doc.data() as Map<String, dynamic>;
-                    final createdAt = (data['createdAt'] as Timestamp?)?.toDate();
-                    final registrationDate = createdAt != null
-                        ? DateFormat('yyyy-MM-dd').format(createdAt)
-                        : 'N/A';
+                    final createdAt =
+                        (data['createdAt'] as Timestamp?)?.toDate();
+                    final registrationDate =
+                        createdAt != null
+                            ? DateFormat('yyyy-MM-dd').format(createdAt)
+                            : 'N/A';
 
                     return Container(
                       margin: const EdgeInsets.only(bottom: 16),
@@ -192,7 +204,9 @@ class _PendingApprovalPageState extends State<PendingApprovalPage> {
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(0xFF0066FF),
                                     foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 12,
+                                    ),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(8),
                                     ),
@@ -206,7 +220,9 @@ class _PendingApprovalPageState extends State<PendingApprovalPage> {
                                     if (!mounted) return;
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
-                                        content: Text('Account approved successfully'),
+                                        content: Text(
+                                          'Account approved successfully',
+                                        ),
                                         backgroundColor: Colors.green,
                                         behavior: SnackBarBehavior.floating,
                                       ),
@@ -226,8 +242,12 @@ class _PendingApprovalPageState extends State<PendingApprovalPage> {
                                 child: OutlinedButton(
                                   style: OutlinedButton.styleFrom(
                                     foregroundColor: const Color(0xFF64748B),
-                                    side: BorderSide(color: Colors.grey.shade300),
-                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                    side: BorderSide(
+                                      color: Colors.grey.shade300,
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 12,
+                                    ),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(8),
                                     ),
@@ -235,35 +255,49 @@ class _PendingApprovalPageState extends State<PendingApprovalPage> {
                                   onPressed: () async {
                                     final confirm = await showDialog<bool>(
                                       context: context,
-                                      builder: (context) => AlertDialog(
-                                        title: const Text('Reject Application'),
-                                        content: const Text(
-                                          'Are you sure you want to reject this application?',
-                                        ),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () => Navigator.pop(context, false),
-                                            child: const Text('Cancel'),
-                                          ),
-                                          TextButton(
-                                            onPressed: () => Navigator.pop(context, true),
-                                            style: TextButton.styleFrom(
-                                              foregroundColor: Colors.red,
+                                      builder:
+                                          (context) => AlertDialog(
+                                            title: const Text(
+                                              'Reject Application',
                                             ),
-                                            child: const Text('Reject'),
+                                            content: const Text(
+                                              'Are you sure you want to reject this application?',
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed:
+                                                    () => Navigator.pop(
+                                                      context,
+                                                      false,
+                                                    ),
+                                                child: const Text('Cancel'),
+                                              ),
+                                              TextButton(
+                                                onPressed:
+                                                    () => Navigator.pop(
+                                                      context,
+                                                      true,
+                                                    ),
+                                                style: TextButton.styleFrom(
+                                                  foregroundColor: Colors.red,
+                                                ),
+                                                child: const Text('Reject'),
+                                              ),
+                                            ],
                                           ),
-                                        ],
-                                      ),
                                     );
 
                                     if (confirm == true) {
                                       await doc.reference.update({
                                         'status': 'rejected',
-                                        'rejectedAt': FieldValue.serverTimestamp(),
+                                        'rejectedAt':
+                                            FieldValue.serverTimestamp(),
                                       });
 
                                       if (!context.mounted) return;
-                                      ScaffoldMessenger.of(context).showSnackBar(
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
                                         const SnackBar(
                                           content: Text('Application rejected'),
                                           backgroundColor: Colors.red,

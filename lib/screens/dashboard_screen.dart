@@ -549,8 +549,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                         ),
                                       ),
                                       const SizedBox(height: 12),
-                                      if (latestPayment.data() != null && 
-                                          (latestPayment.data() as Map<String, dynamic>).containsKey('receiptUrl') &&
+                                      if (latestPayment.data() != null &&
+                                          (latestPayment.data()
+                                                  as Map<String, dynamic>)
+                                              .containsKey('receiptUrl') &&
                                           latestPayment['receiptUrl'] != null)
                                         GestureDetector(
                                           onTap: () {
@@ -770,7 +772,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (_) => const PendingApprovalPage(),
+                                        builder:
+                                            (_) => const PendingApprovalPage(),
                                       ),
                                     );
                                   },
@@ -1209,7 +1212,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (_) => const PendingApprovalPage(),
+                                          builder:
+                                              (_) =>
+                                                  const PendingApprovalPage(),
                                         ),
                                       );
                                     },
