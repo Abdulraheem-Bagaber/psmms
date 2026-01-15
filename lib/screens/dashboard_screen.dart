@@ -15,7 +15,7 @@ import '../viewmodels/kpi_controller.dart';
 import '../viewmodels/preacher_controller.dart';
 import '../views/reports/reporting_dashboard_screen.dart';
 import '../views/payment/preacher/preacher_payment_history_screen.dart';
-import 'profile_screen.dart';
+import 'ProfilePage.dart';
 import '../main.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -73,7 +73,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       case 4:
         return _buildReportsPage(context, user);
       case 5:
-        return const ProfileScreen();
+        return const ProfilePage();
       default:
         return _buildDashboardHome(user);
     }
