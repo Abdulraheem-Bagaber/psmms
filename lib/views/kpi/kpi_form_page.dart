@@ -97,6 +97,7 @@ class _KPIFormPageState extends State<KPIFormPage> {
   Future<void> _saveTargets() async {
     // Validate form
     if (!_formKey.currentState!.validate()) {
+      _showErrorDialog('Please fill in all required fields');
       return;
     }
 
@@ -105,17 +106,26 @@ class _KPIFormPageState extends State<KPIFormPage> {
       return;
     }
 
+    // Validate that fields are not empty
+    if (_monthlySessionController.text.isEmpty ||
+        _totalAttendanceController.text.isEmpty) {
+      _showErrorDialog('Monthly Sermons and Total Attendance are required');
+      return;
+    }
+
     final controller = context.read<KPIController>();
 
     final success = await controller.saveKPITargets(
       preacherId: widget.preacher.preacherId,
-      monthlySessionTarget: int.parse(_monthlySessionController.text),
-      totalAttendanceTarget: int.parse(_totalAttendanceController.text),
-      newConvertsTarget: int.parse(_newConvertsController.text),
-      baptismsTarget: int.parse(_baptismsController.text),
-      communityProjectsTarget: int.parse(_communityProjectsController.text),
-      charityEventsTarget: int.parse(_charityEventsController.text),
-      youthProgramAttendanceTarget: int.parse(_youthProgramController.text),
+      monthlySessionTarget: int.tryParse(_monthlySessionController.text) ?? 0,
+      totalAttendanceTarget: int.tryParse(_totalAttendanceController.text) ?? 0,
+      newConvertsTarget: int.tryParse(_newConvertsController.text) ?? 0,
+      baptismsTarget: int.tryParse(_baptismsController.text) ?? 0,
+      communityProjectsTarget:
+          int.tryParse(_communityProjectsController.text) ?? 0,
+      charityEventsTarget: int.tryParse(_charityEventsController.text) ?? 0,
+      youthProgramAttendanceTarget:
+          int.tryParse(_youthProgramController.text) ?? 0,
       startDate: _startDate!,
       endDate: _endDate!,
     );
@@ -349,23 +359,42 @@ class _KPIFormPageState extends State<KPIFormPage> {
                 // Save Button
                 SizedBox(
                   width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _saveTargets,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF3B82F6),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Text(
-                      _isEditMode ? 'Update Targets' : 'Save Targets',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
+                  child: Consumer<KPIController>(
+                    builder: (context, controller, _) {
+                      return ElevatedButton(
+                        onPressed: controller.isLoading ? null : _saveTargets,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF3B82F6),
+                          disabledBackgroundColor: Colors.grey.shade400,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child:
+                            controller.isLoading
+                                ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white,
+                                    ),
+                                  ),
+                                )
+                                : Text(
+                                  _isEditMode
+                                      ? 'Update Targets'
+                                      : 'Save Targets',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                      );
+                    },
                   ),
                 ),
               ],
