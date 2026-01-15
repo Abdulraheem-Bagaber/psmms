@@ -1987,7 +1987,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
       );
     } else {
       // Preacher view
-      print('DEBUG: Showing Preacher KPI Dashboard for user: ${user.name}, uid: ${user.uid}');
+      print(
+        'DEBUG: Showing Preacher KPI Dashboard for user: ${user.name}, uid: ${user.uid}',
+      );
       return ChangeNotifierProvider(
         create: (_) => KPIController(),
         child: Scaffold(

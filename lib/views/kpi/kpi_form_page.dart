@@ -121,9 +121,11 @@ class _KPIFormPageState extends State<KPIFormPage> {
       totalAttendanceTarget: int.tryParse(_totalAttendanceController.text) ?? 0,
       newConvertsTarget: int.tryParse(_newConvertsController.text) ?? 0,
       baptismsTarget: int.tryParse(_baptismsController.text) ?? 0,
-      communityProjectsTarget: int.tryParse(_communityProjectsController.text) ?? 0,
+      communityProjectsTarget:
+          int.tryParse(_communityProjectsController.text) ?? 0,
       charityEventsTarget: int.tryParse(_charityEventsController.text) ?? 0,
-      youthProgramAttendanceTarget: int.tryParse(_youthProgramController.text) ?? 0,
+      youthProgramAttendanceTarget:
+          int.tryParse(_youthProgramController.text) ?? 0,
       startDate: _startDate!,
       endDate: _endDate!,
     );
@@ -369,23 +371,28 @@ class _KPIFormPageState extends State<KPIFormPage> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: controller.isLoading
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        child:
+                            controller.isLoading
+                                ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white,
+                                    ),
+                                  ),
+                                )
+                                : Text(
+                                  _isEditMode
+                                      ? 'Update Targets'
+                                      : 'Save Targets',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
                                 ),
-                              )
-                            : Text(
-                                _isEditMode ? 'Update Targets' : 'Save Targets',
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
-                                ),
-                              ),
                       );
                     },
                   ),
