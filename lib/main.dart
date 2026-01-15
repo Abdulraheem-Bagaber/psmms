@@ -268,13 +268,15 @@ class MainMenuScreen extends StatelessWidget {
             subtitle: 'Insert sample activities into Firestore.',
             icon: Icons.data_object,
             builder: (_) => const ActivitySeederPage(),
-          ),          _buildModuleCard(
+          ),
+          _buildModuleCard(
             context,
             title: 'DEBUG: Check KPI Data',
             subtitle: 'View all KPI targets in Firestore.',
             icon: Icons.bug_report,
             builder: (_) => const DebugKPICheck(),
-          ),          const SizedBox(height: 24),
+          ),
+          const SizedBox(height: 24),
           _buildSectionHeader('Settings'),
 
           _buildModuleCard(
