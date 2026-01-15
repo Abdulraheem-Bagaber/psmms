@@ -12,6 +12,17 @@ class PendingApprovalPage extends StatefulWidget {
 class _PendingApprovalPageState extends State<PendingApprovalPage> {
   String searchQuery = '';
 
+  // 🔽 Rejection dropdown
+  String selectedRejectReason = 'Incomplete information';
+
+  final List<String> rejectReasons = [
+    'Incomplete information',
+    'Invalid IC number',
+    'Incorrect role selected',
+    'Duplicate registration',
+    'Other',
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,7 +46,7 @@ class _PendingApprovalPageState extends State<PendingApprovalPage> {
       ),
       body: Column(
         children: [
-          // Search bar
+          // 🔍 Search bar
           Padding(
             padding: const EdgeInsets.all(16),
             child: TextField(
@@ -57,58 +68,33 @@ class _PendingApprovalPageState extends State<PendingApprovalPage> {
             ),
           ),
 
-          // Pending list
+          // 📋 Pending list
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream:
-                  FirebaseFirestore.instance
-                      .collection('users')
-                      .where('status', isEqualTo: 'pending')
-                      .orderBy('createdAt', descending: true)
-                      .snapshots(),
+              stream: FirebaseFirestore.instance
+                  .collection('users')
+                  .orderBy('createdAt', descending: true)
+                  .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.people_outline,
-                          size: 64,
-                          color: Colors.grey[400],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No pending registrations',
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 16,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
+                  return _emptyState();
                 }
 
-                final docs =
-                    snapshot.data!.docs.where((doc) {
-                      final data = doc.data() as Map<String, dynamic>;
-                      final name =
-                          (data['fullName'] ?? '').toString().toLowerCase();
-                      return name.contains(searchQuery);
-                    }).toList();
+                final docs = snapshot.data!.docs.where((doc) {
+                  final data = doc.data() as Map<String, dynamic>;
+                  final status = (data['status'] ?? '').toString().toLowerCase();
+                  final name =
+                      (data['fullName'] ?? '').toString().toLowerCase();
+
+                  return status == 'pending' && name.contains(searchQuery);
+                }).toList();
 
                 if (docs.isEmpty) {
-                  return Center(
-                    child: Text(
-                      'No matching results',
-                      style: TextStyle(color: Colors.grey[600]),
-                    ),
-                  );
+                  return const Center(child: Text('No matching results'));
                 }
 
                 return ListView.builder(
@@ -117,12 +103,12 @@ class _PendingApprovalPageState extends State<PendingApprovalPage> {
                   itemBuilder: (context, index) {
                     final doc = docs[index];
                     final data = doc.data() as Map<String, dynamic>;
+
                     final createdAt =
                         (data['createdAt'] as Timestamp?)?.toDate();
-                    final registrationDate =
-                        createdAt != null
-                            ? DateFormat('yyyy-MM-dd').format(createdAt)
-                            : 'N/A';
+                    final registrationDate = createdAt != null
+                        ? DateFormat('yyyy-MM-dd').format(createdAt)
+                        : 'N/A';
 
                     return Container(
                       margin: const EdgeInsets.only(bottom: 16),
@@ -141,7 +127,7 @@ class _PendingApprovalPageState extends State<PendingApprovalPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Avatar and Name
+                          // 👤 Header
                           Row(
                             children: [
                               CircleAvatar(
@@ -182,21 +168,30 @@ class _PendingApprovalPageState extends State<PendingApprovalPage> {
                               ),
                             ],
                           ),
+
                           const SizedBox(height: 16),
 
-                          // Info section (empty white box like in image)
+                          // 🧾 USER INFO BOX (REPLACED EMPTY BOX)
                           Container(
                             width: double.infinity,
-                            height: 80,
+                            padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
                               color: Colors.grey[50],
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(color: Colors.grey.shade200),
                             ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _infoRow('Email', data['email']),
+                                _infoRow('IC Number', data['icNumber']),
+                                _infoRow('Phone', data['phoneNumber']),
+                              ],
+                            ),
                           ),
-                          const SizedBox(height: 16),
 
-                          // Buttons
+                          const SizedBox(height: 12),
+
                           Row(
                             children: [
                               Expanded(
@@ -204,25 +199,19 @@ class _PendingApprovalPageState extends State<PendingApprovalPage> {
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(0xFF0066FF),
                                     foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 12,
-                                    ),
+                                    padding: const EdgeInsets.symmetric(vertical: 14),
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
+                                      borderRadius: BorderRadius.circular(10),
                                     ),
                                     elevation: 0,
                                   ),
                                   onPressed: () async {
-                                    await doc.reference.update({
-                                      'status': 'approved',
-                                    });
+                                    await doc.reference.update({'status': 'approved'});
 
                                     if (!mounted) return;
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
-                                        content: Text(
-                                          'Account approved successfully',
-                                        ),
+                                        content: Text('Account approved successfully'),
                                         backgroundColor: Colors.green,
                                         behavior: SnackBarBehavior.floating,
                                       ),
@@ -238,73 +227,19 @@ class _PendingApprovalPageState extends State<PendingApprovalPage> {
                                 ),
                               ),
                               const SizedBox(width: 12),
+
                               Expanded(
                                 child: OutlinedButton(
                                   style: OutlinedButton.styleFrom(
-                                    foregroundColor: const Color(0xFF64748B),
-                                    side: BorderSide(
-                                      color: Colors.grey.shade300,
-                                    ),
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 12,
-                                    ),
+                                    foregroundColor: const Color(0xFFEF4444), // red text
+                                    side: const BorderSide(color: Color(0xFFEF4444)), // red border
+                                    padding: const EdgeInsets.symmetric(vertical: 14),
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
+                                      borderRadius: BorderRadius.circular(10),
                                     ),
                                   ),
-                                  onPressed: () async {
-                                    final confirm = await showDialog<bool>(
-                                      context: context,
-                                      builder:
-                                          (context) => AlertDialog(
-                                            title: const Text(
-                                              'Reject Application',
-                                            ),
-                                            content: const Text(
-                                              'Are you sure you want to reject this application?',
-                                            ),
-                                            actions: [
-                                              TextButton(
-                                                onPressed:
-                                                    () => Navigator.pop(
-                                                      context,
-                                                      false,
-                                                    ),
-                                                child: const Text('Cancel'),
-                                              ),
-                                              TextButton(
-                                                onPressed:
-                                                    () => Navigator.pop(
-                                                      context,
-                                                      true,
-                                                    ),
-                                                style: TextButton.styleFrom(
-                                                  foregroundColor: Colors.red,
-                                                ),
-                                                child: const Text('Reject'),
-                                              ),
-                                            ],
-                                          ),
-                                    );
-
-                                    if (confirm == true) {
-                                      await doc.reference.update({
-                                        'status': 'rejected',
-                                        'rejectedAt':
-                                            FieldValue.serverTimestamp(),
-                                      });
-
-                                      if (!context.mounted) return;
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        const SnackBar(
-                                          content: Text('Application rejected'),
-                                          backgroundColor: Colors.red,
-                                          behavior: SnackBarBehavior.floating,
-                                        ),
-                                      );
-                                    }
+                                  onPressed: () {
+                                    _showRejectDialog(context, doc.reference);
                                   },
                                   child: const Text(
                                     'Reject',
@@ -330,6 +265,32 @@ class _PendingApprovalPageState extends State<PendingApprovalPage> {
     );
   }
 
+  Widget _infoRow(String label, dynamic value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Text(
+        '$label: ${value ?? '-'}',
+        style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+      ),
+    );
+  }
+
+  Widget _emptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.people_outline, size: 64, color: Colors.grey[400]),
+          const SizedBox(height: 16),
+          Text(
+            'No pending registrations',
+            style: TextStyle(color: Colors.grey[600], fontSize: 16),
+          ),
+        ],
+      ),
+    );
+  }
+
   String _getInitials(String name) {
     if (name.isEmpty) return '?';
     final parts = name.trim().split(' ');
@@ -337,5 +298,85 @@ class _PendingApprovalPageState extends State<PendingApprovalPage> {
       return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
     }
     return name[0].toUpperCase();
+  }
+
+  Future<void> _showRejectDialog(
+    BuildContext context,
+    DocumentReference userRef,
+  ) async {
+    String selectedReason = 'Incomplete information';
+
+    final List<String> rejectReasons = [
+      'Incomplete information',
+      'Invalid IC number',
+      'Incorrect role selected',
+      'Duplicate registration',
+      'Other',
+    ];
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Reject Application'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Please select a reason for rejection:',
+                style: TextStyle(fontSize: 14),
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                value: selectedReason,
+                items: rejectReasons
+                    .map(
+                      (reason) => DropdownMenuItem(
+                        value: reason,
+                        child: Text(reason),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (value) {
+                  selectedReason = value!;
+                },
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  isDense: true,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: const Text('Reject'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm == true) {
+      await userRef.update({
+        'status': 'rejected',
+        'rejectionReason': selectedReason,
+        'rejectedAt': FieldValue.serverTimestamp(),
+      });
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Application rejected'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 }

@@ -74,9 +74,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
       case 4:
         return _buildReportsPage(context, user);
       case 5:
-        return const ProfilePage();
-      case 6:
         return const PendingApprovalPage();
+      case 6:
+        return const ProfilePage();
       default:
         return _buildDashboardHome(user);
     }
@@ -1655,6 +1655,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
         if (user.isAdmin) ...[
           _buildPremiumActionCard(
             context: context,
+            title: 'Pending Registrations',
+            subtitle: 'Approve or reject new user accounts',
+            icon: Icons.approval_rounded,
+            gradient: const LinearGradient(
+              colors: [Color(0xFFff9966), Color(0xFFff5e62)],
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const PendingApprovalPage()),
+              );
+            },
+          ),
+          const SizedBox(height: 12),
+
+          _buildPremiumActionCard(
+            context: context,
             title: 'Approved Payments',
             subtitle: 'Forward approved payments to Yayasan',
             icon: Icons.check_circle_rounded,
@@ -1671,6 +1688,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             },
           ),
           const SizedBox(height: 12),
+
           _buildPremiumActionCard(
             context: context,
             title: 'Manage Activities',
@@ -2078,6 +2096,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
           icon: Icon(Icons.analytics),
           label: 'Reports',
         ),
+
+        if (user.isAdmin)
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.approval),
+            label: 'Approvals',
+          ),
+
         const BottomNavigationBarItem(
           icon: Icon(Icons.person),
           label: 'Profile',
