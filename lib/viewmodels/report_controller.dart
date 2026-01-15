@@ -5,8 +5,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:csv/csv.dart';
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
+import 'dart:typed_data';
 import 'package:share_plus/share_plus.dart';
 import '../models/report.dart';
 import '../services/report_api_handler.dart';
@@ -211,15 +210,18 @@ class ReportController extends ChangeNotifier {
       }
 
       final csv = const ListToCsvConverter().convert(rows);
-      final directory = await getTemporaryDirectory();
       final fileName =
           'report_${report.category.name}_${DateFormat('yyyyMMdd_HHmmss').format(DateTime.now())}.csv';
-      final file = File('${directory.path}/$fileName');
-      await file.writeAsString(csv);
 
-      // Share the file so user can choose where to save
+      // Convert CSV string to bytes
+      final bytes = Uint8List.fromList(csv.codeUnits);
+
+      // Create XFile from bytes
+      final xFile = XFile.fromData(bytes, mimeType: 'text/csv', name: fileName);
+
+      // Share the file
       await Share.shareXFiles([
-        XFile(file.path),
+        xFile,
       ], subject: '${_getCategoryName(report.category)} Report');
 
       _error = null;

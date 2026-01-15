@@ -268,7 +268,6 @@ class MainMenuScreen extends StatelessWidget {
             icon: Icons.data_object,
             builder: (_) => const ActivitySeederPage(),
           ),
-
           const SizedBox(height: 24),
           _buildSectionHeader('Settings'),
 

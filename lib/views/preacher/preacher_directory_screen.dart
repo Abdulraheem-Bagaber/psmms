@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../models/preacher.dart';
 import '../../viewmodels/preacher_controller.dart';
 import 'preacher_detail_screen.dart';
+import 'preacher_create_form_page.dart';
 
 class PreacherDirectoryScreen extends StatelessWidget {
   const PreacherDirectoryScreen({super.key});
@@ -32,6 +33,19 @@ class PreacherDirectoryScreen extends StatelessWidget {
           'Preacher Directory',
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
         ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => PreacherCreateFormPage.withProvider(),
+                ),
+              );
+            },
+            child: const Text('Add'),
+          ),
+        ],
       ),
       body: Column(
         children: [

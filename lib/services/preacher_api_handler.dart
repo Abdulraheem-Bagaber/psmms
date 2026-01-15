@@ -97,6 +97,25 @@ class PreacherAPIHandler {
   }
 
   Future<void> createPreacher(Preacher preacher) async {
-    await _db.collection(_collection).add(preacher.toFirestore());
+    final data = preacher.toFirestore();
+    if ((data['preacherId'] as String?) == null ||
+        (data['preacherId'] as String).isEmpty) {
+      data['preacherId'] = await _generateUniquePreacherId();
+    }
+    await _db.collection(_collection).add(data);
+  }
+
+  Future<String> _generateUniquePreacherId() async {
+    while (true) {
+      final candidate = 'PCH-${DateTime.now().millisecondsSinceEpoch}';
+      final snap =
+          await _db
+              .collection(_collection)
+              .where('preacherId', isEqualTo: candidate)
+              .limit(1)
+              .get();
+      if (snap.docs.isEmpty) return candidate;
+      await Future.delayed(const Duration(milliseconds: 10));
+    }
   }
 }
