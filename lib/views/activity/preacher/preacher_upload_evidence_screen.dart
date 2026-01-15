@@ -1,6 +1,8 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../models/activity.dart';
 import '../../../viewmodels/preacher_activity_view_model.dart';
 
@@ -51,11 +53,15 @@ class PreacherUploadEvidenceScreen extends StatelessWidget {
         ),
         actions: [
           TextButton(
-            onPressed: viewModel.isLoading ? null : () => _handleSubmit(context, viewModel),
+            onPressed:
+                viewModel.isLoading
+                    ? null
+                    : () => _handleSubmit(context, viewModel),
             child: Text(
               'Done',
               style: TextStyle(
-                color: viewModel.isLoading ? Colors.grey : const Color(0xFF0066FF),
+                color:
+                    viewModel.isLoading ? Colors.grey : const Color(0xFF0066FF),
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -87,10 +93,7 @@ class PreacherUploadEvidenceScreen extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       activity.location,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                     ),
                   ],
                 ),
@@ -98,22 +101,17 @@ class PreacherUploadEvidenceScreen extends StatelessWidget {
               const SizedBox(height: 24),
               const Text(
                 'Select one or more photos',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 8),
               Text(
                 'Accepted formats: JPG, PNG. Maximum file size: 5MB',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 13, color: Colors.grey[600]),
               ),
               const SizedBox(height: 16),
               InkWell(
-                onTap: viewModel.isLoading ? null : () => viewModel.pickImages(),
+                onTap:
+                    viewModel.isLoading ? null : () => viewModel.pickImages(),
                 child: Container(
                   height: 120,
                   decoration: BoxDecoration(
@@ -151,10 +149,7 @@ class PreacherUploadEvidenceScreen extends StatelessWidget {
               if (viewModel.selectedImages.isNotEmpty) ...[
                 const Text(
                   'Selected Images',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 12),
                 GridView.builder(
@@ -167,16 +162,31 @@ class PreacherUploadEvidenceScreen extends StatelessWidget {
                   ),
                   itemCount: viewModel.selectedImages.length,
                   itemBuilder: (context, index) {
+                    final imageFile = viewModel.selectedImages[index];
                     return Stack(
                       children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            image: DecorationImage(
-                              image: FileImage(File(viewModel.selectedImages[index].path)),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
+                        FutureBuilder<Widget>(
+                          future: _buildImageWidget(imageFile),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData) {
+                              return Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                clipBehavior: Clip.antiAlias,
+                                child: snapshot.data,
+                              );
+                            }
+                            return Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                color: Colors.grey[300],
+                              ),
+                              child: const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
+                          },
                         ),
                         Positioned(
                           top: 4,
@@ -203,32 +213,6 @@ class PreacherUploadEvidenceScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
               ],
-              if (viewModel.selectedImages.length < 3) ...[
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.orange.shade50,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.orange.shade200),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.warning_amber, color: Colors.orange.shade700),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          'Upload failed for 1 photo. Please try again.',
-                          style: TextStyle(
-                            color: Colors.orange.shade700,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 24),
-              ],
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -240,26 +224,33 @@ class PreacherUploadEvidenceScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  onPressed: (viewModel.selectedImages.length >= 3 && !viewModel.isLoading)
-                      ? () => _handleSubmit(context, viewModel)
-                      : null,
-                  child: viewModel.isLoading
-                      ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  onPressed:
+                      (viewModel.selectedImages.isNotEmpty &&
+                              !viewModel.isLoading)
+                          ? () => _handleSubmit(context, viewModel)
+                          : null,
+                  child:
+                      viewModel.isLoading
+                          ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          )
+                          : Text(
+                            viewModel.selectedImages.isEmpty
+                                ? 'Select Photos First'
+                                : 'Upload ${viewModel.selectedImages.length} Photo${viewModel.selectedImages.length > 1 ? 's' : ''}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        )
-                      : Text(
-                          'Upload ${viewModel.selectedImages.length} Photos',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
                 ),
               ),
               if (viewModel.errorMessage != null) ...[
@@ -295,11 +286,14 @@ class PreacherUploadEvidenceScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _handleSubmit(BuildContext context, PreacherActivityViewModel viewModel) async {
-    if (viewModel.selectedImages.length < 3) {
+  Future<void> _handleSubmit(
+    BuildContext context,
+    PreacherActivityViewModel viewModel,
+  ) async {
+    if (viewModel.selectedImages.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please upload at least 3 photos'),
+          content: Text('Please select at least one photo'),
           backgroundColor: Colors.orange,
           behavior: SnackBarBehavior.floating,
         ),
@@ -327,12 +321,52 @@ class PreacherUploadEvidenceScreen extends StatelessWidget {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(viewModel.errorMessage ?? 'Failed to submit evidence'),
+            content: Text(
+              viewModel.errorMessage ?? 'Failed to submit evidence',
+            ),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),
         );
       }
+    }
+  }
+
+  Future<Widget> _buildImageWidget(XFile imageFile) async {
+    if (kIsWeb) {
+      // On web, use network image from data URL
+      final bytes = await imageFile.readAsBytes();
+      return Image.memory(
+        bytes,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
+      );
+    } else {
+      // On mobile, use network image from file path
+      return Image.network(
+        imageFile.path,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
+        errorBuilder: (context, error, stackTrace) {
+          // Fallback to memory if network fails
+          return FutureBuilder<Uint8List>(
+            future: imageFile.readAsBytes(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return Image.memory(
+                  snapshot.data!,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: double.infinity,
+                );
+              }
+              return const SizedBox();
+            },
+          );
+        },
+      );
     }
   }
 }

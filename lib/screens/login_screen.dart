@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../services/auth_service.dart';
 import 'register_screen.dart';
-import 'reset_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -31,97 +30,53 @@ class _LoginScreenState extends State<LoginScreen> {
         password: passwordController.text.trim(),
       );
 
+      // 2️⃣ Get current user
       final user = FirebaseAuth.instance.currentUser;
-      if (user == null) throw Exception('Login failed.');
+      if (user == null) throw 'Login failed. Please try again.';
 
-      // 2️⃣ Fetch user record
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
+      // 3️⃣ Check approval status
+      final doc =
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .get();
 
       if (!doc.exists) {
         await FirebaseAuth.instance.signOut();
-        throw Exception('Account record not found.');
+        throw 'Account record not found.';
       }
 
-      final data = doc.data()!;
-      final status = data['status'];
+      final status = doc['status'];
 
-      // 🚫 Pending
-      if (status == 'pending') {
+      if (status != 'approved') {
         await FirebaseAuth.instance.signOut();
 
-        if (!mounted) return;
+        String msg =
+            status == 'pending'
+                ? 'Your account is pending admin approval.'
+                : 'Your account has been rejected.';
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Your account is pending admin approval.\nPlease wait for approval.',
-            ),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-        return;
-      }
-
-      // ❌ Rejected
-      if (status == 'rejected') {
-        await FirebaseAuth.instance.signOut();
-
-        final reason = data['rejectionReason'];
+        // 🔔 Delay toa allow UI to settle before showing SnackBar
+        await Future.delayed(const Duration(milliseconds: 300));
 
         if (!mounted) return;
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              reason != null && reason.toString().isNotEmpty
-                  ? 'Your application was rejected.\nReason: $reason'
-                  : 'Your application was rejected.\nPlease submit a new application.',
-            ),
+            content: Text(msg),
             behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 4),
+            duration: const Duration(seconds: 3),
           ),
         );
-        return;
+
+        return; // 🚫 stop navigation
       }
 
-      // ✅ Approved
-      Navigator.pushReplacementNamed(context, '/dashboard');
-
-    } on FirebaseAuthException catch (e) {
-      String msg;
-      final message = e.message?.toLowerCase() ?? '';
-
-      if (e.code == 'invalid-email') {
-        msg = 'Invalid email format.';
-      } else if (message.contains('password') ||
-          message.contains('credential')) {
-        msg = 'Incorrect password.';
-      } else if (message.contains('user-not-found') ||
-          message.contains('no user record')) {
-        msg = 'No account found with this email.';
-      } else if (message.contains('disabled')) {
-        msg = 'This account has been disabled.';
-      } else {
-        msg = 'Login failed. Please check your credentials.';
-      }
-
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(msg),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      // ✅ Approved user - AuthGate will handle navigation automatically
     } catch (e) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
     } finally {
       if (mounted) setState(() => loading = false);
     }
@@ -138,6 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // Logo / Title
                 const Icon(Icons.mosque, size: 64, color: Colors.teal),
                 const SizedBox(height: 12),
                 const Text(
@@ -145,6 +101,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
+
                 const SizedBox(height: 32),
 
                 TextField(
@@ -175,16 +132,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
 
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const ResetPasswordScreen(),
-                      ),
-                    );
-                  },
-                  child: const Text('Forgot Password?'),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () {},
+                    child: const Text('Forgot Password?'),
+                  ),
                 ),
 
                 const SizedBox(height: 20),
@@ -194,16 +147,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   height: 48,
                   child: ElevatedButton(
                     onPressed: loading ? null : login,
-                    child: loading
-                        ? const SizedBox(
-                            height: 24,
-                            width: 24,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : const Text('Login'),
+                    child:
+                        loading
+                            ? const SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                            : const Text('Login'),
                   ),
                 ),
 
@@ -213,9 +167,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (_) => const RegisterScreen(),
-                      ),
+                      MaterialPageRoute(builder: (_) => const RegisterScreen()),
                     );
                   },
                   child: const Text('Create new account'),

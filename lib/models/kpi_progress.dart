@@ -16,9 +16,19 @@ class KPIProgress {
   final double achievedDonations;
   final int achievedActivities;
 
+  // Additional fields for backward compatibility
+  final int sessionsCompleted;
+  final int totalAttendanceAchieved;
+  final int newConvertsAchieved;
+  final int baptismsAchieved;
+  final int communityProjectsAchieved;
+  final int charityEventsAchieved;
+  final int youthProgramAttendanceAchieved;
+
   // Performance Tracking
   final double overallPercentage;
-  final String performanceStatus; // 'excellent', 'good', 'warning', 'critical', 'new'
+  final String
+  performanceStatus; // 'excellent', 'good', 'warning', 'critical', 'new'
   final int performancePoints;
   final int ranking; // Position in leaderboard (1 = top)
 
@@ -36,14 +46,21 @@ class KPIProgress {
     this.achievedKhidmat = 0,
     this.achievedDonations = 0.0,
     this.achievedActivities = 0,
+    this.sessionsCompleted = 0,
+    this.totalAttendanceAchieved = 0,
+    this.newConvertsAchieved = 0,
+    this.baptismsAchieved = 0,
+    this.communityProjectsAchieved = 0,
+    this.charityEventsAchieved = 0,
+    this.youthProgramAttendanceAchieved = 0,
     this.overallPercentage = 0.0,
     this.performanceStatus = 'new',
     this.performancePoints = 0,
     this.ranking = 0,
     DateTime? createdAt,
     DateTime? updatedAt,
-  })  : createdAt = createdAt ?? DateTime.now(),
-        updatedAt = updatedAt ?? DateTime.now();
+  }) : createdAt = createdAt ?? DateTime.now(),
+       updatedAt = updatedAt ?? DateTime.now();
 
   // Calculate progress percentage for a specific metric
   double calculateProgress(int achieved, int target) {
@@ -69,6 +86,13 @@ class KPIProgress {
       'achieved_khidmat': achievedKhidmat,
       'achieved_donations': achievedDonations,
       'achieved_activities': achievedActivities,
+      'sessions_completed': sessionsCompleted,
+      'total_attendance_achieved': totalAttendanceAchieved,
+      'new_converts_achieved': newConvertsAchieved,
+      'baptisms_achieved': baptismsAchieved,
+      'community_projects_achieved': communityProjectsAchieved,
+      'charity_events_achieved': charityEventsAchieved,
+      'youth_program_attendance_achieved': youthProgramAttendanceAchieved,
       'overall_percentage': overallPercentage,
       'performance_status': performanceStatus,
       'performance_points': performancePoints,
@@ -95,6 +119,14 @@ class KPIProgress {
       achievedKhidmat: map['achieved_khidmat'] ?? 0,
       achievedDonations: (map['achieved_donations'] ?? 0.0).toDouble(),
       achievedActivities: map['achieved_activities'] ?? 0,
+      sessionsCompleted: map['sessions_completed'] ?? 0,
+      totalAttendanceAchieved: map['total_attendance_achieved'] ?? 0,
+      newConvertsAchieved: map['new_converts_achieved'] ?? 0,
+      baptismsAchieved: map['baptisms_achieved'] ?? 0,
+      communityProjectsAchieved: map['community_projects_achieved'] ?? 0,
+      charityEventsAchieved: map['charity_events_achieved'] ?? 0,
+      youthProgramAttendanceAchieved:
+          map['youth_program_attendance_achieved'] ?? 0,
       overallPercentage: (map['overall_percentage'] ?? 0.0).toDouble(),
       performanceStatus: map['performance_status'] ?? 'new',
       performancePoints: map['performance_points'] ?? 0,
@@ -127,6 +159,13 @@ class KPIProgress {
     int? achievedKhidmat,
     double? achievedDonations,
     int? achievedActivities,
+    int? sessionsCompleted,
+    int? totalAttendanceAchieved,
+    int? newConvertsAchieved,
+    int? baptismsAchieved,
+    int? communityProjectsAchieved,
+    int? charityEventsAchieved,
+    int? youthProgramAttendanceAchieved,
     double? overallPercentage,
     String? performanceStatus,
     int? performancePoints,
@@ -144,6 +183,17 @@ class KPIProgress {
       achievedKhidmat: achievedKhidmat ?? this.achievedKhidmat,
       achievedDonations: achievedDonations ?? this.achievedDonations,
       achievedActivities: achievedActivities ?? this.achievedActivities,
+      sessionsCompleted: sessionsCompleted ?? this.sessionsCompleted,
+      totalAttendanceAchieved:
+          totalAttendanceAchieved ?? this.totalAttendanceAchieved,
+      newConvertsAchieved: newConvertsAchieved ?? this.newConvertsAchieved,
+      baptismsAchieved: baptismsAchieved ?? this.baptismsAchieved,
+      communityProjectsAchieved:
+          communityProjectsAchieved ?? this.communityProjectsAchieved,
+      charityEventsAchieved:
+          charityEventsAchieved ?? this.charityEventsAchieved,
+      youthProgramAttendanceAchieved:
+          youthProgramAttendanceAchieved ?? this.youthProgramAttendanceAchieved,
       overallPercentage: overallPercentage ?? this.overallPercentage,
       performanceStatus: performanceStatus ?? this.performanceStatus,
       performancePoints: performancePoints ?? this.performancePoints,

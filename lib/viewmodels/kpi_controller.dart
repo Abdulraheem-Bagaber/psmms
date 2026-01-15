@@ -184,6 +184,13 @@ class KPIController extends ChangeNotifier {
         // Create new KPI
         final kpi = KPITarget(
           preacherId: preacherId,
+          targetTarbiah: 0,
+          targetDakwah: 0,
+          targetAqidah: 0,
+          targetIrtiqak: 0,
+          targetKhidmat: 0,
+          targetDonations: 0.0,
+          targetActivities: 0,
           monthlySessionTarget: monthlySessionTarget,
           totalAttendanceTarget: totalAttendanceTarget,
           newConvertsTarget: newConvertsTarget,
@@ -200,7 +207,7 @@ class KPIController extends ChangeNotifier {
             .add(kpi.toFirestore());
 
         // Create corresponding progress record
-        final progress = KPIProgress(kpiId: docRef.id, preacherId: preacherId);
+        final progress = KPIProgress(id: docRef.id, preacherId: preacherId);
 
         await _db.collection('kpi_progress').add(progress.toFirestore());
 
@@ -342,7 +349,7 @@ class KPIController extends ChangeNotifier {
         youthProgramAttendanceAchieved:
             _currentProgress!.youthProgramAttendanceAchieved +
             (youthAttendanceIncrement ?? 0),
-        lastUpdated: DateTime.now(),
+        updatedAt: DateTime.now(),
       );
 
       await _db

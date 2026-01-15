@@ -14,10 +14,16 @@ class PreacherAssignActivityScreen extends StatelessWidget {
     required this.preacherName,
   });
 
-  static Widget withProvider({required String preacherId, required String preacherName}) {
+  static Widget withProvider({
+    required String preacherId,
+    required String preacherName,
+  }) {
     return ChangeNotifierProvider(
       create: (_) => PreacherActivityViewModel()..loadAvailableActivities(),
-      child: PreacherAssignActivityScreen(preacherId: preacherId, preacherName: preacherName),
+      child: PreacherAssignActivityScreen(
+        preacherId: preacherId,
+        preacherName: preacherName,
+      ),
     );
   }
 
@@ -42,7 +48,7 @@ class PreacherAssignActivityScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_outlined, color: Colors.black),
-            onPressed: () {},
+            onPressed: () => _showNotifications(context, viewModel),
           ),
         ],
       ),
@@ -81,7 +87,10 @@ class PreacherAssignActivityScreen extends StatelessWidget {
           ),
           filled: true,
           fillColor: Colors.white,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 12,
+          ),
         ),
       ),
     );
@@ -127,9 +136,20 @@ class PreacherAssignActivityScreen extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (label == 'Nearest') const Icon(Icons.near_me, size: 16, color: Colors.white),
-            if (label == 'Newest') Icon(Icons.access_time, size: 16, color: isSelected ? Colors.white : Colors.black87),
-            if (label == 'Urgent') Icon(Icons.priority_high, size: 16, color: isSelected ? Colors.white : Colors.black87),
+            if (label == 'Nearest')
+              const Icon(Icons.near_me, size: 16, color: Colors.white),
+            if (label == 'Newest')
+              Icon(
+                Icons.access_time,
+                size: 16,
+                color: isSelected ? Colors.white : Colors.black87,
+              ),
+            if (label == 'Urgent')
+              Icon(
+                Icons.priority_high,
+                size: 16,
+                color: isSelected ? Colors.white : Colors.black87,
+              ),
             const SizedBox(width: 4),
             Text(
               label,
@@ -145,7 +165,10 @@ class PreacherAssignActivityScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildContent(BuildContext context, PreacherActivityViewModel viewModel) {
+  Widget _buildContent(
+    BuildContext context,
+    PreacherActivityViewModel viewModel,
+  ) {
     if (viewModel.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -164,13 +187,21 @@ class PreacherAssignActivityScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         itemCount: viewModel.availableActivities.length,
         itemBuilder: (context, index) {
-          return _buildActivityCard(context, viewModel, viewModel.availableActivities[index]);
+          return _buildActivityCard(
+            context,
+            viewModel,
+            viewModel.availableActivities[index],
+          );
         },
       ),
     );
   }
 
-  Widget _buildActivityCard(BuildContext context, PreacherActivityViewModel viewModel, Activity activity) {
+  Widget _buildActivityCard(
+    BuildContext context,
+    PreacherActivityViewModel viewModel,
+    Activity activity,
+  ) {
     final isUrgent = activity.urgency == 'Urgent';
 
     return Container(
@@ -205,7 +236,10 @@ class PreacherAssignActivityScreen extends StatelessWidget {
               ),
               if (isUrgent)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.red,
                     borderRadius: BorderRadius.circular(12),
@@ -224,7 +258,11 @@ class PreacherAssignActivityScreen extends StatelessWidget {
           const SizedBox(height: 8),
           Row(
             children: [
-              const Icon(Icons.calendar_today_outlined, size: 16, color: Colors.grey),
+              const Icon(
+                Icons.calendar_today_outlined,
+                size: 16,
+                color: Colors.grey,
+              ),
               const SizedBox(width: 4),
               Text(
                 '${DateFormat('dd MMM yyyy').format(activity.activityDate)}, ${activity.startTime} - ${activity.endTime}',
@@ -235,7 +273,11 @@ class PreacherAssignActivityScreen extends StatelessWidget {
           const SizedBox(height: 4),
           Row(
             children: [
-              const Icon(Icons.location_on_outlined, size: 16, color: Colors.grey),
+              const Icon(
+                Icons.location_on_outlined,
+                size: 16,
+                color: Colors.grey,
+              ),
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
@@ -273,7 +315,9 @@ class PreacherAssignActivityScreen extends StatelessWidget {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(success ? 'Applied successfully' : 'Failed to apply'),
+                      content: Text(
+                        success ? 'Applied successfully' : 'Failed to apply',
+                      ),
                       backgroundColor: success ? Colors.green : Colors.red,
                       behavior: SnackBarBehavior.floating,
                     ),
@@ -292,6 +336,76 @@ class PreacherAssignActivityScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  void _showNotifications(
+    BuildContext context,
+    PreacherActivityViewModel viewModel,
+  ) {
+    final activities = viewModel.availableActivities;
+
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Row(
+              children: [
+                const Icon(Icons.notifications, color: Colors.blue),
+                const SizedBox(width: 8),
+                const Text('New Activities'),
+              ],
+            ),
+            content: SizedBox(
+              width: double.maxFinite,
+              child:
+                  activities.isEmpty
+                      ? const Text('No new activities available.')
+                      : ListView.builder(
+                        shrinkWrap: true,
+                        itemCount:
+                            activities.length > 5 ? 5 : activities.length,
+                        itemBuilder: (context, index) {
+                          final activity = activities[index];
+                          return ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            leading: CircleAvatar(
+                              backgroundColor: Colors.blue.shade100,
+                              child: Icon(
+                                Icons.event,
+                                color: Colors.blue.shade700,
+                              ),
+                            ),
+                            title: Text(
+                              activity.title,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            subtitle: Text(
+                              '${activity.location}\n${DateFormat('MMM dd, yyyy').format(activity.activityDate)}',
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            isThreeLine: true,
+                            trailing: const Icon(
+                              Icons.arrow_forward_ios,
+                              size: 16,
+                            ),
+                            onTap: () {
+                              Navigator.pop(context);
+                              // Could navigate to activity details here
+                            },
+                          );
+                        },
+                      ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Close'),
+              ),
+            ],
+          ),
     );
   }
 }
