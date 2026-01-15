@@ -107,6 +107,43 @@ class _KPIDashboardPageState extends State<KPIDashboardPage> {
                         color: Colors.grey.shade600,
                       ),
                     ),
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.shade50,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.orange.shade200),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Debug Info:',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.orange.shade900,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Searching for: ${_selectedPreacherId ?? "N/A"}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.orange.shade800,
+                              fontFamily: 'monospace',
+                            ),
+                          ),
+                          Text(
+                            'Error: ${controller.error ?? "N/A"}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.orange.shade800,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -181,7 +218,11 @@ class _KPIDashboardPageState extends State<KPIDashboardPage> {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.leaderboard, color: Colors.white, size: 18),
+                              const Icon(
+                                Icons.leaderboard,
+                                color: Colors.white,
+                                size: 18,
+                              ),
                               const SizedBox(width: 8),
                               Text(
                                 'Rank #${progress.ranking}',
@@ -236,41 +277,52 @@ class _KPIDashboardPageState extends State<KPIDashboardPage> {
                         target: kpi.totalAttendanceTarget,
                         icon: Icons.people,
                       ),
-                      const SizedBox(height: 12),
-                      _buildKPICard(
-                        title: 'New Member Registrations',
-                        current: progress.newConvertsAchieved,
-                        target: kpi.newConvertsTarget,
-                        icon: Icons.person_add,
-                      ),
-                      const SizedBox(height: 12),
-                      _buildKPICard(
-                        title: 'Baptisms Performed',
-                        current: progress.baptismsAchieved,
-                        target: kpi.baptismsTarget,
-                        icon: Icons.water_drop,
-                      ),
-                      const SizedBox(height: 12),
-                      _buildKPICard(
-                        title: 'Community Projects',
-                        current: progress.communityProjectsAchieved,
-                        target: kpi.communityProjectsTarget,
-                        icon: Icons.handshake,
-                      ),
-                      const SizedBox(height: 12),
-                      _buildKPICard(
-                        title: 'Charity Events Organized',
-                        current: progress.charityEventsAchieved,
-                        target: kpi.charityEventsTarget,
-                        icon: Icons.volunteer_activism,
-                      ),
-                      const SizedBox(height: 12),
-                      _buildKPICard(
-                        title: 'Youth Program Attendance',
-                        current: progress.youthProgramAttendanceAchieved,
-                        target: kpi.youthProgramAttendanceTarget,
-                        icon: Icons.groups,
-                      ),
+                      // Only show optional KPIs if they have targets > 0
+                      if (kpi.newConvertsTarget > 0) ...[
+                        const SizedBox(height: 12),
+                        _buildKPICard(
+                          title: 'New Member Registrations',
+                          current: progress.newConvertsAchieved,
+                          target: kpi.newConvertsTarget,
+                          icon: Icons.person_add,
+                        ),
+                      ],
+                      if (kpi.baptismsTarget > 0) ...[
+                        const SizedBox(height: 12),
+                        _buildKPICard(
+                          title: 'Baptisms Performed',
+                          current: progress.baptismsAchieved,
+                          target: kpi.baptismsTarget,
+                          icon: Icons.water_drop,
+                        ),
+                      ],
+                      if (kpi.communityProjectsTarget > 0) ...[
+                        const SizedBox(height: 12),
+                        _buildKPICard(
+                          title: 'Community Projects',
+                          current: progress.communityProjectsAchieved,
+                          target: kpi.communityProjectsTarget,
+                          icon: Icons.handshake,
+                        ),
+                      ],
+                      if (kpi.charityEventsTarget > 0) ...[
+                        const SizedBox(height: 12),
+                        _buildKPICard(
+                          title: 'Charity Events Organized',
+                          current: progress.charityEventsAchieved,
+                          target: kpi.charityEventsTarget,
+                          icon: Icons.volunteer_activism,
+                        ),
+                      ],
+                      if (kpi.youthProgramAttendanceTarget > 0) ...[
+                        const SizedBox(height: 12),
+                        _buildKPICard(
+                          title: 'Youth Program Attendance',
+                          current: progress.youthProgramAttendanceAchieved,
+                          target: kpi.youthProgramAttendanceTarget,
+                          icon: Icons.groups,
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -441,7 +493,7 @@ class _KPIDashboardPageState extends State<KPIDashboardPage> {
     Color textColor;
     String emoji;
     String statusText;
-    
+
     switch (progress.performanceStatus) {
       case 'excellent':
         bgColor = Colors.green.shade50;
@@ -560,15 +612,11 @@ class _KPIDashboardPageState extends State<KPIDashboardPage> {
                 progress.performanceStatus == 'excellent'
                     ? 'MashaAllah! Outstanding work! You have achieved ${progress.overallPercentage.toStringAsFixed(1)}% of your targets!'
                     : progress.performanceStatus == 'good'
-                        ? 'Good effort! You are at ${progress.overallPercentage.toStringAsFixed(1)}%. Keep pushing forward!'
-                        : progress.performanceStatus == 'warning'
-                            ? 'You need to improve! Currently at ${progress.overallPercentage.toStringAsFixed(1)}%. Please increase your efforts.'
-                            : 'Critical status! Only ${progress.overallPercentage.toStringAsFixed(1)}% completed. Contact your officer immediately.',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: textColor,
-                  height: 1.4,
-                ),
+                    ? 'Good effort! You are at ${progress.overallPercentage.toStringAsFixed(1)}%. Keep pushing forward!'
+                    : progress.performanceStatus == 'warning'
+                    ? 'You need to improve! Currently at ${progress.overallPercentage.toStringAsFixed(1)}%. Please increase your efforts.'
+                    : 'Critical status! Only ${progress.overallPercentage.toStringAsFixed(1)}% completed. Contact your officer immediately.',
+                style: TextStyle(fontSize: 13, color: textColor, height: 1.4),
                 textAlign: TextAlign.center,
               ),
             ),

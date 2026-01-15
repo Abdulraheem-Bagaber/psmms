@@ -41,22 +41,21 @@ class PaymentListViewModel extends ChangeNotifier {
 
       switch (mode) {
         case PaymentListMode.officerPending:
-          query = _db
-              .collection('activities')
-              .where('status', isEqualTo: 'Pending Payment');
+          query = query.where('status', isEqualTo: 'Pending Payment');
           break;
         case PaymentListMode.adminApproved:
           query = query.where('status', isEqualTo: 'Approved by MUIP Officer');
           break;
         case PaymentListMode.adminHistory:
-          query = _db
-              .collection('activities')
-              .where('status', whereIn: [
-            'Pending Payment',
-            'Forwarded to Yayasan',
-            'Paid',
-            'Rejected'
-          ]);
+          query = query.where(
+            'status',
+            whereIn: [
+              'Pending Payment',
+              'Forwarded to Yayasan',
+              'Paid',
+              'Rejected',
+            ],
+          );
           break;
         case PaymentListMode.preacherHistory:
           if (preacherId != null) {
@@ -94,45 +93,53 @@ class PaymentListViewModel extends ChangeNotifier {
 
     // For adminHistory mode, ensure only specified statuses are shown
     if (mode == PaymentListMode.adminHistory) {
-      result = result
-          .where((item) =>
-              item.status == 'Pending Payment' ||
-              item.status == 'Forwarded to Yayasan' ||
-              item.status == 'Paid' ||
-              item.status == 'Rejected')
-          .toList();
+      result =
+          result
+              .where(
+                (item) =>
+                    item.status == 'Pending Payment' ||
+                    item.status == 'Forwarded to Yayasan' ||
+                    item.status == 'Paid' ||
+                    item.status == 'Rejected',
+              )
+              .toList();
     }
 
     if (_statusFilter != 'All') {
       if (_statusFilter == 'Pending') {
-        result = result
-            .where((item) => item.status == 'Pending Payment')
-            .toList();
-      } else if (_statusFilter == 'Approved') {
-        result = result
-            .where((item) =>
-                item.status == 'Approved by MUIP Officer' ||
-                item.status == 'Paid')
-            .toList();
-      } else if (_statusFilter == 'Forwarded') {
-        result = result
-            .where((item) => item.status == 'Forwarded to Yayasan')
-            .toList();
-      } else if (_statusFilter == 'Rejected') {
         result =
-            result.where((item) => item.status == 'Rejected').toList();
+            result.where((item) => item.status == 'Pending Payment').toList();
+      } else if (_statusFilter == 'Approved') {
+        result =
+            result
+                .where(
+                  (item) =>
+                      item.status == 'Approved by MUIP Officer' ||
+                      item.status == 'Paid',
+                )
+                .toList();
+      } else if (_statusFilter == 'Forwarded') {
+        result =
+            result
+                .where((item) => item.status == 'Forwarded to Yayasan')
+                .toList();
+      } else if (_statusFilter == 'Rejected') {
+        result = result.where((item) => item.status == 'Rejected').toList();
       }
     }
 
     if (_searchQuery.isNotEmpty) {
       final query = _searchQuery.toLowerCase();
-      result = result
-          .where((item) =>
-              item.activityName.toLowerCase().contains(query) ||
-              item.paymentId.toLowerCase().contains(query) ||
-              item.activityId.toLowerCase().contains(query) ||
-              item.preacherName.toLowerCase().contains(query))
-          .toList();
+      result =
+          result
+              .where(
+                (item) =>
+                    item.activityName.toLowerCase().contains(query) ||
+                    item.paymentId.toLowerCase().contains(query) ||
+                    item.activityId.toLowerCase().contains(query) ||
+                    item.preacherName.toLowerCase().contains(query),
+              )
+              .toList();
     }
 
     _visible = result;
@@ -141,13 +148,14 @@ class PaymentListViewModel extends ChangeNotifier {
 
   Future<String> _generatePaymentId() async {
     final year = DateTime.now().year;
-    final snapshot = await _db
-        .collection('payment')
-        .where('paymentId', isGreaterThanOrEqualTo: 'PAY-$year-')
-        .where('paymentId', isLessThan: 'PAY-${year + 1}-')
-        .orderBy('paymentId', descending: true)
-        .limit(1)
-        .get();
+    final snapshot =
+        await _db
+            .collection('payment')
+            .where('paymentId', isGreaterThanOrEqualTo: 'PAY-$year-')
+            .where('paymentId', isLessThan: 'PAY-${year + 1}-')
+            .orderBy('paymentId', descending: true)
+            .limit(1)
+            .get();
 
     int sequence = 1;
     if (snapshot.docs.isNotEmpty) {
@@ -192,11 +200,12 @@ class PaymentListViewModel extends ChangeNotifier {
         'updatedAt': FieldValue.serverTimestamp(),
       });
 
-      final activityQuery = await _db
-          .collection('activities')
-          .where('activityId', isEqualTo: payment.activityId)
-          .limit(1)
-          .get();
+      final activityQuery =
+          await _db
+              .collection('activities')
+              .where('activityId', isEqualTo: payment.activityId)
+              .limit(1)
+              .get();
 
       if (activityQuery.docs.isNotEmpty) {
         final activityDoc = activityQuery.docs.first;
