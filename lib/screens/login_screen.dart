@@ -119,7 +119,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   'Preacher System Monitoring\nManagement System',
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 32),
 

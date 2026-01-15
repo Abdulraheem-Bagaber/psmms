@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import '../models/activity.dart';
 import '../models/preacher.dart';
 import '../services/preacher_api_handler.dart';
 
@@ -50,6 +51,9 @@ class PreacherController extends ChangeNotifier {
   PreacherMetrics? _metrics;
   bool _isDetailLoading = false;
   String? _detailError;
+  List<Activity> _trainingSchedules = [];
+  bool _isTrainingLoading = false;
+  String? _trainingError;
 
   List<Preacher> get items => _items;
   List<Preacher> get preachers => _preachers; // Alias getter
@@ -67,6 +71,9 @@ class PreacherController extends ChangeNotifier {
   PreacherMetrics? get metrics => _metrics;
   bool get isDetailLoading => _isDetailLoading;
   String? get detailError => _detailError;
+  List<Activity> get trainingSchedules => _trainingSchedules;
+  bool get isTrainingLoading => _isTrainingLoading;
+  String? get trainingError => _trainingError;
 
   Future<void> loadInitial() async {
     _isLoading = true;
@@ -149,11 +156,18 @@ class PreacherController extends ChangeNotifier {
     _metrics = null;
     _detailError = null;
     _isDetailLoading = true;
+    _trainingSchedules = [];
+    _trainingError = null;
+    _isTrainingLoading = true;
     notifyListeners();
 
     try {
-      final metrics = await _computeMetrics(preacher.preacherId);
-      _metrics = metrics;
+      final metricsFuture = _computeMetrics(preacher.preacherId);
+      final trainingFuture = loadTrainingSchedules(preacher.preacherId);
+
+      _metrics = await metricsFuture;
+      await trainingFuture;
+
       _isDetailLoading = false;
       notifyListeners();
     } catch (e) {
@@ -185,6 +199,33 @@ class PreacherController extends ChangeNotifier {
   Future<void> updateProfile(String docId, Map<String, dynamic> data) async {
     await _api.updatePreacher(docId, data);
     await refreshSelected();
+  }
+
+  Future<void> createPreacher(Map<String, dynamic> data) async {
+    final preacher = Preacher(
+      id: '',
+      preacherId: '',
+      fullName: data['fullName'] ?? '',
+      email:
+          (data['email'] as String?)?.isNotEmpty == true ? data['email'] : null,
+      phone:
+          (data['phone'] as String?)?.isNotEmpty == true ? data['phone'] : null,
+      region: data['region'] ?? '',
+      specialization: List<String>.from(data['specialization'] ?? const []),
+      skills: List<String>.from(data['skills'] ?? const []),
+      bio: (data['bio'] as String?)?.isNotEmpty == true ? data['bio'] : null,
+      status: 'Active',
+      rating: 0,
+      completedActivities: 0,
+      approvedActivities: 0,
+      rejectedActivities: 0,
+      paymentsTotal: 0,
+      lastPaymentDate: null,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+    await _api.createPreacher(preacher);
+    await loadInitial();
   }
 
   /// Gets a preacher by ID from Firestore
@@ -258,5 +299,29 @@ class PreacherController extends ChangeNotifier {
       totalPayments: totalPayments,
       lastPaymentDate: lastPaymentDate,
     );
+  }
+
+  Future<void> loadTrainingSchedules(String preacherId) async {
+    _isTrainingLoading = true;
+    _trainingError = null;
+    notifyListeners();
+
+    try {
+      final snapshot =
+          await _db
+              .collection('activities')
+              .where('assignedPreacherId', isEqualTo: preacherId)
+              .orderBy('activityDate', descending: false)
+              .get();
+
+      _trainingSchedules =
+          snapshot.docs.map((doc) => Activity.fromFirestore(doc)).toList();
+      _isTrainingLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _trainingError = 'Failed to load training schedules: $e';
+      _isTrainingLoading = false;
+      notifyListeners();
+    }
   }
 }
