@@ -218,7 +218,11 @@ class _KPIDashboardPageState extends State<KPIDashboardPage> {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.leaderboard, color: Colors.white, size: 18),
+                              const Icon(
+                                Icons.leaderboard,
+                                color: Colors.white,
+                                size: 18,
+                              ),
                               const SizedBox(width: 8),
                               Text(
                                 'Rank #${progress.ranking}',
@@ -478,7 +482,7 @@ class _KPIDashboardPageState extends State<KPIDashboardPage> {
     Color textColor;
     String emoji;
     String statusText;
-    
+
     switch (progress.performanceStatus) {
       case 'excellent':
         bgColor = Colors.green.shade50;
@@ -597,15 +601,11 @@ class _KPIDashboardPageState extends State<KPIDashboardPage> {
                 progress.performanceStatus == 'excellent'
                     ? 'MashaAllah! Outstanding work! You have achieved ${progress.overallPercentage.toStringAsFixed(1)}% of your targets!'
                     : progress.performanceStatus == 'good'
-                        ? 'Good effort! You are at ${progress.overallPercentage.toStringAsFixed(1)}%. Keep pushing forward!'
-                        : progress.performanceStatus == 'warning'
-                            ? 'You need to improve! Currently at ${progress.overallPercentage.toStringAsFixed(1)}%. Please increase your efforts.'
-                            : 'Critical status! Only ${progress.overallPercentage.toStringAsFixed(1)}% completed. Contact your officer immediately.',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: textColor,
-                  height: 1.4,
-                ),
+                    ? 'Good effort! You are at ${progress.overallPercentage.toStringAsFixed(1)}%. Keep pushing forward!'
+                    : progress.performanceStatus == 'warning'
+                    ? 'You need to improve! Currently at ${progress.overallPercentage.toStringAsFixed(1)}%. Please increase your efforts.'
+                    : 'Critical status! Only ${progress.overallPercentage.toStringAsFixed(1)}% completed. Contact your officer immediately.',
+                style: TextStyle(fontSize: 13, color: textColor, height: 1.4),
                 textAlign: TextAlign.center,
               ),
             ),
