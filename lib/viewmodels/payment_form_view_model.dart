@@ -125,31 +125,34 @@ class PaymentFormViewModel extends ChangeNotifier {
     _setRemarksText(trimmedRemarks);
 
     try {
-      final paymentId = await _generatePaymentId();
+      // Find existing payment by activityId
+      final paymentQuery = await _db
+          .collection('payment')
+          .where('activityId', isEqualTo: activityId)
+          .limit(1)
+          .get();
+
+      if (paymentQuery.docs.isEmpty) {
+        isSubmitting = false;
+        _errorMessage = 'Payment not found for this activity.';
+        notifyListeners();
+        return;
+      }
+
       final batch = _db.batch();
+      final existingPaymentRef = paymentQuery.docs.first.reference;
 
-      final paymentRef = _db.collection('payment').doc();
-      final payment = Payment(
-        id: paymentRef.id,
-        paymentId: paymentId,
-        activityId: activityId,
-        activityName: activityName,
-        preacherId: preacherId,
-        preacherName: preacherName,
-        activityDate: activityDate,
-        amount: paymentAmount,
-        status: 'Approved by MUIP Officer',
-      );
-
-      final paymentData = payment.toFirestore();
-      paymentData['remarks'] = remarks;
-      batch.set(paymentRef, paymentData);
-
-      final activityRef = _db.collection('activities').doc(sourceActivity!.id);
-      batch.update(activityRef, {
+      // Update existing payment with new status, amount, and remarks
+      batch.update(existingPaymentRef, {
+        'amount': paymentAmount,
         'status': 'Approved by MUIP Officer',
+        'remarks': remarks,
         'updatedAt': FieldValue.serverTimestamp(),
       });
+
+      // NOTE: We do NOT update activity status here
+      // Activity status remains "Approved" so preacher can still see it
+      // Only the payment status changes
 
       await batch.commit();
 

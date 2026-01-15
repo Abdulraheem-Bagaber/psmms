@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
 import 'activity_seeder.dart';
 import 'firebase_options.dart';
 import 'views/payment/officer/activity_payments_screen.dart';
@@ -14,10 +17,8 @@ import 'views/preacher/preacher_directory_screen.dart';
 import 'views/reports/reporting_dashboard_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'screens/ProfilePage.dart';
 import 'screens/dashboard_screen.dart';
-import 'package:provider/provider.dart';
 import 'views/kpi/kpi_preacher_list_page.dart';
 import 'views/kpi/kpi_dashboard_page.dart';
 import 'viewmodels/kpi_controller.dart';
@@ -73,7 +74,44 @@ class AuthGate extends StatelessWidget {
         }
 
         if (snapshot.hasData) {
-          return const DashboardScreen();
+          // User is logged in, but we need to check approval status
+          return FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+            future: FirebaseFirestore.instance
+                .collection('users')
+                .doc(snapshot.data!.uid)
+                .get(),
+            builder: (context, userSnapshot) {
+              if (userSnapshot.connectionState == ConnectionState.waiting) {
+                return const Scaffold(
+                  body: Center(child: CircularProgressIndicator()),
+                );
+              }
+
+              if (userSnapshot.hasError || !userSnapshot.hasData || !userSnapshot.data!.exists) {
+                // User document not found, logout
+                print('❌ AuthGate: User document not found or error');
+                FirebaseAuth.instance.signOut();
+                return const LoginScreen();
+              }
+
+              final userData = userSnapshot.data!.data();
+              print('👤 AuthGate: User data: $userData');
+              
+              final status = userData?['status'];
+              print('✅ AuthGate: User status = $status');
+              
+              if (status != 'approved' && status != 'active') {
+                // Not approved, logout and show login
+                print('🚫 AuthGate: Status not approved, signing out');
+                FirebaseAuth.instance.signOut();
+                return const LoginScreen();
+              }
+
+              // Approved user, show dashboard
+              print('✅ AuthGate: User approved/active, showing dashboard');
+              return const DashboardScreen();
+            },
+          );
         }
 
         return const LoginScreen();

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../models/activity.dart';
 import '../../../models/activity_submission.dart';
 import '../../../viewmodels/preacher_activity_view_model.dart';
@@ -82,21 +83,45 @@ class PreacherViewActivityScreen extends StatelessWidget {
                   _buildInfoRow(Icons.location_on, activity.location),
                   _buildInfoRow(Icons.place, activity.venue),
                   const SizedBox(height: 12),
-                  Container(
-                    height: 200,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade200,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                  InkWell(
+                    onTap: () async {
+                      final uri = Uri.parse('https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(activity.location)}');
+                      if (await canLaunchUrl(uri)) {
+                        await launchUrl(uri, mode: LaunchMode.externalApplication);
+                      }
+                    },
+                    child: Container(
+                      height: 200,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade200,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFF0066FF), width: 2),
+                      ),
+                      child: Stack(
                         children: [
-                          Icon(Icons.map, size: 48, color: Colors.grey.shade400),
-                          const SizedBox(height: 8),
-                          TextButton(
-                            onPressed: () {},
-                            child: const Text('View on Map'),
+                          Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.map, size: 48, color: Color(0xFF0066FF)),
+                                const SizedBox(height: 8),
+                                const Text('View on Map', style: TextStyle(color: Color(0xFF0066FF), fontWeight: FontWeight.w600)),
+                                const SizedBox(height: 4),
+                                Text(activity.location, style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                              ],
+                            ),
+                          ),
+                          Positioned(
+                            top: 8,
+                            right: 8,
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Icon(Icons.launch, size: 20, color: Color(0xFF0066FF)),
+                            ),
                           ),
                         ],
                       ),

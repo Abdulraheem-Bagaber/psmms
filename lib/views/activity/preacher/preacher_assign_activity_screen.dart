@@ -42,7 +42,7 @@ class PreacherAssignActivityScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_outlined, color: Colors.black),
-            onPressed: () {},
+            onPressed: () => _showNotifications(context, viewModel),
           ),
         ],
       ),
@@ -294,4 +294,59 @@ class PreacherAssignActivityScreen extends StatelessWidget {
       ),
     );
   }
-}
+
+  void _showNotifications(BuildContext context, PreacherActivityViewModel viewModel) {
+    final activities = viewModel.availableActivities;
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.notifications, color: Colors.blue),
+            const SizedBox(width: 8),
+            const Text('New Activities'),
+          ],
+        ),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: activities.isEmpty
+              ? const Text('No new activities available.')
+              : ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: activities.length > 5 ? 5 : activities.length,
+                  itemBuilder: (context, index) {
+                    final activity = activities[index];
+                    return ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: CircleAvatar(
+                        backgroundColor: Colors.blue.shade100,
+                        child: Icon(Icons.event, color: Colors.blue.shade700),
+                      ),
+                      title: Text(
+                        activity.title,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      subtitle: Text(
+                        '${activity.location}\n${DateFormat('MMM dd, yyyy').format(activity.activityDate)}',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      isThreeLine: true,
+                      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                      onTap: () {
+                        Navigator.pop(context);
+                        // Could navigate to activity details here
+                      },
+                    );
+                  },
+                ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }}

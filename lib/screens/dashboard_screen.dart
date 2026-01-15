@@ -15,7 +15,8 @@ import '../viewmodels/kpi_controller.dart';
 import '../viewmodels/preacher_controller.dart';
 import '../views/reports/reporting_dashboard_screen.dart';
 import '../views/payment/preacher/preacher_payment_history_screen.dart';
-import 'profile_screen.dart';
+import 'ProfilePage.dart';
+import 'PendingApprovalPage.dart';
 import '../main.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -73,7 +74,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
       case 4:
         return _buildReportsPage(context, user);
       case 5:
-        return const ProfileScreen();
+        return const ProfilePage();
+      case 6:
+        return const PendingApprovalPage();
       default:
         return _buildDashboardHome(user);
     }
@@ -286,7 +289,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             return StreamBuilder<QuerySnapshot>(
               stream:
                   FirebaseFirestore.instance
-                      .collection('payments')
+                      .collection('payment')
                       .where('preacherId', isEqualTo: user.uid)
                       .orderBy('createdAt', descending: true)
                       .limit(1)
@@ -1140,7 +1143,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         return StreamBuilder<QuerySnapshot>(
           stream:
               FirebaseFirestore.instance
-                  .collection('payments')
+                  .collection('payment')
                   .where('status', isEqualTo: 'Approved')
                   .snapshots(),
           builder: (context, paymentsSnapshot) {
@@ -1924,64 +1927,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildActivitiesPage(BuildContext context, UserModel user) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Activities'),
-        automaticallyImplyLeading: false,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.event, size: 64, color: Colors.grey[400]),
-            const SizedBox(height: 16),
-            const Text(
-              'Activities Management',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              user.isPreacher
-                  ? 'View and manage your activities'
-                  : 'Manage all activities',
-              style: TextStyle(color: Colors.grey[600]),
-            ),
-            const SizedBox(height: 24),
-            if (user.isPreacher)
-              ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (_) => PreacherListActivitiesScreen.withProvider(
-                            preacherId: user.uid,
-                            preacherName: user.name,
-                          ),
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.list),
-                label: const Text('My Activities'),
-              )
-            else
-              ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (_) => OfficerListActivitiesScreen.withProvider(),
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.admin_panel_settings),
-                label: const Text('Manage Activities'),
-              ),
-          ],
-        ),
-      ),
-    );
+    // Show activities list directly based on user role
+    if (user.isPreacher) {
+      return PreacherListActivitiesScreen.withProvider(
+        preacherId: user.uid,
+        preacherName: user.name,
+      );
+    } else {
+      // Officer or Admin
+      return OfficerListActivitiesScreen.withProvider();
+    }
   }
 
   Widget _buildPaymentsPage(BuildContext context, UserModel user) {

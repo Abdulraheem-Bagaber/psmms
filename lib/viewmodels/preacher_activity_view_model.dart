@@ -149,7 +149,9 @@ class PreacherActivityViewModel extends ChangeNotifier {
       result = result.where((a) => a.status == 'Submitted').toList();
       print('Found ${result.length} Submitted activities'); // Debug
     } else if (_myActivitiesStatus == 'Approved') {
-      result = result.where((a) => a.status == 'Approved').toList();
+      result = result.where((a) => 
+        a.status == 'Approved' || a.status == 'Approved by MUIP Officer'
+      ).toList();
     } else if (_myActivitiesStatus == 'Rejected') {
       result = result.where((a) => a.status == 'Rejected').toList();
     }
@@ -284,8 +286,8 @@ class PreacherActivityViewModel extends ChangeNotifier {
     required String preacherId,
     required String preacherName,
   }) async {
-    if (_selectedImages.length < 3) {
-      _errorMessage = 'Please upload at least 3 photos';
+    if (_selectedImages.isEmpty) {
+      _errorMessage = 'Please upload at least one photo';
       notifyListeners();
       return false;
     }

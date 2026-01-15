@@ -71,8 +71,7 @@ class _LoginScreenState extends State<LoginScreen> {
         return; // 🚫 stop navigation
       }
 
-      // ✅ Approved user
-      Navigator.pushReplacementNamed(context, '/dashboard');
+      // ✅ Approved user - AuthGate will handle navigation automatically
 
     } catch (e) {
       ScaffoldMessenger.of(context)

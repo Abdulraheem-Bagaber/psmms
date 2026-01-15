@@ -59,12 +59,22 @@ class PreacherListActivitiesScreen extends StatelessWidget {
 
   Widget _buildStatusTabs(PreacherActivityViewModel viewModel) {
     final statuses = ['Upcoming', 'Pending', 'Approved', 'Rejected'];
+    
+    // Count activities by status
+    final counts = {
+      'Upcoming': viewModel.myActivities.where((a) => a.status == 'Assigned').length,
+      'Pending': viewModel.myActivities.where((a) => a.status == 'Submitted').length,
+      'Approved': viewModel.myActivities.where((a) => a.status == 'Approved' || a.status == 'Approved by MUIP Officer').length,
+      'Rejected': viewModel.myActivities.where((a) => a.status == 'Rejected').length,
+    };
+    
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       color: Colors.white,
       child: Row(
         children: statuses.map((status) {
           final isSelected = viewModel.myActivitiesStatus == status;
+          final count = counts[status] ?? 0;
           return Padding(
             padding: const EdgeInsets.only(right: 8),
             child: GestureDetector(
@@ -76,7 +86,7 @@ class PreacherListActivitiesScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  status,
+                  count > 0 ? '$status ($count)' : status,
                   style: TextStyle(
                     color: isSelected ? Colors.white : Colors.black87,
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
@@ -180,6 +190,17 @@ class PreacherListActivitiesScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
+          Row(
+            children: [
+              const Icon(Icons.person_outline, size: 16, color: Colors.grey),
+              const SizedBox(width: 4),
+              Text(
+                preacherName,
+                style: TextStyle(fontSize: 13, color: Colors.grey[600], fontWeight: FontWeight.w500),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
           Row(
             children: [
               const Icon(Icons.calendar_today_outlined, size: 16, color: Colors.grey),

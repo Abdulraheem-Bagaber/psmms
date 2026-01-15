@@ -22,10 +22,8 @@ class PreacherAPIHandler {
     int limit = 20,
     DocumentSnapshot? startAfter,
   }) async {
-    // Fetch users where role is 'Preacher'
-    Query query = _db
-        .collection(_collection)
-        .where('role', isEqualTo: 'Preacher');
+    // Fetch all users, then filter by role in code (to catch any role variations)
+    Query query = _db.collection(_collection);
 
     if (region != null && region.isNotEmpty && region != 'All') {
       query = query.where('region', isEqualTo: region);
@@ -44,11 +42,25 @@ class PreacherAPIHandler {
       query = query.startAfterDocument(startAfter);
     }
 
-    final snapshot = await query.limit(limit).get();
-    var items =
-        snapshot.docs.map((doc) => Preacher.fromFirestore(doc)).toList();
+    final snapshot = await query.limit(limit * 3).get(); // Fetch more to account for filtering
+    
+    // Filter by role (case-insensitive) and create Preacher objects
+    var items = <Preacher>[];
+    for (var doc in snapshot.docs) {
+      final data = doc.data() as Map<String, dynamic>;
+      final role = (data['role']?.toString() ?? '').toLowerCase().trim();
+      if (role == 'preacher') {
+        items.add(Preacher.fromFirestore(doc));
+      }
+    }
 
     // Sort by fullName in code instead of using orderBy
+    items.sort((a, b) => a.fullName.compareTo(b.fullName));
+
+    // Limit to requested amount after filtering
+    if (items.length > limit) {
+      items = items.sublist(0, limit);
+    }
     items.sort((a, b) => a.fullName.compareTo(b.fullName));
 
     // Apply search filter if provided

@@ -34,6 +34,7 @@ class _OfficerAddActivityContentState extends State<_OfficerAddActivityContent> 
   final _venueController = TextEditingController();
   final _topicController = TextEditingController();
   final _requirementsController = TextEditingController();
+  final _attendanceController = TextEditingController();
 
   String _activityType = 'Keynote Lecture';
   String _urgency = 'Normal';
@@ -61,6 +62,7 @@ class _OfficerAddActivityContentState extends State<_OfficerAddActivityContent> 
     _venueController.dispose();
     _topicController.dispose();
     _requirementsController.dispose();
+    _attendanceController.dispose();
     super.dispose();
   }
 
@@ -124,6 +126,13 @@ class _OfficerAddActivityContentState extends State<_OfficerAddActivityContent> 
                   controller: _topicController,
                   label: 'Topic *',
                   hint: 'Enter activity topic',
+                ),
+                const SizedBox(height: 16),
+                _buildTextField(
+                  controller: _attendanceController,
+                  label: 'Expected Attendance',
+                  hint: 'Number of expected attendees (for KPI tracking)',
+                  keyboardType: TextInputType.number,
                 ),
                 const SizedBox(height: 16),
                 _buildTextField(
@@ -311,10 +320,12 @@ class _OfficerAddActivityContentState extends State<_OfficerAddActivityContent> 
     String? hint,
     int maxLines = 1,
     IconData? suffixIcon,
+    TextInputType? keyboardType,
   }) {
     return TextFormField(
       controller: controller,
       maxLines: maxLines,
+      keyboardType: keyboardType,
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
@@ -431,6 +442,8 @@ class _OfficerAddActivityContentState extends State<_OfficerAddActivityContent> 
     final startTimeStr = '${_startTime.hour.toString().padLeft(2, '0')}:${_startTime.minute.toString().padLeft(2, '0')}';
     final endTimeStr = '${_endTime.hour.toString().padLeft(2, '0')}:${_endTime.minute.toString().padLeft(2, '0')}';
 
+    final expectedAttendance = int.tryParse(_attendanceController.text.trim());
+    
     final success = await viewModel.createActivity(
       activityType: _activityType,
       title: _titleController.text.trim(),
@@ -442,6 +455,7 @@ class _OfficerAddActivityContentState extends State<_OfficerAddActivityContent> 
       topic: _topicController.text.trim(),
       specialRequirements: _requirementsController.text.trim(),
       urgency: _urgency,
+      expectedAttendance: expectedAttendance,
     );
 
     if (context.mounted) {

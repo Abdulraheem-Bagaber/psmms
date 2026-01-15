@@ -41,17 +41,13 @@ class PaymentListViewModel extends ChangeNotifier {
 
       switch (mode) {
         case PaymentListMode.officerPending:
-          query = _db
-              .collection('activities')
-              .where('status', isEqualTo: 'Pending Payment');
+          query = query.where('status', isEqualTo: 'Pending Payment');
           break;
         case PaymentListMode.adminApproved:
           query = query.where('status', isEqualTo: 'Approved by MUIP Officer');
           break;
         case PaymentListMode.adminHistory:
-          query = _db
-              .collection('activities')
-              .where('status', whereIn: [
+          query = query.where('status', whereIn: [
             'Pending Payment',
             'Forwarded to Yayasan',
             'Paid',

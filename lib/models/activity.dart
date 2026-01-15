@@ -14,7 +14,8 @@ class Activity {
   final String specialRequirements;
   final String? assignedPreacherId;
   final String? assignedPreacherName;
-  final String status; // "Available", "Assigned", "Submitted", "Approved", "Rejected"
+  final int? expectedAttendance; // Number of expected attendees
+  final String status; // "Available", "Assigned", "Submitted", "Pending Payment", "Rejected"
   final String urgency; // "Normal", "Urgent"
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -33,6 +34,7 @@ class Activity {
     required this.specialRequirements,
     this.assignedPreacherId,
     this.assignedPreacherName,
+    this.expectedAttendance,
     required this.status,
     required this.urgency,
     required this.createdAt,
@@ -55,6 +57,7 @@ class Activity {
       specialRequirements: data['specialRequirements'] ?? '',
       assignedPreacherId: data['assignedPreacherId'],
       assignedPreacherName: data['assignedPreacherName'],
+      expectedAttendance: data['expectedAttendance'] as int?,
       status: data['status'] ?? 'Available',
       urgency: data['urgency'] ?? 'Normal',
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
@@ -76,6 +79,7 @@ class Activity {
       'specialRequirements': specialRequirements,
       'assignedPreacherId': assignedPreacherId,
       'assignedPreacherName': assignedPreacherName,
+      'expectedAttendance': expectedAttendance,
       'status': status,
       'urgency': urgency,
       'createdAt': Timestamp.fromDate(createdAt),
@@ -97,6 +101,7 @@ class Activity {
     String? specialRequirements,
     String? assignedPreacherId,
     String? assignedPreacherName,
+    int? expectedAttendance,
     String? status,
     String? urgency,
     DateTime? createdAt,
@@ -116,6 +121,7 @@ class Activity {
       specialRequirements: specialRequirements ?? this.specialRequirements,
       assignedPreacherId: assignedPreacherId ?? this.assignedPreacherId,
       assignedPreacherName: assignedPreacherName ?? this.assignedPreacherName,
+      expectedAttendance: expectedAttendance ?? this.expectedAttendance,
       status: status ?? this.status,
       urgency: urgency ?? this.urgency,
       createdAt: createdAt ?? this.createdAt,

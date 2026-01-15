@@ -472,7 +472,7 @@ class OfficerListActivitiesScreen extends StatelessWidget {
         .map((snapshot) => snapshot.docs.length);
 
     final paymentsStream = db
-        .collection('payments')
+        .collection('payment')
         .where('status', isEqualTo: 'Pending Payment')
         .snapshots()
         .map((snapshot) => snapshot.docs.length);
@@ -564,7 +564,7 @@ class OfficerListActivitiesScreen extends StatelessWidget {
                               Icons.payment,
                               Colors.blue,
                               FirebaseFirestore.instance
-                                  .collection('payments')
+                                  .collection('payment')
                                   .where('status', isEqualTo: 'Pending Payment')
                                   .snapshots(),
                             ),
